@@ -8,15 +8,20 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
-import GradientButton from "../../components/GradientButton";
 
 function HomeScreen(): React.JSX.Element {
     return (
-        <View>
+        <View style={styles.container}>
             <Text>HomeScreen</Text>
-            <GradientButton />
         </View>
     );
 }
+
+const styles = StyleSheet.create({
+    container:{
+        flex: 1,
+        paddingHorizontal: 16,
+    }
+})
 
 export default HomeScreen;

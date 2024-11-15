@@ -11,20 +11,34 @@ import {
   View,
 } from 'react-native';
 
-function GradientButton(): React.JSX.Element {
+interface GradientButtonProps {
+  height?: number; // 버튼 높이
+  width?: number;  // 버튼 너비
+  text: string;    // 버튼 안에 들어갈 텍스트
+}
+
+const GradientButton: React.FC<GradientButtonProps> = ({ height = 56, width = 328, text }) => {
+    const handlePress = () => {
+        alert("버튼이 클릭되었습니다!");
+      };
     return (
-        <LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={['#9BC9FE', '#69E6A2']} style={styles.linearGradient}>
+    <TouchableOpacity onPress={handlePress}>
+        <LinearGradient
+          start={{x: 0, y: 0}}
+          end={{x: 1, y: 0}}
+          colors={['#9BC9FE', '#69E6A2']}
+          style={[styles.linearGradient, {height, width}]}
+          >
           <Text style={styles.buttonText}>
-            제출하기
+            {text}
           </Text>
         </LinearGradient>
+    </TouchableOpacity>
     );
 };
 
-var styles = StyleSheet.create({
+const styles = StyleSheet.create({
   linearGradient: {
-    height: 56,
-    width: 328,
     paddingLeft: 15,
     paddingRight: 15,
     paddingVertical: 10,

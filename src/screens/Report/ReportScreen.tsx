@@ -11,8 +11,17 @@ import {
 
 function ReportScreen(): React.JSX.Element {
     return (
-        <View><Text>ReportScreen</Text></View>
+        <View style={styles.container}>
+            <Text>ReportScreen</Text>
+        </View>
     );
 }
+
+const styles = StyleSheet.create({
+    container:{
+        flex: 1,
+        paddingHorizontal: 16,
+    }
+})
 
 export default ReportScreen;

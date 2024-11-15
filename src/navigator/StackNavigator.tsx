@@ -3,7 +3,6 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
 // components
 import BottomTabNavigator from './BottomTabNavigator';
-import Record from '../screens/Record';
 
 const StackNavigator = () => {
   const Stack = createNativeStackNavigator();

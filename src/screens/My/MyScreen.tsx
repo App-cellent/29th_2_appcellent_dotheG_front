@@ -11,8 +11,17 @@ import {
 
 function MyScreen(): React.JSX.Element {
     return (
-        <View><Text>MyScreen</Text></View>
+        <View style={styles.container}>
+            <Text>MyScreen</Text>
+        </View>
     );
 }
+
+const styles = StyleSheet.create({
+    container:{
+        flex: 1,
+        paddingHorizontal: 16,
+    }
+})
 
 export default MyScreen;

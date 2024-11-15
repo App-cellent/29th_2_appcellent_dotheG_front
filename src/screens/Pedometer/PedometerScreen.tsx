@@ -11,8 +11,17 @@ import {
 
 function PedometerScreen(): React.JSX.Element {
     return (
-        <View><Text>PedometerScreen</Text></View>
+        <View style={styles.container}>
+            <Text>PedometerScreen</Text>
+        </View>
     );
 }
+
+const styles = StyleSheet.create({
+    container:{
+        flex: 1,
+        paddingHorizontal: 16,
+    }
+})
 
 export default PedometerScreen;
