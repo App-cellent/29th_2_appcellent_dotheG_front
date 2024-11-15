@@ -14,7 +14,7 @@ function CharacterScreen(): React.JSX.Element {
     return (
         <View style={styles.container}>
             <Text>CharacterScreen</Text>
-            <GradientButton height={64} width={280} text="캐릭터 뽑기" isDisabled={true} />
+            <GradientButton height={64} width={280} text="캐릭터 뽑기"/>
         </View>
     );
 }
