@@ -8,10 +8,14 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
+import GradientButton from "../../components/GradientButton";
 
-function HomeScreen(){
+function HomeScreen(): React.JSX.Element {
     return (
-        <View>HomeScreen</View>
+        <View>
+            <Text>HomeScreen</Text>
+            <GradientButton />
+        </View>
     );
 }
 

@@ -8,9 +8,10 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
-function ReportScreen(){
+
+function ReportScreen(): React.JSX.Element {
     return (
-        <View>ReportScreen</View>
+        <View><Text>ReportScreen</Text></View>
     );
 }
 

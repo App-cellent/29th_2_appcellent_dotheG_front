@@ -8,10 +8,11 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
-function PedometerScreen(){
+
+function MyScreen(): React.JSX.Element {
     return (
-        <View>PedometerScreen</View>
+        <View><Text>MyScreen</Text></View>
     );
 }
 
-export default PedometerScreen;
+export default MyScreen;

@@ -39,11 +39,12 @@ function BottomTabNavigator(): React.JSX.Element {
   return (
     <Tab.Navigator
       screenOptions={{
-          headerShown: true,
+          headerShown: false,
+          animation: 'fade',
           tabBarActiveTintColor: '#69E6A2',
           tabBarInactiveTintColor: '#D9D9D9',
           tabBarLabelStyle: {
-            fontSize: 14,
+            fontSize: 11,
             paddingVertical: 5,
             fontWeight: '700',
           },

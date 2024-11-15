@@ -8,9 +8,10 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
-function CharacterScreen(){
+
+function CharacterScreen(): React.JSX.Element {
     return (
-        <View>CharacterScreen</View>
+        <View><Text>CharacterScreen</Text></View>
     );
 }
 
