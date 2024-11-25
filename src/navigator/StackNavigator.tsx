@@ -45,6 +45,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     height: 56,
     paddingHorizontal: 16,
+    borderBottomColor: '#C9C9C9',
+    borderBottomWidth: 0.5
   },
   headerLeft: {
     flexDirection: 'row',
