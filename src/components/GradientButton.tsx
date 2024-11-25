@@ -18,18 +18,14 @@ interface GradientButtonProps {
   isDisabled: boolean;
 }
 
-const GradientButton: React.FC<GradientButtonProps> = ({ height = 56, width = 328, text, isDisabled = false }) => {
+const GradientButton: React.FC<GradientButtonProps> = ({ height = 56, width = 328, text, isDisabled = false, onPress }) => {
     const buttonTextColor = isDisabled ? '#C9C9C9' : '#ffffff';
     const buttonBackgroundColor = isDisabled ? ['#D3D3D3', '#D3D3D3'] : ['#9BC9FE', '#69E6A2'];
 
-    const handlePress = () => {
-        alert("버튼이 클릭되었습니다!");
-      };
-
     return (
     <TouchableOpacity
-        onPress={handlePress}
         disabled={isDisabled}
+        onPress={onPress}
         style={[styles.button, isDisabled && styles.disabledButton]}>
         <LinearGradient
           start={{x: 0, y: 0}}
