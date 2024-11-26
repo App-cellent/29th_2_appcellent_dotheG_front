@@ -8,8 +8,8 @@ StyleSheet,
 } from 'react-native';
 // components
 import BottomTabNavigator from './BottomTabNavigator';
-import DoTheG from '../img/DoTheG.svg';
-import AlarmIcon from '../img/AlarmIcon.svg';
+import DoTheG from '../img/Navigator/DoTheG.svg';
+import AlarmIcon from '../img/Navigator/AlarmIcon.svg';
 
 const StackNavigator = () => {
   const Stack = createNativeStackNavigator();

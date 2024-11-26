@@ -1,5 +1,6 @@
 import * as React from 'react'
-import colors from "../../colors/colors";
+import colors from "../../utils/colors";
+import { getFontSize } from '../../utils/fontUtils';
 
 import {
   SafeAreaView,
@@ -9,23 +10,24 @@ import {
   Text,
   useColorScheme,
   View,
+  PixelRatio,
 } from 'react-native';
 
 function HomeScreen(): React.JSX.Element {
     return (
         <View style={styles.container}>
-            <Text style={styles.titleText}>HomeScreen</Text>
+            <Text style={[styles.titleText, {fontSize: getFontSize(23)}]}>HomeScreen</Text>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
     container:{
+        height: 1,
         flex: 1,
         paddingHorizontal: 16,
     },
     titleText:{
-        fontSize: 24,
         color: colors.green,
     }
 })
