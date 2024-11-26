@@ -43,16 +43,23 @@ function BottomTabNavigator(): React.JSX.Element {
           animation: 'fade',
           tabBarActiveTintColor: '#69E6A2',
           tabBarInactiveTintColor: '#D9D9D9',
-          tabBarLabelStyle: {
-            fontSize: 11,
-            paddingVertical: 5,
-            fontWeight: '700',
-          },
-          tabBarStyle: {
-            height: 70,
-            padding: 0,
-            elevation: 0,
-          },
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: '700',
+          paddingVertical: 3,
+        },
+        tabBarStyle: {
+          height: 70,
+          padding: 0,
+          elevation: 0,
+          justifyContent: 'center', // 탭 바 세로 가운데 정렬
+          alignItems: 'center', // 탭 바 세로 가운데 정렬
+        },
+        tabBarItemStyle: {
+          justifyContent: 'center',
+          alignItems: 'center',
+          flexDirection: 'column',
+        },
       }}>
       <Tab.Screen
           name="Home"

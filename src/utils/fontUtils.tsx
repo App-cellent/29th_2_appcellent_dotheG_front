@@ -1,5 +1,3 @@
-// utils/fontUtils.js
-
 import { PixelRatio } from 'react-native';
 
 export const getFontSize = (size) => {
