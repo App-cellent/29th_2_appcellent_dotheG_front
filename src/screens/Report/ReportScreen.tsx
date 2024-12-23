@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import {
-  Image,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
+  Image,
 } from 'react-native';
 
 function ReportScreen(): React.JSX.Element {
@@ -21,9 +21,9 @@ function ReportScreen(): React.JSX.Element {
 
   // 히스토리 내역 예시
   const historyDetails = [
-    '제로 웨이스트 매장 방문 1회',
-    '텀블러 사용 1회',
-    '만보기 목표 달성 4회',
+    { content: '제로 웨이스트 매장 방문', count: 1 },
+    { content: '텀블러 사용', count: 1 },
+    { content: '만보기 목표 달성', count: 4 },
   ];
 
   const handleTabSwitch = (tab: string) => {
@@ -62,60 +62,66 @@ function ReportScreen(): React.JSX.Element {
 
           {/* 지난 주 하루 평균 걸음 수 */}
           <View style={styles.averageStepsContainer}>
-            <Image source={require('../../img/Report/reportbox.png')} style={styles.backgroundImage} />
-            <View style={styles.averageStepsContent}>
-              {/* 왼쪽 상단 로고와 제목 */}
-              <View style={styles.logoAndTitle}>
-                <Image source={require('../../img/Report/averagesteplogo.png')} style={styles.logoImage} />
-                <Text style={styles.stepsTitle}>지난 주 하루 평균 걸음수</Text>
-              </View>
-              {/* 오른쪽 하단 걸음수 */}
-              <View style={styles.stepsCountContainer}>
-                <Text style={styles.stepsCount}>{averageSteps.toLocaleString()}</Text>
-                <Text style={styles.stepsText}>걸음</Text>
+            <View style={styles.shadowBox}>
+              <View style={styles.averageStepsContent}>
+                {/* 왼쪽 상단 로고와 제목 */}
+                <View style={styles.logoAndTitle}>
+                  <Image source={require('../../img/Report/averagesteplogo.png')} style={styles.logoImage} />
+                  <Text style={styles.stepsTitle}>지난 주 하루 평균 걸음수</Text>
+                </View>
+                {/* 오른쪽 하단 걸음수 */}
+                <View style={styles.stepsCountContainer}>
+                  <Text style={styles.stepsCount}>{averageSteps.toLocaleString()}</Text>
+                  <Text style={styles.stepsText}>걸음</Text>
+                </View>
               </View>
             </View>
           </View>
 
           {/* 지난 주 인증 히스토리 */}
-          <View style={styles.historyContainer}>
-            <Image source={require('../../img/Report/reportbox.png')} style={styles.backgroundImage} />
-            <View style={styles.historyContent}>
-              {/* 왼쪽 상단 오버랩 로고와 제목 */}
-              <View style={styles.logoAndTitle}>
-                <View style={styles.overlayedLogos}>
-                  <Image source={require('../../img/Report/historylogo1.png')} style={styles.historyLogo} />
-                  <Image source={require('../../img/Report/historylogo2.png')} style={styles.overlappingLogo} />
+          <View style={[styles.historyContainer, isHistoryOpen && styles.historyOpen]}>
+            <View style={styles.shadowBox}>
+              <View style={styles.historyContent}>
+                <View style={styles.logoAndTitle}>
+                  <View style={styles.overlayedLogos}>
+                    <Image source={require('../../img/Report/historylogo1.png')} style={styles.historyLogo} />
+                    <Image source={require('../../img/Report/historylogo2.png')} style={styles.overlappingLogo} />
+                  </View>
+                  <Text style={styles.historyTitle}>지난 주 인증 히스토리</Text>
                 </View>
-                <Text style={styles.historyTitle}>지난 주 인증 히스토리</Text>
+                <View style={styles.historyCountContainer}>
+                  <Text style={styles.historyCount}>{historyCount}</Text>
+                  <Text style={styles.historyText}>회</Text>
+                </View>
               </View>
-              {/* 오른쪽 하단 인증 횟수 */}
-              <View style={styles.historyCountContainer}>
-                <Text style={styles.historyCount}>{historyCount}</Text>
-                <Text style={styles.historyText}>회</Text>
+
+              {/* 토글 버튼과 텍스트 */}
+              <View style={styles.toggleButtonContainer}>
+                <TouchableOpacity onPress={toggleHistory} style={styles.toggleButton}>
+                  <Image
+                    source={isHistoryOpen
+                      ? require('../../img/Report/arrowup.png') // 위 화살표
+                      : require('../../img/Report/arrowdown.png')} // 아래 화살표
+                    style={styles.arrowImage}
+                  />
+                </TouchableOpacity>
+                {!isHistoryOpen && (
+                  <Text style={styles.toggleText}>인증 히스토리 보기</Text>
+                )}
               </View>
+
+              {/* 히스토리 내역 */}
+              {isHistoryOpen && (
+                <View style={styles.historyDetailsContainer}>
+                  {historyDetails.map((detail, index) => (
+                    <View key={index} style={styles.historyDetail}>
+                      <Text style={styles.historyDetailContent}>{detail.content}</Text>
+                      <Text style={styles.historyDetailCount}>{detail.count}회</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
             </View>
-
-            {/* 히스토리 토글 버튼 */}
-            <TouchableOpacity onPress={toggleHistory} style={styles.toggleButton}>
-              <Image
-                source={isHistoryOpen
-                  ? require('../../img/Report/arrowup.png')  // 위 화살표
-                  : require('../../img/Report/arrowdown.png')}  // 아래 화살표
-                style={styles.arrowImage}
-              />
-            </TouchableOpacity>
-
-            {/* 히스토리 내역 표시 */}
-            {isHistoryOpen && (
-              <View style={styles.historyDetailsContainer}>
-                {historyDetails.map((detail, index) => (
-                  <Text key={index} style={styles.historyDetail}>
-                    {detail}
-                  </Text>
-                ))}
-              </View>
-            )}
           </View>
         </View>
       )}
@@ -133,12 +139,11 @@ function ReportScreen(): React.JSX.Element {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    //paddingHorizontal: 16,
     backgroundColor: '#ffffff',
   },
   switchContainer: {
-    marginTop: 16, // 위에서 16px 떨어짐
-    marginRight: 15, // 오른쪽에서 15px 떨어짐
+    marginTop: 16,
+    marginRight: 15,
     alignItems: 'flex-end',
   },
   switchBackground: {
@@ -170,8 +175,6 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    //justifyContent: 'flex-start',
-    //alignItems: 'center',
     marginTop: 7,
   },
   dateText: {
@@ -184,8 +187,8 @@ const styles = StyleSheet.create({
     fontSize: 25,
     fontWeight: 'bold',
     color: '#121212',
-    marginTop: 10,
     marginLeft: 21,
+    paddingVertical: 10,
   },
   contentText: {
     fontSize: 18,
@@ -193,16 +196,24 @@ const styles = StyleSheet.create({
   },
   averageStepsContainer: {
     width: '100%',
-    marginTop: 23,
+    minHeight: 127,
+    marginTop: 19,
     paddingHorizontal: 16,
+    //position: 'relative'
+  },
+  shadowBox: {
+    backgroundColor: '#ffffff',
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 5,
+    padding: 10,
   },
   averageStepsContent: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
     justifyContent: 'space-between',
-    //marginLeft: 50,
-    marginTop: 24,
+    minHeight: 127,
   },
   logoAndTitle: {
     flexDirection: 'row',
@@ -211,8 +222,8 @@ const styles = StyleSheet.create({
   stepsCountContainer: {
     position: 'absolute',
     flexDirection: 'row',
-    marginTop: 50,
-    marginLeft: 230,
+    bottom: 14,
+    right: 20,
     alignItems: 'flex-end',
   },
   stepsText: {
@@ -223,30 +234,25 @@ const styles = StyleSheet.create({
   },
   historyContainer: {
     width: '100%',
+    minHeight: 127,
     marginTop: 23,
     paddingHorizontal: 16,
   },
-  backgroundImage: {
-    width: '100%',
-    minHeight: 127,
-    resizeMode: 'cover',
-    borderRadius: 20,
-  },
-  textContent: {
-    position: 'absolute',
-    top: 16,
-    left: 16,
+  historyOpen: {
+    height: 'auto',
   },
   logoImage: {
     width: 45,
     height: 45,
-    marginLeft: 50,
+    marginLeft: 16,
+    marginTop: 16,
   },
   stepsTitle: {
     fontSize: 15,
     color: '#121212',
     fontWeight: 'bold',
     marginLeft: 10,
+    marginTop: 16,
   },
   stepsCount: {
     fontSize: 40,
@@ -254,17 +260,14 @@ const styles = StyleSheet.create({
     color: '#121212',
   },
   historyContent: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
     justifyContent: 'space-between',
-    marginTop: 24,
+    minHeight: 127,
   },
   historyCountContainer: {
     position: 'absolute',
     flexDirection: 'row',
-    marginTop: 50,
-    marginLeft: 320,
+    bottom: 0,
+    right: 20,
     alignItems: 'flex-end',
   },
   historyText: {
@@ -279,42 +282,63 @@ const styles = StyleSheet.create({
   historyLogo: {
     width: 45,
     height: 45,
-    marginLeft: 50,
+    marginLeft: 16,
+    marginTop: 16,
   },
   overlappingLogo: {
     position: 'absolute',
-    width: 25,
-    height: 25,
-    marginLeft: 60,
-    marginTop: 10,
+    width: 24,
+    height: 24,
+    marginLeft: 26.5,
+    marginTop: 26.5,
   },
   historyTitle: {
     fontSize: 15,
     color: '#121212',
     fontWeight: 'bold',
     marginLeft: 10,
+    marginTop: 16,
   },
   historyCount: {
     fontSize: 40,
     fontWeight: 'bold',
     color: '#121212',
   },
-  toggleButton: {
-    marginTop: 10,
+  toggleButtonContainer: {
+    position: 'relative',
+    bottom: 16,
+    flexDirection: 'row',
     alignItems: 'center',
+  },
+  toggleButton: {
+    marginLeft: 25,
   },
   arrowImage: {
-    width: 30,
-    height: 30,
+    width: 10,
+    height: 6.18,
+  },
+  toggleText: {
+    fontSize: 13,
+    color: '#929292',
+    marginLeft: 7,
   },
   historyDetailsContainer: {
-    marginTop: 10,
-    alignItems: 'center',
+    paddingHorizontal: 23,
   },
   historyDetail: {
-    fontSize: 16,
-    color: '#333333',
-    marginBottom: 4,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 15,
+    marginTop: 10,
+  },
+  historyDetailContent: {
+    fontSize: 13,
+    color: '#929292',
+  },
+  historyDetailCount: {
+    fontSize: 13,
+    color: '#929292',
   },
 });
 
