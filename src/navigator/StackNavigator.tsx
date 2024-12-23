@@ -8,8 +8,9 @@ StyleSheet,
 } from 'react-native';
 // components
 import BottomTabNavigator from './BottomTabNavigator';
-import DoTheG from '../img/DoTheG.svg';
-import AlarmIcon from '../img/AlarmIcon.svg';
+import DoTheG from '../img/Navigator/DoTheG.svg';
+import AlarmIcon from '../img/Navigator/AlarmIcon.svg';
+import { Shadow } from 'react-native-shadow-2';
 
 const StackNavigator = () => {
   const Stack = createNativeStackNavigator();
@@ -20,7 +21,7 @@ const StackNavigator = () => {
         name="Main"
         component={BottomTabNavigator}
         options={{
-            header: () => (
+        header: () => (
             <View style={styles.customHeader}>
               <View style={styles.headerLeft}>
                 <DoTheG />
@@ -45,8 +46,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     height: 56,
     paddingHorizontal: 16,
-    borderBottomColor: '#C9C9C9',
-    borderBottomWidth: 0.5
   },
   headerLeft: {
     flexDirection: 'row',

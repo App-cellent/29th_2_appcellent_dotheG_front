@@ -13,16 +13,16 @@ import PedometerScreen from '../screens/Pedometer/PedometerScreen';
 import ReportScreen from '../screens/Report/ReportScreen';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { SvgXml } from 'react-native-svg';
-import HomeIcon from '../img/HomeIcon.svg';
-import PedometerIcon from '../img/PedometerIcon.svg';
-import CharacterIcon from '../img/CharacterIcon.svg';
-import ReportIcon from '../img/ReportIcon.svg';
-import MyIcon from '../img/MyIcon.svg';
-import HomeActiveIcon from '../img/HomeActiveIcon.svg';
-import PedometerActiveIcon from '../img/PedometerActiveIcon.svg';
-import CharacterActiveIcon from '../img/CharacterActiveIcon.svg';
-import ReportActiveIcon from '../img/ReportActiveIcon.svg';
-import MyActiveIcon from '../img/MyActiveIcon.svg';
+import HomeIcon from '../img/Navigator/HomeIcon.svg';
+import PedometerIcon from '../img/Navigator/PedometerIcon.svg';
+import CharacterIcon from '../img/Navigator/CharacterIcon.svg';
+import ReportIcon from '../img/Navigator/ReportIcon.svg';
+import MyIcon from '../img/Navigator/MyIcon.svg';
+import HomeActiveIcon from '../img/Navigator/HomeActiveIcon.svg';
+import PedometerActiveIcon from '../img/Navigator/PedometerActiveIcon.svg';
+import CharacterActiveIcon from '../img/Navigator/CharacterActiveIcon.svg';
+import ReportActiveIcon from '../img/Navigator/ReportActiveIcon.svg';
+import MyActiveIcon from '../img/Navigator/MyActiveIcon.svg';
 
 // import {
 //   SafeAreaView,
@@ -43,16 +43,23 @@ function BottomTabNavigator(): React.JSX.Element {
           animation: 'fade',
           tabBarActiveTintColor: '#69E6A2',
           tabBarInactiveTintColor: '#D9D9D9',
-          tabBarLabelStyle: {
-            fontSize: 11,
-            paddingVertical: 5,
-            fontWeight: '700',
-          },
-          tabBarStyle: {
-            height: 70,
-            padding: 0,
-            elevation: 0,
-          },
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: '700',
+          paddingVertical: 3,
+        },
+        tabBarStyle: {
+          height: 70,
+          padding: 0,
+          elevation: 0,
+          justifyContent: 'center', // 탭 바 세로 가운데 정렬
+          alignItems: 'center', // 탭 바 세로 가운데 정렬
+        },
+        tabBarItemStyle: {
+          justifyContent: 'center',
+          alignItems: 'center',
+          flexDirection: 'column',
+        },
       }}>
       <Tab.Screen
           name="Home"
