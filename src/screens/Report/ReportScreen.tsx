@@ -18,6 +18,7 @@ function ReportScreen(): React.JSX.Element {
   const username = '앱설런트';
   const averageSteps = 5032;
   const historyCount = 6;
+  const savedTree = 11;
 
   // 히스토리 내역 예시
   const historyDetails = [
@@ -61,7 +62,7 @@ function ReportScreen(): React.JSX.Element {
           <Text style={styles.usernameText}>{username}님의 지난 주{'\n'}성과보고서를 확인해보세요!</Text>
 
           {/* 지난 주 하루 평균 걸음 수 */}
-          <View style={styles.averageStepsContainer}>
+          <View style={styles.boxContainer}>
             <View style={styles.shadowBox}>
               <View style={styles.averageStepsContent}>
                 {/* 왼쪽 상단 로고와 제목 */}
@@ -79,7 +80,7 @@ function ReportScreen(): React.JSX.Element {
           </View>
 
           {/* 지난 주 인증 히스토리 */}
-          <View style={[styles.historyContainer, isHistoryOpen && styles.historyOpen]}>
+          <View style={[styles.toggleBoxContainer, isHistoryOpen && styles.historyOpen]}>
             <View style={styles.shadowBox}>
               <View style={styles.historyContent}>
                 <View style={styles.logoAndTitle}>
@@ -87,7 +88,7 @@ function ReportScreen(): React.JSX.Element {
                     <Image source={require('../../img/Report/historylogo1.png')} style={styles.historyLogo} />
                     <Image source={require('../../img/Report/historylogo2.png')} style={styles.overlappingLogo} />
                   </View>
-                  <Text style={styles.historyTitle}>지난 주 인증 히스토리</Text>
+                  <Text style={styles.historyTitle}>지난 주 인증 히스토리 (횟수)</Text>
                 </View>
                 <View style={styles.historyCountContainer}>
                   <Text style={styles.historyCount}>{historyCount}</Text>
@@ -129,7 +130,43 @@ function ReportScreen(): React.JSX.Element {
       {/* 월간 화면 내용 */}
       {selectedTab === '월간' && (
         <View style={styles.content}>
-          <Text style={styles.contentText}>월간 성과 화면</Text>
+          <Text style={styles.dateText}>{year}년 {month}월</Text>
+          <Text style={styles.usernameText}>{username}님의 이번 달{'\n'}성과보고서를 확인해보세요!</Text>
+
+          {/* 이번 달 내가 지킨 나무 */}
+          <View style={styles.boxContainer}>
+            <View style={styles.shadowBox}>
+              <View style={styles.averageStepsContent}>
+                <View style={styles.logoAndTitle}>
+                  <Image source={require('../../img/Report/savetreelogo1.png')} style={styles.logoImage} />
+                  <Image source={require('../../img/Report/savetreelogo2.png')} style={styles.overlappingLogo} />
+                  <Text style={styles.stepsTitle}>이번 달 내가 지킨 나무</Text>
+                </View>
+                <View style={styles.stepsCountContainer}>
+                  <Text style={styles.stepsCount}>{savedTree.toLocaleString()}</Text>
+                  <Text style={styles.stepsText}>그루</Text>
+                </View>
+              </View>
+            </View>
+          </View>
+
+          {/* 이번 달 내가 줄인 탄소 배출량 순위 */}
+          <View style={styles.boxContainer}>
+            <View style={styles.shadowBox}>
+              <View style={styles.averageStepsContent}>
+                <View style={styles.logoAndTitle}>
+                  <Image source={require('../../img/Report/savecarbonlogo1.png')} style={styles.logoImage} />
+                  <Image source={require('../../img/Report/savecarbonlogo2.png')} style={styles.overlappingLogo} />
+                  <Text style={styles.stepsTitle}>이번 달 내가 줄인 탄소 배출량 순위</Text>
+                </View>
+                <Image source={require('../../img/Report/carbongraph.png')} style={styles.logoImage} />
+                <Text>0kg</Text>
+                <Text>10kg</Text>
+                <Image source={require('../../img/Report/carbonearth.png')} style={styles.logoImage} />
+                <Image source={require('../../img/Report/carbonrank.png')} style={styles.logoImage} />
+              </View>
+            </View>
+          </View>
         </View>
       )}
     </View>
@@ -194,7 +231,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#333333',
   },
-  averageStepsContainer: {
+  boxContainer: {
     width: '100%',
     minHeight: 127,
     marginTop: 19,
@@ -232,7 +269,7 @@ const styles = StyleSheet.create({
     marginLeft: 4,
     marginBottom: 8,
   },
-  historyContainer: {
+  toggleBoxContainer: {
     width: '100%',
     minHeight: 127,
     marginTop: 23,
