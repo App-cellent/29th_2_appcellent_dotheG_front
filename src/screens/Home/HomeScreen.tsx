@@ -13,6 +13,8 @@ import CircleQuestionIcon from '../../img/Home/CircleQuestionIcon.svg';
 import QuestIcon from '../../img/Home/QuestIcon.svg';
 import PedometerIcon from '../../img/Home/PedometerIcon.svg';
 
+import FloatingButton from '../../img/Home/FloatingButton.svg';
+
 import {
   ScrollView,
   StyleSheet,
@@ -20,7 +22,8 @@ import {
   View,
   Image,
   ImageBackground,
-  Dimensions
+  Dimensions,
+  TouchableOpacity
 } from 'react-native';
 
 const { height } = Dimensions.get('window');
@@ -115,9 +118,14 @@ function HomeScreen(): React.JSX.Element {
                     </View>
                 </View>
             </ScrollView>
+            <TouchableOpacity style={styles.floatingBtn}>
+                <FloatingButton width={41} height={41}/>
+            </TouchableOpacity>
         </View>
     );
 }
+
+// onPress={()=>{this.props.navigation.navigate("")}
 
 const styles = StyleSheet.create({
     container: {
@@ -251,6 +259,12 @@ const styles = StyleSheet.create({
         lineHeight: 20,
         fontSize: getFontSize(12),
         fontWeight: '400',
+    },
+    floatingBtn:{
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        width: 41,
+        height: 41,
     },
 });
 
