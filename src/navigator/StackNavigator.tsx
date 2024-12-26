@@ -14,6 +14,7 @@ import AlarmIcon from '../img/Navigator/AlarmIcon.svg';
 import LeftArrowIcon from '../img/Navigator/LeftArrowIcon.svg';
 
 import TodayQuizGuideScreen from '../screens/Home/TodayQuizGuideScreen';
+import TodayQuizScreen from '../screens/Home/TodayQuizScreen';
 
 const StackNavigator = () => {
     const navigation = useNavigation();
@@ -47,6 +48,22 @@ const StackNavigator = () => {
             <Stack.Screen
                 name="TodayQuizGuideScreen"
                 component={TodayQuizGuideScreen}
+                options={{
+                    header: () => (
+                        <View style={styles.customHeader}>
+                            <View style={styles.headerLeft}>
+                            <TouchableOpacity onPress={goBack}>
+                                <LeftArrowIcon style={styles.LeftArrow}/>
+                            </TouchableOpacity>
+                            </View>
+                        </View>
+                    )
+                }}
+            />
+
+            <Stack.Screen
+                name="TodayQuizScreen"
+                component={TodayQuizScreen}
                 options={{
                     header: () => (
                         <View style={styles.customHeader}>

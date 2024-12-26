@@ -33,7 +33,7 @@ function TodayQuizGuideScreen(): React.JSX.Element {
     });
 
     const handleNavigateQuizPress = useCallback(async () => {
-        navigation.navigate('CharacterScreen');
+        navigation.navigate('TodayQuizScreen');
     }, [navigation]);
 
     return (
