@@ -37,8 +37,8 @@ function HomeScreen(): React.JSX.Element {
     const thismonthtree = '5';
     const usertree = '21';
 
-const handleNavigateTodayQuiz = useCallback(async () => {
-        navigation.navigate('TodayQuizScreen');
+    const handleNavigateTodayQuiz = useCallback(async () => {
+        navigation.navigate('TodayQuizGuideScreen');
     }, []);
 
     return (
@@ -138,8 +138,6 @@ const handleNavigateTodayQuiz = useCallback(async () => {
         </View>
     );
 }
-
-// onPress={()=>{this.props.navigation.navigate("")}
 
 const styles = StyleSheet.create({
     container: {
