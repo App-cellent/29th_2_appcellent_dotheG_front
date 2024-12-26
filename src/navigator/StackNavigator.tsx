@@ -12,6 +12,8 @@ import DoTheG from '../img/Navigator/DoTheG.svg';
 import AlarmIcon from '../img/Navigator/AlarmIcon.svg';
 import { Shadow } from 'react-native-shadow-2';
 
+import TodayQuizScreen from '../screens/Home/TodayQuizScreen';
+
 const StackNavigator = () => {
   const Stack = createNativeStackNavigator();
 
@@ -35,6 +37,7 @@ const StackNavigator = () => {
           ),
         }}
       />
+      <Stack.Screen name="TodayQuizScreen" component={TodayQuizScreen} />
     </Stack.Navigator>
   );
 };

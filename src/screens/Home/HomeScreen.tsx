@@ -1,4 +1,5 @@
-import * as React from 'react';
+import React, { useCallback } from 'react';
+import { useNavigation } from '@react-navigation/native';
 import colors from "../../utils/colors";
 import { getFontSize } from '../../utils/fontUtils';
 import LinearGradient from 'react-native-linear-gradient';
@@ -29,6 +30,17 @@ import {
 const { height } = Dimensions.get('window');
 
 function HomeScreen(): React.JSX.Element {
+    const navigation = useNavigation();
+
+    const seed = '361';
+    const username = '앱설런트';
+    const thismonthtree = '5';
+    const usertree = '21';
+
+const handleNavigateTodayQuiz = useCallback(async () => {
+        navigation.navigate('TodayQuizScreen');
+    }, []);
+
     return (
         <View style={styles.container}>
             <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -41,22 +53,24 @@ function HomeScreen(): React.JSX.Element {
                 <View style={styles.HomeMainContainer}>
                     <View style={styles.SeedsContainer}>
                         <SeedIcon width={15} height={20} />
-                        <Text style={styles.SeedsText}>261</Text>
+                        <Text style={styles.SeedsText}>{seed}</Text>
                     </View>
                     <View style={styles.HomeTextContainer}>
                         <View style={styles.MainTextContainer}>
                             <Text style={styles.TitleText1}>반가워요, </Text>
-                            <Text style={styles.YellowText}>앱설런트</Text>
+                            <Text style={styles.YellowText}>{username}</Text>
                             <Text style={styles.TitleText1}> 님!</Text>
                         </View>
                         <Text style={styles.TitleText2}>오늘도 우리 함께 달려보아요:)</Text>
                     </View>
                     <HomeMainIcon width="100%" height="50%" />
 
+                    <TouchableOpacity onPress={handleNavigateTodayQuiz}>
                     <View style={styles.QuizBox}>
                         <Text style={styles.BoldLargeText}>오늘의 퀴즈 풀기</Text>
                         <RightArrowIcon width={8} height={14} />
                     </View>
+                    </TouchableOpacity>
                 </View>
                 </ImageBackground>
 
@@ -64,14 +78,14 @@ function HomeScreen(): React.JSX.Element {
                     <View style={styles.TreeBox}>
                         <CircleThisMonthTreeIcon width={36} height={36} />
                         <View style={styles.TreeDetailBox}>
-                            <Text style={styles.BoldSmallText}>5그루</Text>
+                            <Text style={styles.BoldSmallText}>{thismonthtree}그루</Text>
                             <Text style={styles.GrayText}>이번 달 지킨 나무</Text>
                         </View>
                     </View>
                     <View style={styles.TreeBox}>
                         <CircleUserTreeIcon width={36} height={36} />
                         <View style={styles.TreeDetailBox}>
-                            <Text style={styles.BoldSmallText}>21그루</Text>
+                            <Text style={styles.BoldSmallText}>{usertree}그루</Text>
                             <Text style={styles.GrayText}>지금까지 지킨 나무</Text>
                         </View>
                     </View>
@@ -148,7 +162,7 @@ const styles = StyleSheet.create({
     SeedsText: {
         color: colors.white,
         marginLeft: 8,
-        fontSize: 16,
+        fontSize: getFontSize(16),
         fontWeight: '800',
     },
     HomeTextContainer: {
