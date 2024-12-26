@@ -233,6 +233,7 @@ const styles = StyleSheet.create({
     color: '#121212',
     marginLeft: 21,
     paddingVertical: 10,
+    height:85,
   },
   boxContainer: {
     width: '100%',
