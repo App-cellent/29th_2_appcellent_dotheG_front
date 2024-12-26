@@ -5,13 +5,13 @@ import {
   TouchableOpacity,
   View,
   Image,
+  ImageBackground,
 } from 'react-native';
 
 function ReportScreen(): React.JSX.Element {
   const [selectedTab, setSelectedTab] = useState('주간');
-  const [isHistoryOpen, setIsHistoryOpen] = useState(false); // 히스토리 토글 상태
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
-  // 주간 화면용 변수
   const year = 2024;
   const month = 10;
   const week = '첫째주';
@@ -19,8 +19,9 @@ function ReportScreen(): React.JSX.Element {
   const averageSteps = 5032;
   const historyCount = 6;
   const savedTree = 11;
+  const topPercentage= '21';
 
-  // 히스토리 내역 예시
+  // 인증 히스토리 내역 예시
   const historyDetails = [
     { content: '제로 웨이스트 매장 방문', count: 1 },
     { content: '텀블러 사용', count: 1 },
@@ -28,16 +29,16 @@ function ReportScreen(): React.JSX.Element {
   ];
 
   const handleTabSwitch = (tab: string) => {
-    setSelectedTab(tab); // 상태 변경
+    setSelectedTab(tab);
   };
 
   const toggleHistory = () => {
-    setIsHistoryOpen(!isHistoryOpen); // 히스토리 토글 상태 변경
+    setIsHistoryOpen(!isHistoryOpen);
   };
 
   return (
     <View style={styles.container}>
-      {/* 타원형 버튼 영역 */}
+      {/* 주간/월간 버튼 */}
       <View style={styles.switchContainer}>
         <View style={styles.switchBackground}>
           <TouchableOpacity
@@ -55,39 +56,36 @@ function ReportScreen(): React.JSX.Element {
         </View>
       </View>
 
-      {/* 주간 화면 내용 */}
+      {/* 주간 화면 */}
       {selectedTab === '주간' && (
         <View style={styles.content}>
           <Text style={styles.dateText}>{year}년 {month}월 {week}</Text>
-          <Text style={styles.usernameText}>{username}님의 지난 주{'\n'}성과보고서를 확인해보세요!</Text>
+          <Text style={styles.usernameText}>
+            <Text style={{ color: '#69E6A2' }}>{username}</Text>님의 지난 주{'\n'}성과보고서를 확인해보세요!
+          </Text>
 
-          {/* 지난 주 하루 평균 걸음 수 */}
+          {/* 지난 주 하루 평균 걸음수 */}
           <View style={styles.boxContainer}>
             <View style={styles.shadowBox}>
-              <View style={styles.averageStepsContent}>
-                {/* 왼쪽 상단 로고와 제목 */}
+              <View style={styles.boxContent}>
                 <View style={styles.logoAndTitle}>
                   <Image source={require('../../img/Report/averagesteplogo.png')} style={styles.logoImage} />
-                  <Text style={styles.stepsTitle}>지난 주 하루 평균 걸음수</Text>
+                  <Text style={styles.boxTitle}>지난 주 하루 평균 걸음수</Text>
                 </View>
-                {/* 오른쪽 하단 걸음수 */}
-                <View style={styles.stepsCountContainer}>
-                  <Text style={styles.stepsCount}>{averageSteps.toLocaleString()}</Text>
-                  <Text style={styles.stepsText}>걸음</Text>
+                <View style={styles.countContainer}>
+                  <Text style={styles.countNum}>{averageSteps.toLocaleString()}</Text>
+                  <Text style={styles.countText}>걸음</Text>
                 </View>
               </View>
             </View>
           </View>
 
-          {/* 지난 주 인증 히스토리 */}
+          {/* 지난 주 인증 히스토리 (횟수) */}
           <View style={[styles.toggleBoxContainer, isHistoryOpen && styles.historyOpen]}>
             <View style={styles.shadowBox}>
               <View style={styles.historyContent}>
                 <View style={styles.logoAndTitle}>
-                  <View style={styles.overlayedLogos}>
-                    <Image source={require('../../img/Report/historylogo1.png')} style={styles.historyLogo} />
-                    <Image source={require('../../img/Report/historylogo2.png')} style={styles.overlappingLogo} />
-                  </View>
+                  <Image source={require('../../img/Report/historylogo.png')} style={styles.logoImage} />
                   <Text style={styles.historyTitle}>지난 주 인증 히스토리 (횟수)</Text>
                 </View>
                 <View style={styles.historyCountContainer}>
@@ -96,13 +94,13 @@ function ReportScreen(): React.JSX.Element {
                 </View>
               </View>
 
-              {/* 토글 버튼과 텍스트 */}
+              {/* 인증 히스토리 토글 버튼 */}
               <View style={styles.toggleButtonContainer}>
                 <TouchableOpacity onPress={toggleHistory} style={styles.toggleButton}>
                   <Image
                     source={isHistoryOpen
-                      ? require('../../img/Report/arrowup.png') // 위 화살표
-                      : require('../../img/Report/arrowdown.png')} // 아래 화살표
+                      ? require('../../img/Report/arrowup.png')
+                      : require('../../img/Report/arrowdown.png')}
                     style={styles.arrowImage}
                   />
                 </TouchableOpacity>
@@ -111,7 +109,7 @@ function ReportScreen(): React.JSX.Element {
                 )}
               </View>
 
-              {/* 히스토리 내역 */}
+              {/* 인증 히스토리 내역 */}
               {isHistoryOpen && (
                 <View style={styles.historyDetailsContainer}>
                   {historyDetails.map((detail, index) => (
@@ -127,24 +125,25 @@ function ReportScreen(): React.JSX.Element {
         </View>
       )}
 
-      {/* 월간 화면 내용 */}
+      {/* 월간 화면 */}
       {selectedTab === '월간' && (
         <View style={styles.content}>
           <Text style={styles.dateText}>{year}년 {month}월</Text>
-          <Text style={styles.usernameText}>{username}님의 이번 달{'\n'}성과보고서를 확인해보세요!</Text>
+          <Text style={styles.usernameText}>
+            <Text style={{ color: '#69E6A2' }}>{username}</Text>님의 이번 달{'\n'}성과보고서를 확인해보세요!
+          </Text>
 
           {/* 이번 달 내가 지킨 나무 */}
           <View style={styles.boxContainer}>
             <View style={styles.shadowBox}>
-              <View style={styles.averageStepsContent}>
+              <View style={styles.boxContent}>
                 <View style={styles.logoAndTitle}>
-                  <Image source={require('../../img/Report/savetreelogo1.png')} style={styles.logoImage} />
-                  <Image source={require('../../img/Report/savetreelogo2.png')} style={styles.overlappingLogo} />
-                  <Text style={styles.stepsTitle}>이번 달 내가 지킨 나무</Text>
+                  <Image source={require('../../img/Report/savetreelogo.png')} style={styles.logoImage} />
+                  <Text style={styles.boxTitle}>이번 달 내가 지킨 나무</Text>
                 </View>
-                <View style={styles.stepsCountContainer}>
-                  <Text style={styles.stepsCount}>{savedTree.toLocaleString()}</Text>
-                  <Text style={styles.stepsText}>그루</Text>
+                <View style={styles.countContainer}>
+                  <Text style={styles.countNum}>{savedTree.toLocaleString()}</Text>
+                  <Text style={styles.countText}>그루</Text>
                 </View>
               </View>
             </View>
@@ -153,17 +152,24 @@ function ReportScreen(): React.JSX.Element {
           {/* 이번 달 내가 줄인 탄소 배출량 순위 */}
           <View style={styles.boxContainer}>
             <View style={styles.shadowBox}>
-              <View style={styles.averageStepsContent}>
+              <View style={styles.boxContent}>
                 <View style={styles.logoAndTitle}>
-                  <Image source={require('../../img/Report/savecarbonlogo1.png')} style={styles.logoImage} />
-                  <Image source={require('../../img/Report/savecarbonlogo2.png')} style={styles.overlappingLogo} />
-                  <Text style={styles.stepsTitle}>이번 달 내가 줄인 탄소 배출량 순위</Text>
+                  <Image source={require('../../img/Report/savecarbonlogo.png')} style={styles.logoImage} />
+                  <Text style={styles.boxTitle}>이번 달 내가 줄인 탄소 배출량 순위</Text>
                 </View>
-                <Image source={require('../../img/Report/carbongraph.png')} style={styles.logoImage} />
-                <Text>0kg</Text>
-                <Text>10kg</Text>
-                <Image source={require('../../img/Report/carbonearth.png')} style={styles.logoImage} />
-                <Image source={require('../../img/Report/carbonrank.png')} style={styles.logoImage} />
+                <View style={styles.rankBox}>
+                  <Image source={require('../../img/Report/carbonbackground.png')} style={styles.backgroundImage} />
+                  <View style={styles.graphContainer}>
+                    <Image source={require('../../img/Report/carbongraph.png')} style={styles.graphImage} />
+                  </View>
+                  <View style={styles.rankAndEarth}>
+                    <ImageBackground source={require('../../img/Report/carbonrankbox.png')} style={styles.rankImage}>
+                      <Text style={styles.appText}>앱설런트</Text>
+                      <Text style={styles.rankText}>상위 {topPercentage}%</Text>
+                    </ImageBackground>
+                    <Image source={require('../../img/Report/carbonearth.png')} style={styles.earthImage} />
+                  </View>
+                </View>
               </View>
             </View>
           </View>
@@ -200,12 +206,13 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     borderRadius: 20,
   },
-  selectedOption: {
-    backgroundColor: '#69E6A2',
-  },
   optionText: {
     fontSize: 13,
+    fontWeight: 'bold',
     color: '#333333',
+  },
+  selectedOption: {
+    backgroundColor: '#69E6A2',
   },
   selectedText: {
     color: '#ffffff',
@@ -227,16 +234,11 @@ const styles = StyleSheet.create({
     marginLeft: 21,
     paddingVertical: 10,
   },
-  contentText: {
-    fontSize: 18,
-    color: '#333333',
-  },
   boxContainer: {
     width: '100%',
     minHeight: 127,
     marginTop: 19,
     paddingHorizontal: 16,
-    //position: 'relative'
   },
   shadowBox: {
     backgroundColor: '#ffffff',
@@ -246,24 +248,43 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 20,
     elevation: 5,
-    padding: 10,
   },
-  averageStepsContent: {
+  boxContent: {
     justifyContent: 'space-between',
     minHeight: 127,
   },
   logoAndTitle: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  stepsCountContainer: {
     position: 'absolute',
     flexDirection: 'row',
-    bottom: 14,
-    right: 20,
+    alignItems: 'center',
+    zIndex: 2,
+  },
+  logoImage: {
+    width: 45,
+    height: 45,
+    marginLeft: 20,
+    marginTop: 16,
+  },
+  boxTitle: {
+    fontSize: 15,
+    color: '#121212',
+    fontWeight: 'bold',
+    marginLeft: 10,
+    marginTop: 16,
+  },
+  countContainer: {
+    position: 'absolute',
+    flexDirection: 'row',
+    bottom: 20,
+    right: 24,
     alignItems: 'flex-end',
   },
-  stepsText: {
+  countNum: {
+    fontSize: 40,
+    fontWeight: 'bold',
+    color: '#121212',
+  },
+  countText: {
     fontSize: 15,
     color: '#C9C9C9',
     marginLeft: 4,
@@ -278,56 +299,9 @@ const styles = StyleSheet.create({
   historyOpen: {
     height: 'auto',
   },
-  logoImage: {
-    width: 45,
-    height: 45,
-    marginLeft: 16,
-    marginTop: 16,
-  },
-  stepsTitle: {
-    fontSize: 15,
-    color: '#121212',
-    fontWeight: 'bold',
-    marginLeft: 10,
-    marginTop: 16,
-  },
-  stepsCount: {
-    fontSize: 40,
-    fontWeight: 'bold',
-    color: '#121212',
-  },
   historyContent: {
     justifyContent: 'space-between',
     minHeight: 127,
-  },
-  historyCountContainer: {
-    position: 'absolute',
-    flexDirection: 'row',
-    bottom: 0,
-    right: 20,
-    alignItems: 'flex-end',
-  },
-  historyText: {
-    fontSize: 15,
-    color: '#C9C9C9',
-    marginLeft: 4,
-    marginBottom: 8,
-  },
-  overlayedLogos: {
-    position: 'relative',
-  },
-  historyLogo: {
-    width: 45,
-    height: 45,
-    marginLeft: 16,
-    marginTop: 16,
-  },
-  overlappingLogo: {
-    position: 'absolute',
-    width: 24,
-    height: 24,
-    marginLeft: 26.5,
-    marginTop: 26.5,
   },
   historyTitle: {
     fontSize: 15,
@@ -336,10 +310,23 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     marginTop: 16,
   },
+  historyCountContainer: {
+    position: 'absolute',
+    flexDirection: 'row',
+    bottom: 0,
+    right: 24,
+    alignItems: 'flex-end',
+  },
   historyCount: {
     fontSize: 40,
     fontWeight: 'bold',
     color: '#121212',
+  },
+  historyText: {
+    fontSize: 15,
+    color: '#C9C9C9',
+    marginLeft: 4,
+    marginBottom: 8,
   },
   toggleButtonContainer: {
     position: 'relative',
@@ -361,13 +348,14 @@ const styles = StyleSheet.create({
   },
   historyDetailsContainer: {
     paddingHorizontal: 23,
+    marginBottom: 28,
   },
   historyDetail: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 15,
-    marginTop: 10,
+    marginBottom: 5,
+    marginTop: 20,
   },
   historyDetailContent: {
     fontSize: 13,
@@ -376,6 +364,62 @@ const styles = StyleSheet.create({
   historyDetailCount: {
     fontSize: 13,
     color: '#929292',
+  },
+  rankBox: {
+    position: 'relative',
+    borderRadius: 20,
+  },
+  backgroundImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 20,
+    position: 'absolute',
+    resizeMode: 'cover',
+    zIndex: 1,
+  },
+  graphContainer: {
+    position: 'relative',
+    alignItems: 'center',
+    marginTop: 80,
+    marginBottom: 38,
+    paddingHorizontal:20,
+    zIndex: 2,
+  },
+  graphImage: {
+    width: '100%',
+    minHeight: 160,
+    resizeMode: 'contain',
+  },
+  rankAndEarth: {
+    position: 'absolute',
+    top: 65,
+    marginLeft:218,
+    width: '100%',
+    zIndex: 3,
+  },
+  rankImage: {
+    width: 90,
+    height: 70,
+  },
+  earthImage: {
+    marginTop: 27,
+    marginLeft:3,
+    width: 80,
+    height: 55,
+  },
+  appText: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: '#69E6A2',
+    marginTop:10,
+    paddingHorizontal:12,
+  },
+  rankText: {
+    fontSize: 11,
+    textAlign: 'center',
+    color: '#545454',
+    marginBottom:10,
   },
 });
 
