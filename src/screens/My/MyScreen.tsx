@@ -9,14 +9,13 @@ import {
   Modal,
 } from 'react-native';
 
-function MyScreen(): React.JSX.Element {
+function MyScreen({ navigation }): React.JSX.Element {
   const [alarmEnabled, setAlarmEnabled] = useState(true);
   const [userName, setUserName] = useState("앱설런트");
   const [userId, setUserId] = useState("Appcellent123");
   const [nicknameModalVisible, setNicknameModalVisible] = useState(false);
   const [newNickname, setNewNickname] = useState("");
   const [logoutModalVisible, setLogoutModalVisible] = useState(false);
-  const [withdrawalModalVisible, setWithdrawalModalVisible] = useState(false);
 
   const toggleAlarm = () => {
     setAlarmEnabled(!alarmEnabled);
@@ -54,17 +53,8 @@ function MyScreen(): React.JSX.Element {
     setLogoutModalVisible(false);
   };
 
-  const openWithdrawalModal = () => {
-    setWithdrawalModalVisible(true);
-  };
-
-  const closeWithdrawalModal = () => {
-    setWithdrawalModalVisible(false);
-  };
-
-  const handleWithdrawal = () => {
-    alert("탈퇴가 완료되었습니다.");
-    setWithdrawalModalVisible(false);
+  const goToWithdrawalScreen = () => {
+    navigation.navigate('WithdrawalScreen');
   };
 
   return (
@@ -148,7 +138,7 @@ function MyScreen(): React.JSX.Element {
       <View style={styles.boxContainer}>
         <View style={styles.deleteAccountBox}>
           <Text style={styles.boxText}>탈퇴하기</Text>
-          <TouchableOpacity onPress={openWithdrawalModal}>
+          <TouchableOpacity onPress={goToWithdrawalScreen}>
             <Image
               source={require('../../img/My/arrowright.png')}
               style={styles.arrowImage}
@@ -206,29 +196,6 @@ function MyScreen(): React.JSX.Element {
                 <Text style={styles.confirmButtonText}>확인</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.cancelButton} onPress={closeLogoutModal}>
-                <Text style={styles.cancelButtonText}>취소</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
-
-      {/* 탈퇴하기 모달 */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={withdrawalModalVisible}
-        onRequestClose={closeWithdrawalModal}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContainer, styles.shadowEffect]}>
-            <Text style={styles.modalTitle}>탈퇴하기</Text>
-            <Text style={styles.modalSubtitle}>정말 탈퇴하시겠습니까?</Text>
-            <View style={styles.logoutModalButtonContainer}>
-              <TouchableOpacity style={[styles.confirmButton, { backgroundColor: '#FF5959' }]} onPress={handleWithdrawal}>
-                <Text style={styles.confirmButtonText}>확인</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.cancelButton} onPress={closeWithdrawalModal}>
                 <Text style={styles.cancelButtonText}>취소</Text>
               </TouchableOpacity>
             </View>

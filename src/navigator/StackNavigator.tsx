@@ -16,6 +16,8 @@ import LeftArrowIcon from '../img/Navigator/LeftArrowIcon.svg';
 import TodayQuizGuideScreen from '../screens/Home/TodayQuizGuideScreen';
 import TodayQuizScreen from '../screens/Home/TodayQuizScreen';
 
+import WithdrawalScreen from '../screens/My/WithdrawalScreen';
+
 const StackNavigator = () => {
     const navigation = useNavigation();
     const Stack = createNativeStackNavigator();
@@ -75,6 +77,12 @@ const StackNavigator = () => {
                         </View>
                     )
                 }}
+            />
+
+            <Stack.Screen
+                name="WithdrawalScreen"
+                component={WithdrawalScreen}
+                options={{ headerShown: false }}
             />
         </Stack.Navigator>
     );
