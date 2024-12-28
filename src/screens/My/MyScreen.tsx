@@ -57,6 +57,10 @@ function MyScreen({ navigation }): React.JSX.Element {
     navigation.navigate('WithdrawalScreen');
   };
 
+  const goToAlarmScreen = () => {
+    navigation.navigate('AlarmScreen');
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.profileContainer}>
@@ -80,7 +84,7 @@ function MyScreen({ navigation }): React.JSX.Element {
       <View style={styles.boxContainer}>
         <View style={styles.box}>
           <Text style={styles.boxText}>알림 히스토리</Text>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={goToAlarmScreen}>
             <Image
               source={require('../../img/My/arrowright.png')}
               style={styles.arrowImage}

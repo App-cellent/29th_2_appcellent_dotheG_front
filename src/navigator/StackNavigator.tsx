@@ -17,6 +17,7 @@ import TodayQuizGuideScreen from '../screens/Home/TodayQuizGuideScreen';
 import TodayQuizScreen from '../screens/Home/TodayQuizScreen';
 
 import WithdrawalScreen from '../screens/My/WithdrawalScreen';
+import AlarmScreen from '../screens/My/AlarmScreen';
 
 const StackNavigator = () => {
     const navigation = useNavigation();
@@ -82,6 +83,12 @@ const StackNavigator = () => {
             <Stack.Screen
                 name="WithdrawalScreen"
                 component={WithdrawalScreen}
+                options={{ headerShown: false }}
+            />
+
+            <Stack.Screen
+                name="AlarmScreen"
+                component={AlarmScreen}
                 options={{ headerShown: false }}
             />
         </Stack.Navigator>

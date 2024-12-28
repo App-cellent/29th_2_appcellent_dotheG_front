@@ -37,7 +37,6 @@ function WithdrawalScreen({ navigation }): React.JSX.Element {
   };
 
   const handlePasswordCheck = () => {
-    // 여기서 비밀번호를 실제로 확인하는 로직을 추가할 수 있습니다.
     // 예시: 비밀번호가 "1234"인지 확인
     if (password === '1234') {
       setIsPasswordValid(true);
@@ -51,25 +50,23 @@ function WithdrawalScreen({ navigation }): React.JSX.Element {
   const toggleReasonSelection = (reasonText: string) => {
     setSelectedReasons((prevSelectedReasons) => {
       if (prevSelectedReasons.includes(reasonText)) {
-        // If the reason is already selected, remove it
         return prevSelectedReasons.filter((item) => item !== reasonText);
       } else {
-        // If the reason is not selected, add it
         return [...prevSelectedReasons, reasonText];
       }
     });
   };
 
   const toggleAgreement = () => {
-    setIsAgreed((prev) => !prev); // Toggle the agreement state
+    setIsAgreed((prev) => !prev);
   };
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
-      setIsKeyboardVisible(true); // 키보드가 올라오면 버튼 숨김
+      setIsKeyboardVisible(true);
     });
     const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
-      setIsKeyboardVisible(false); // 키보드가 내려가면 버튼 보임
+      setIsKeyboardVisible(false);
     });
 
     return () => {
@@ -84,12 +81,11 @@ function WithdrawalScreen({ navigation }): React.JSX.Element {
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Image
-            source={require('../../img/My/exit.png')} // 나가기 아이콘 이미지 경로 수정
+            source={require('../../img/My/exit.png')}
             style={styles.closeIcon}
           />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>탈퇴하기</Text>
-        <View style={{ width: 24 }} /> {/* 오른쪽 여백 */}
       </View>
 
       {/* 본인확인 텍스트 */}
@@ -98,7 +94,7 @@ function WithdrawalScreen({ navigation }): React.JSX.Element {
           <Text style={{ color: '#69E6A2', fontWeight: 'bold' }}>본인확인</Text>을 진행해주세요.
         </Text>
 
-        {/* 비밀번호 입력 텍스트 */}
+        {/* 비밀번호 입력 */}
         <Text style={styles.inputLabel}>비밀번호 입력</Text>
         <View style={styles.passwordInputContainer}>
           <TextInput
@@ -127,21 +123,21 @@ function WithdrawalScreen({ navigation }): React.JSX.Element {
           </TouchableOpacity>
         </View>
 
-        {/* 탈퇴 사유 선택 텍스트 */}
+        {/* 탈퇴 사유 선택 */}
         <Text style={styles.inputLabel}>탈퇴 사유 선택</Text>
         <View style={styles.reasonContainer}>
           {['인증할 수 있는 활동이 너무 적어요.', '성과 보고서가 체계적이지 않아요.', '캐릭터가 마음에 안 들어요.'].map((item, index) => (
             <TouchableOpacity
               key={index}
               style={styles.reasonBox}
-              onPress={() => toggleReasonSelection(item)} // Handle checkbox click
+              onPress={() => toggleReasonSelection(item)}
             >
               <Text style={styles.reasonText}>{item}</Text>
               <Image
                 source={
                   selectedReasons.includes(item)
-                    ? require('../../img/My/smallchecked.png') // Checked icon
-                    : require('../../img/My/smallunchecked.png') // Unchecked icon
+                    ? require('../../img/My/smallchecked.png')
+                    : require('../../img/My/smallunchecked.png')
                 }
                 style={styles.smallCheckboxIcon}
               />
@@ -155,11 +151,11 @@ function WithdrawalScreen({ navigation }): React.JSX.Element {
           />
         </View>
 
-        {/* 경고 문구 추가 */}
+        {/* 경고 문구 */}
         <View style={styles.warningContainer}>
           <View style={styles.warningItem}>
             <Image
-              source={require('../../img/My/alerticon.png')} // 경고 아이콘 이미지 경로
+              source={require('../../img/My/alerticon.png')}
               style={styles.warningIcon}
             />
             <Text style={styles.warningText}>
@@ -168,7 +164,7 @@ function WithdrawalScreen({ navigation }): React.JSX.Element {
           </View>
           <View style={styles.warningItem}>
             <Image
-              source={require('../../img/My/alerticon.png')} // 경고 아이콘 이미지 경로
+              source={require('../../img/My/alerticon.png')}
               style={styles.warningIcon}
             />
             <Text style={styles.warningText}>
@@ -194,7 +190,7 @@ function WithdrawalScreen({ navigation }): React.JSX.Element {
       </View>
 
       {/* 탈퇴하기 버튼 */}
-      {!isKeyboardVisible && ( // 키보드가 보일 때 버튼 숨기기
+      {!isKeyboardVisible && (
         <TouchableOpacity
           style={[
             styles.withdrawButton,
@@ -271,12 +267,14 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: '#393939',
+    position: 'absolute',
+    left: '44%',
   },
   content: {
     flex: 1,
     justifyContent: 'flex-start',
     alignItems: 'center',
-    marginTop: 30, // 상단에서 30만큼 아래에 배치
+    marginTop: 30,
   },
   confirmationText: {
     fontSize: 18,
