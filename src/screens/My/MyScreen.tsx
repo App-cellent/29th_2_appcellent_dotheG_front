@@ -61,6 +61,10 @@ function MyScreen({ navigation }): React.JSX.Element {
     navigation.navigate('AlarmScreen');
   };
 
+  const goToPasswordChangeScreen = () => {
+    navigation.navigate('PasswordChangeScreen');
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.profileContainer}>
@@ -115,7 +119,7 @@ function MyScreen({ navigation }): React.JSX.Element {
       <View style={styles.boxContainer}>
         <View style={styles.box}>
           <Text style={styles.boxText}>비밀번호 변경하기</Text>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={goToPasswordChangeScreen}>
             <Image
               source={require('../../img/My/arrowright.png')}
               style={styles.arrowImage}

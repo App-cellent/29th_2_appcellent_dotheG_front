@@ -99,7 +99,7 @@ function WithdrawalScreen({ navigation }): React.JSX.Element {
         <View style={styles.passwordInputContainer}>
           <TextInput
             style={styles.inputBox}
-            placeholder="비밀번호를 입력하세요"
+            placeholder="비밀번호를 입력해주세요."
             secureTextEntry
             value={password}
             onChangeText={setPassword}
