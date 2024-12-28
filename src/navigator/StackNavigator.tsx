@@ -16,6 +16,10 @@ import LeftArrowIcon from '../img/Navigator/LeftArrowIcon.svg';
 import TodayQuizGuideScreen from '../screens/Home/TodayQuizGuideScreen';
 import TodayQuizScreen from '../screens/Home/TodayQuizScreen';
 
+import WithdrawalScreen from '../screens/My/WithdrawalScreen';
+import AlarmScreen from '../screens/My/AlarmScreen';
+import PasswordChangeScreen from '../screens/My/PasswordChangeScreen';
+
 const StackNavigator = () => {
     const navigation = useNavigation();
     const Stack = createNativeStackNavigator();
@@ -75,6 +79,24 @@ const StackNavigator = () => {
                         </View>
                     )
                 }}
+            />
+
+            <Stack.Screen
+                name="WithdrawalScreen"
+                component={WithdrawalScreen}
+                options={{ headerShown: false }}
+            />
+
+            <Stack.Screen
+                name="AlarmScreen"
+                component={AlarmScreen}
+                options={{ headerShown: false }}
+            />
+
+            <Stack.Screen
+                name="PasswordChangeScreen"
+                component={PasswordChangeScreen}
+                options={{ headerShown: false }}
             />
         </Stack.Navigator>
     );
