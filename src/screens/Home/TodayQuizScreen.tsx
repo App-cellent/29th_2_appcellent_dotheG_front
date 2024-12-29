@@ -33,7 +33,7 @@ function TodayQuizScreen(): React.JSX.Element {
     });
 
     const handleNavigateQuizPress = useCallback(async () => {
-        navigation.navigate('TodayQuizCorrectScreen');
+        navigation.navigate('TodayQuizWrongScreen');
     }, [navigation]);
 
     const [selectedAnswer, setSelectedAnswer] = useState(null);
@@ -60,7 +60,7 @@ function TodayQuizScreen(): React.JSX.Element {
             </View>
 
             <View style={styles.TopTextContainer}>
-                <View style={styles.rowContainer}>
+                <View style={[styles.rowContainer, {marginBottom: 10}]}>
                     <Text style={styles.GreenText}>{formattedDate}</Text>
                     <Text style={[styles.GreenText, { color: colors.lightblack }]}> 오늘의 퀴즈</Text>
                 </View>
