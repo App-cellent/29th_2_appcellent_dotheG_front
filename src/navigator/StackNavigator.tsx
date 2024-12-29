@@ -15,6 +15,8 @@ import LeftArrowIcon from '../img/Navigator/LeftArrowIcon.svg';
 
 import TodayQuizGuideScreen from '../screens/Home/TodayQuizGuideScreen';
 import TodayQuizScreen from '../screens/Home/TodayQuizScreen';
+import TodayQuizCorrectScreen from '../screens/Home/TodayQuizCorrectScreen';
+import TodayQuizWrongScreen from '../screens/Home/TodayQuizWrongScreen';
 
 import WithdrawalScreen from '../screens/My/WithdrawalScreen';
 import AlarmScreen from '../screens/My/AlarmScreen';
@@ -52,33 +54,25 @@ const StackNavigator = () => {
             <Stack.Screen
                 name="TodayQuizGuideScreen"
                 component={TodayQuizGuideScreen}
-                options={{
-                    header: () => (
-                        <View style={styles.customHeader}>
-                            <View style={styles.headerLeft}>
-                            <TouchableOpacity onPress={goBack}>
-                                <LeftArrowIcon style={styles.LeftArrow}/>
-                            </TouchableOpacity>
-                            </View>
-                        </View>
-                    )
-                }}
+                options={{ headerShown: false }}
             />
 
             <Stack.Screen
                 name="TodayQuizScreen"
                 component={TodayQuizScreen}
-                options={{
-                    header: () => (
-                        <View style={styles.customHeader}>
-                            <View style={styles.headerLeft}>
-                            <TouchableOpacity onPress={goBack}>
-                                <LeftArrowIcon style={styles.LeftArrow}/>
-                            </TouchableOpacity>
-                            </View>
-                        </View>
-                    )
-                }}
+                options={{ headerShown: false }}
+            />
+
+            <Stack.Screen
+                name="TodayQuizCorrectScreen"
+                component={TodayQuizCorrectScreen}
+                options={{ headerShown: false }}
+            />
+
+            <Stack.Screen
+                name="TodayQuizWrongScreen"
+                component={TodayQuizWrongScreen}
+                options={{ headerShown: false }}
             />
 
             <Stack.Screen

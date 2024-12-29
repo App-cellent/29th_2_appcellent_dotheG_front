@@ -38,6 +38,15 @@ function TodayQuizGuideScreen(): React.JSX.Element {
 
     return (
         <View style={styles.container}>
+            <View style={styles.header}>
+                <TouchableOpacity onPress={() => navigation.goBack()}>
+                  <Image
+                    source={require('../../img/My/arrowleft.png')}
+                    style={styles.closeIcon}
+                  />
+                </TouchableOpacity>
+            </View>
+
             <View style={styles.TopTextContainer}>
                 <Text style={styles.GreenText}>{formattedDate}</Text>
                 <Text style={styles.BoldLargeText}>오늘의 퀴즈 DO!</Text>
@@ -66,10 +75,22 @@ function TodayQuizGuideScreen(): React.JSX.Element {
 
 const styles = StyleSheet.create({
     container: {
-        paddingVertical: 36,
+        flex: 1,
+        backgroundColor: '#FFFFFF',
+    },
+    header: {
+        alignItems: 'flex-start',
+        justifyContent: 'center',
+        paddingHorizontal: 18,
+        height: 56,
+    },
+    closeIcon: {
+        width: 7.13,
+        height: 14,
     },
     TopTextContainer: {
         paddingHorizontal: 22,
+        marginTop: 29,
     },
     BottomTextContainer: {
         paddingHorizontal: 21,
