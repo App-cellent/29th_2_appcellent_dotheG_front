@@ -50,6 +50,15 @@ function TodayQuizScreen(): React.JSX.Element {
 
     return (
         <View style={styles.container}>
+            <View style={styles.header}>
+                <TouchableOpacity onPress={() => navigation.goBack()}>
+                  <Image
+                    source={require('../../img/My/arrowleft.png')}
+                    style={styles.closeIcon}
+                  />
+                </TouchableOpacity>
+            </View>
+
             <View style={styles.TopTextContainer}>
                 <View style={styles.rowContainer}>
                     <Text style={styles.GreenText}>{formattedDate}</Text>
@@ -62,18 +71,16 @@ function TodayQuizScreen(): React.JSX.Element {
 
             <View style={styles.TwoAnswerContainer}>
               <TouchableOpacity
-                style={[selectedAnswer === 'quiz1' && styles.selected]}
                 onPress={() => handleSelectAnswer('quiz1')}
               >
-                  <View style={styles.Answer}>
+                  <View style={[styles.Answer, selectedAnswer === 'quiz1' && styles.selected]}>
                     <Image source={require('../../img/Home/Quiz/quiz1.png')} />
                   </View>
               </TouchableOpacity>
               <TouchableOpacity
-                  style={[selectedAnswer === 'quiz2' && styles.selected]}
                   onPress={() => handleSelectAnswer('quiz2')}
                 >
-                <View style={styles.Answer}>
+                <View style={[styles.Answer, selectedAnswer === 'quiz2' && styles.selected]}>
                 <Image source={require('../../img/Home/Quiz/quiz2.png')} />
                 </View>
                 </TouchableOpacity>
@@ -81,18 +88,16 @@ function TodayQuizScreen(): React.JSX.Element {
 
             <View style={styles.TwoAnswerContainer}>
             <TouchableOpacity
-                style={[selectedAnswer === 'quiz3' && styles.selected]}
                 onPress={() => handleSelectAnswer('quiz3')}
               >
-              <View style={styles.Answer}>
+              <View style={[styles.Answer, selectedAnswer === 'quiz3' && styles.selected]}>
                 <Image source={require('../../img/Home/Quiz/quiz3.png')} />
               </View>
               </TouchableOpacity>
               <TouchableOpacity
-                  style={[selectedAnswer === 'quiz4' && styles.selected]}
                   onPress={() => handleSelectAnswer('quiz4')}
                 >
-              <View style={styles.Answer}>
+              <View style={[styles.Answer, selectedAnswer === 'quiz4' && styles.selected]}>
                 <Image source={require('../../img/Home/Quiz/quiz4.png')} />
               </View>
               </TouchableOpacity>
@@ -107,10 +112,22 @@ function TodayQuizScreen(): React.JSX.Element {
 
 const styles = StyleSheet.create({
     container: {
-        paddingVertical: 36,
+        flex: 1,
+        backgroundColor: '#FFFFFF',
+    },
+    header: {
+        alignItems: 'flex-start',
+        justifyContent: 'center',
+        paddingHorizontal: 18,
+        height: 56,
+    },
+    closeIcon: {
+        width: 7.13,
+        height: 14,
     },
     TopTextContainer: {
         paddingHorizontal: 22,
+        marginTop: 29,
     },
     TwoAnswerContainer: {
         flexDirection: 'row',

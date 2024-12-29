@@ -52,33 +52,13 @@ const StackNavigator = () => {
             <Stack.Screen
                 name="TodayQuizGuideScreen"
                 component={TodayQuizGuideScreen}
-                options={{
-                    header: () => (
-                        <View style={styles.customHeader}>
-                            <View style={styles.headerLeft}>
-                            <TouchableOpacity onPress={goBack}>
-                                <LeftArrowIcon style={styles.LeftArrow}/>
-                            </TouchableOpacity>
-                            </View>
-                        </View>
-                    )
-                }}
+                options={{ headerShown: false }}
             />
 
             <Stack.Screen
                 name="TodayQuizScreen"
                 component={TodayQuizScreen}
-                options={{
-                    header: () => (
-                        <View style={styles.customHeader}>
-                            <View style={styles.headerLeft}>
-                            <TouchableOpacity onPress={goBack}>
-                                <LeftArrowIcon style={styles.LeftArrow}/>
-                            </TouchableOpacity>
-                            </View>
-                        </View>
-                    )
-                }}
+                options={{ headerShown: false }}
             />
 
             <Stack.Screen
