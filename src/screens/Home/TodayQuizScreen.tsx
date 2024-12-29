@@ -33,7 +33,7 @@ function TodayQuizScreen(): React.JSX.Element {
     });
 
     const handleNavigateQuizPress = useCallback(async () => {
-        navigation.navigate('TodayQuizScreen');
+        navigation.navigate('TodayQuizCorrectScreen');
     }, [navigation]);
 
     const [selectedAnswer, setSelectedAnswer] = useState(null);
