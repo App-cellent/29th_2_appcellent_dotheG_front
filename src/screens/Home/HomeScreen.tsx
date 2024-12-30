@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import colors from "../../utils/colors";
 import { getFontSize } from '../../utils/fontUtils';
@@ -40,6 +40,12 @@ function HomeScreen(): React.JSX.Element {
     const handleNavigateTodayQuiz = useCallback(async () => {
         navigation.navigate('TodayQuizGuideScreen');
     }, []);
+
+    const [openQuest, setOpenQuest] = useState(false);
+
+    const handleSelectAnswer = () => {
+        setOpenQuest(!openQuest);
+    };
 
     return (
         <View style={styles.container}>
@@ -132,9 +138,26 @@ function HomeScreen(): React.JSX.Element {
                     </View>
                 </View>
             </ScrollView>
-            <TouchableOpacity style={styles.floatingBtn}>
-                <FloatingButton width={41} height={41}/>
-            </TouchableOpacity>
+
+            <View style={styles.floatingBtn}>
+                <TouchableOpacity onPress={handleSelectAnswer}>
+                    <FloatingButton width={71} height={71}/>
+                </TouchableOpacity>
+            </View>
+
+            {openQuest &&
+            <View style={styles.openQuestOption}>
+                <View style={[styles.questOption, {borderBottomWidth: 1, borderBottomColor: '#C9C9C9'}]}>
+                    <Text style={styles.optionText}>갤러리</Text>
+                    <Image source={require('../../img/Home/GalleryIcon.png')} style={styles.GalleryIcon} />
+                </View>
+
+                <View style={styles.questOption}>
+                    <Text style={styles.optionText}>사진 촬영하기</Text>
+                    <Image source={require('../../img/Home/CameraIcon.png')} style={styles.CameraIcon} />
+                </View>
+            </View>
+            }
         </View>
     );
 }
@@ -272,11 +295,48 @@ const styles = StyleSheet.create({
         fontSize: getFontSize(12),
         fontWeight: '400',
     },
-    floatingBtn:{
+    floatingBtn: {
+        position: 'absolute',
+        right: 0,
+        bottom: 17,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 0,
+    },
+    openQuestOption: {
+        backgroundColor: colors.white,
+        marginHorizontal: 16,
+        position: 'absolute',
+        justifyContent: 'space-evenly',
+        alignContent: 'space-between',
+        borderWidth: 1,
+        borderColor: colors.lightblack,
+        borderRadius: 15,
+        right: 0,
+        bottom: 89,
+        width: 136,
+        height: 85,
+    },
+    questOption: {
+        paddingHorizontal: 13,
         flexDirection: 'row',
-        justifyContent: 'flex-end',
-        width: 41,
-        height: 41,
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        height: 42,
+    },
+    optionText:{
+        color: colors.lightblack,
+        lineHeight: 20,
+        fontSize: getFontSize(13),
+        fontWeight: '400',
+    },
+    GalleryIcon: {
+        width: 26,
+        height: 20,
+    },
+    CameraIcon: {
+        width: 23,
+        height: 17,
     },
 });
 
