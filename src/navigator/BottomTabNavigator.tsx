@@ -45,20 +45,18 @@ function BottomTabNavigator(): React.JSX.Element {
           tabBarInactiveTintColor: '#D9D9D9',
         tabBarLabelStyle: {
           fontSize: 11,
-          fontWeight: '700',
-          paddingVertical: 3,
+          fontWeight: '800',
+          paddingTop: 5,
         },
         tabBarStyle: {
           height: 70,
-          padding: 0,
           elevation: 0,
-          justifyContent: 'center', // 탭 바 세로 가운데 정렬
-          alignItems: 'center', // 탭 바 세로 가운데 정렬
         },
         tabBarItemStyle: {
+          flexDirection: 'column',
           justifyContent: 'center',
           alignItems: 'center',
-          flexDirection: 'column',
+          marginVertical: 5,
         },
       }}>
       <Tab.Screen
