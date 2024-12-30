@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import MainHeader from '../../components/MainHeader';
+
 import {
   StyleSheet,
   Text,
@@ -67,6 +69,8 @@ function MyScreen({ navigation }): React.JSX.Element {
 
   return (
     <View style={styles.container}>
+      <MainHeader />
+
       <View style={styles.profileContainer}>
         <Image
           source={require('../../img/My/profileimage.png')}
@@ -217,13 +221,13 @@ function MyScreen({ navigation }): React.JSX.Element {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 32,
   },
   profileContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingBottom: 24,
     paddingHorizontal: 16,
+    paddingTop: 32,
   },
   profileImage: {
     width: 54,
