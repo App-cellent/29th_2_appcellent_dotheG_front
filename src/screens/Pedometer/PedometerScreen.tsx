@@ -1,4 +1,6 @@
 import * as React from 'react'
+
+import MainHeader from '../../components/MainHeader';
 import {
   SafeAreaView,
   ScrollView,
@@ -12,6 +14,7 @@ import {
 function PedometerScreen(): React.JSX.Element {
     return (
         <View style={styles.container}>
+            <MainHeader />
             <Text>PedometerScreen</Text>
         </View>
     );
@@ -20,7 +23,6 @@ function PedometerScreen(): React.JSX.Element {
 const styles = StyleSheet.create({
     container:{
         flex: 1,
-        paddingHorizontal: 16,
     }
 })
 

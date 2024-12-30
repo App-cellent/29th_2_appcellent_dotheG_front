@@ -9,9 +9,6 @@ import {
 } from 'react-native';
 
 import BottomTabNavigator from './BottomTabNavigator';
-import DoTheG from '../img/Navigator/DoTheG.svg';
-import AlarmIcon from '../img/Navigator/AlarmIcon.svg';
-import LeftArrowIcon from '../img/Navigator/LeftArrowIcon.svg';
 
 import TodayQuizGuideScreen from '../screens/Home/TodayQuizGuideScreen';
 import TodayQuizScreen from '../screens/Home/TodayQuizScreen';
@@ -35,20 +32,7 @@ const StackNavigator = () => {
             <Stack.Screen
                 name="Main"
                 component={BottomTabNavigator}
-                options={{
-                    header: () => (
-                        <View style={styles.customHeader}>
-                            <View style={styles.headerLeft}>
-                                <DoTheG />
-                            </View>
-                            <View style={styles.headerRight}>
-                                <TouchableOpacity>
-                                    <AlarmIcon />
-                                </TouchableOpacity>
-                            </View>
-                        </View>
-                    ),
-                }}
+                options={{ headerShown: false }}
             />
 
             <Stack.Screen

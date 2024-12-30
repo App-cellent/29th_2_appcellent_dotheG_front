@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+
+import MainHeader from '../../components/MainHeader';
 import {
   StyleSheet,
   Text,
@@ -38,6 +40,7 @@ function ReportScreen(): React.JSX.Element {
 
   return (
     <View style={styles.container}>
+        <MainHeader />
       {/* 주간/월간 버튼 */}
       <View style={styles.switchContainer}>
         <View style={styles.switchBackground}>

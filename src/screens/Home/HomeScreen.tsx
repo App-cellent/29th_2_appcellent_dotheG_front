@@ -3,6 +3,7 @@ import { useNavigation } from '@react-navigation/native';
 import colors from "../../utils/colors";
 import { getFontSize } from '../../utils/fontUtils';
 import LinearGradient from 'react-native-linear-gradient';
+import MainHeader from '../../components/MainHeader';
 
 import RightArrowIcon from '../../img/Home/RightArrowIcon.svg';
 import SeedIcon from '../../img/Home/SeedIcon.svg';
@@ -49,6 +50,7 @@ function HomeScreen(): React.JSX.Element {
 
     return (
         <View style={styles.container}>
+            <MainHeader />
             <ScrollView contentContainerStyle={styles.scrollContainer}>
                 {/* 배경 이미지가 포함된 부분 */}
                 <ImageBackground
