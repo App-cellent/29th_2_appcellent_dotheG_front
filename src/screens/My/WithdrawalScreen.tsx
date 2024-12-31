@@ -9,6 +9,7 @@ import {
   Modal,
   Keyboard,
   Platform,
+  ScrollView,
 } from 'react-native';
 
 function WithdrawalScreen({ navigation }): React.JSX.Element {
@@ -37,7 +38,6 @@ function WithdrawalScreen({ navigation }): React.JSX.Element {
   };
 
   const handlePasswordCheck = () => {
-    // 예시: 비밀번호가 "1234"인지 확인
     if (password === '1234') {
       setIsPasswordValid(true);
       alert('비밀번호 확인 완료');
@@ -76,7 +76,7 @@ function WithdrawalScreen({ navigation }): React.JSX.Element {
   }, []);
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       {/* 상단바 */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -159,7 +159,7 @@ function WithdrawalScreen({ navigation }): React.JSX.Element {
               style={styles.warningIcon}
             />
             <Text style={styles.warningText}>
-              지금 탈퇴하시면 리워드가 함께 사라져 추후에 동일 계정으로{'\n'}재가입하셔도 만보기와 캐릭터 내역이 복구되지 않아요!
+              지금 탈퇴하시면 리워드가 함께 사라져 추후에 동일 계정으로 재가입하셔도 만보기와 캐릭터 내역이 복구되지 않아요!
             </Text>
           </View>
           <View style={styles.warningItem}>
@@ -168,29 +168,30 @@ function WithdrawalScreen({ navigation }): React.JSX.Element {
               style={styles.warningIcon}
             />
             <Text style={styles.warningText}>
-              인증한 퀘스트와 나의 성과 보고서 내용이 사라져요.{'\n'}재가입하셔도 모든 내역이 복구되지 않아요!
+              인증한 퀘스트와 나의 성과 보고서 내용이 사라져요. 재가입하셔도 모든 내역이 복구되지 않아요!
             </Text>
           </View>
         </View>
+      </View>
 
-        {/* 동의 사항 */}
-        <View style={styles.agreementContainer}>
-          <TouchableOpacity style={styles.checkboxContainer} onPress={toggleAgreement}>
-            <Image
-              source={isAgreed
-                ? require('../../img/My/bigchecked.png')
-                : require('../../img/My/bigunchecked.png')}
-              style={styles.checkboxIcon}
-            />
-          </TouchableOpacity>
-          <Text style={styles.agreementText}>
-            회원 탈퇴 유의사항을 확인했으며 동의합니다.
-          </Text>
-        </View>
+      {/* 동의 사항 */}
+      <View style={styles.agreementContainer}>
+        <TouchableOpacity style={styles.checkboxContainer} onPress={toggleAgreement}>
+          <Image
+            source={isAgreed
+              ? require('../../img/My/bigchecked.png')
+              : require('../../img/My/bigunchecked.png')}
+            style={styles.checkboxIcon}
+          />
+        </TouchableOpacity>
+        <Text style={styles.agreementText}>
+          회원 탈퇴 유의사항을 확인했으며 동의합니다.
+        </Text>
       </View>
 
       {/* 탈퇴하기 버튼 */}
       {!isKeyboardVisible && (
+        <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={[
             styles.withdrawButton,
@@ -216,6 +217,7 @@ function WithdrawalScreen({ navigation }): React.JSX.Element {
             탈퇴하기
           </Text>
         </TouchableOpacity>
+        </View>
       )}
 
       {/* 탈퇴하기 모달 */}
@@ -240,7 +242,7 @@ function WithdrawalScreen({ navigation }): React.JSX.Element {
           </View>
         </View>
       </Modal>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -293,8 +295,8 @@ const styles = StyleSheet.create({
     width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop:5,
-    paddingHorizontal:24,
+    marginTop: 5,
+    paddingHorizontal: 24,
   },
   inputBox: {
     height: 47,
@@ -302,7 +304,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     fontSize: 14,
     backgroundColor: '#F7F7F7',
-    width:'67.5%',
+    width: '67.5%',
   },
   confirmButton: {
     height: 47,
@@ -315,13 +317,13 @@ const styles = StyleSheet.create({
   },
   confirmButtonText: {
     color: '#C9C9C9',
-    fontWeight:'bold',
+    fontWeight: 'bold',
     fontSize: 14,
   },
   reasonContainer: {
     width: '100%',
-    marginTop:5,
-    paddingHorizontal:24,
+    marginTop: 5,
+    paddingHorizontal: 24,
   },
   reasonBox: {
     flexDirection: 'row',
@@ -336,19 +338,20 @@ const styles = StyleSheet.create({
   },
   reasonText: {
     fontSize: 14,
-    fontWeight:'medium',
+    fontWeight: 'medium',
     color: '#545454',
   },
+  buttonContainer: {
+    paddingHorizontal: 16,
+    width: '100%',
+  },
   withdrawButton: {
-    position: 'absolute',
-    bottom: 56,
-    left: 24,
-    right: 24,
-    backgroundColor: '#EEEEEE',
+    width: '100%',
     height: 56,
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 15,
+    marginBottom: 20,
   },
   withdrawButtonText: {
     color: '#C9C9C9',
@@ -367,12 +370,12 @@ const styles = StyleSheet.create({
   warningIcon: {
     width: 12,
     height: 12,
-    marginTop:3,
+    marginTop: 3,
     marginRight: 5,
   },
   warningText: {
     fontSize: 12,
-    fontWeight:'medium',
+    fontWeight: 'medium',
     color: '#545454',
   },
   agreementContainer: {
@@ -380,21 +383,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 20,
     paddingHorizontal: 32,
+    marginBottom: 40,
   },
   checkboxContainer: {
     marginRight: 7,
   },
   checkboxIcon: {
-    width: 25,
-    height: 25,
+    width: 22,
+    height: 22,
   },
   smallCheckboxIcon: {
     width: 16,
     height: 16,
   },
   agreementText: {
-    fontSize: 16,
-    fontWeight:'medium',
+    fontSize: 14,
+    fontWeight: 'medium',
     color: '#545454',
   },
   modalOverlay: {

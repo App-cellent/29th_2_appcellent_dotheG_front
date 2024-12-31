@@ -28,6 +28,41 @@ function AlarmScreen({ navigation }) {
       message: 'Do the G는 데일리 퀘스트와 스페셜 퀘스트를 제공합니다.',
       time: '9분 전',
     },
+    {
+      id: '6',
+      message: 'Do the G는 데일리 퀘스트와 스페셜 퀘스트를 제공합니다.',
+      time: '9분 전',
+    },
+    {
+      id: '7',
+      message: 'Do the G는 데일리 퀘스트와 스페셜 퀘스트를 제공합니다.',
+      time: '9분 전',
+    },
+    {
+      id: '8',
+      message: 'Do the G는 데일리 퀘스트와 스페셜 퀘스트를 제공합니다.',
+      time: '9분 전',
+    },
+    {
+      id: '9',
+      message: 'Do the G는 데일리 퀘스트와 스페셜 퀘스트를 제공합니다.',
+      time: '9분 전',
+    },
+    {
+      id: '10',
+      message: 'Do the G는 데일리 퀘스트와 스페셜 퀘스트를 제공합니다.',
+      time: '9분 전',
+    },
+    {
+      id: '11',
+      message: 'Do the G는 데일리 퀘스트와 스페셜 퀘스트를 제공합니다.',
+      time: '9분 전',
+    },
+    {
+      id: '12',
+      message: 'Do the G는 데일리 퀘스트와 스페셜 퀘스트를 제공합니다.',
+      time: '9분 전',
+    },
   ]);
 
   const renderNotification = ({ item }) => (
@@ -45,49 +80,49 @@ function AlarmScreen({ navigation }) {
     </View>
   );
 
-  return (
-    <View style={styles.container}>
-      {/* 상단바 */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Image
-            source={require('../../img/My/arrowleft.png')}
-            style={styles.closeIcon}
-          />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>알림</Text>
-        {notifications.length > 0 && (
-          <Image
-            source={require('../../img/My/alarmicon.png')}
-            style={styles.alarmIcon}
-          />
-        )}
-      </View>
-
-      {/* 알림 내역 여부에 따라 화면 표시 */}
-      {notifications.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Image
-            source={require('../../img/My/graymole.png')}
-            style={styles.moleImage}
-          />
-          <Text style={styles.emptyText}>아직 알림 사항이 없어요!</Text>
-        </View>
-      ) : (
-        <FlatList
-          data={notifications}
-          renderItem={renderNotification}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.notificationList}
+  const renderHeader = () => (
+    <View style={styles.header}>
+      <TouchableOpacity onPress={() => navigation.goBack()}>
+        <Image
+          source={require('../../img/My/arrowleft.png')}
+          style={styles.closeIcon}
+        />
+      </TouchableOpacity>
+      <Text style={styles.headerTitle}>알림</Text>
+      {notifications.length > 0 && (
+        <Image
+          source={require('../../img/My/alarmicon.png')}
+          style={styles.alarmIcon}
         />
       )}
     </View>
   );
+
+  const renderEmptyContent = () => (
+    <View style={styles.emptyContainer}>
+      <Image
+        source={require('../../img/My/graymole.png')}
+        style={styles.moleImage}
+      />
+      <Text style={styles.emptyText}>아직 알림 사항이 없어요!</Text>
+    </View>
+  );
+
+  return (
+    <FlatList
+      data={notifications}
+      renderItem={renderNotification}
+      keyExtractor={(item) => item.id}
+      ListHeaderComponent={renderHeader}
+      ListEmptyComponent={renderEmptyContent}
+      contentContainerStyle={styles.notificationList}
+    />
+  );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  notificationList: {
+    flexGrow: 1,
     backgroundColor: '#FFFFFF',
   },
   header: {
@@ -100,8 +135,8 @@ const styles = StyleSheet.create({
     height: 56,
   },
   closeIcon: {
-    width: 7.13,
-    height: 14,
+    width: 8,
+    height: 16,
   },
   headerTitle: {
     fontSize: 20,
@@ -126,11 +161,8 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 18,
-    fontWeight:'bold',
+    fontWeight: 'bold',
     color: '#C9C9C9',
-  },
-  notificationList: {
-    flex: 1,
   },
   notificationItem: {
     flexDirection: 'row',
@@ -141,8 +173,8 @@ const styles = StyleSheet.create({
   speakerIcon: {
     width: 36,
     height: 36,
-    marginTop:20,
-    marginBottom:20,
+    marginTop: 20,
+    marginBottom: 20,
     marginLeft: 22,
     marginRight: 18,
   },
@@ -151,14 +183,14 @@ const styles = StyleSheet.create({
   },
   notificationMessage: {
     fontSize: 13,
-    fontWeight:'medium',
+    fontWeight: 'medium',
     color: '#545454',
-    marginRight:40,
-    marginBottom:3,
+    marginRight: 40,
+    marginBottom: 3,
   },
   notificationTime: {
     fontSize: 13,
-    fontWeight:'medium',
+    fontWeight: 'medium',
     color: '#C9C9C9',
   },
 });

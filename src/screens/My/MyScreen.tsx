@@ -91,8 +91,8 @@ function MyScreen({ navigation }): React.JSX.Element {
       {/* 알림 히스토리 */}
       <View style={styles.boxContainer}>
         <View style={styles.box}>
-          <Text style={styles.boxText}>알림 히스토리</Text>
-          <TouchableOpacity onPress={goToAlarmScreen}>
+          <TouchableOpacity onPress={goToAlarmScreen} style={styles.buttonContainer}>
+            <Text style={styles.boxText}>알림 히스토리</Text>
             <Image
               source={require('../../img/My/arrowright.png')}
               style={styles.arrowImage}
@@ -122,8 +122,8 @@ function MyScreen({ navigation }): React.JSX.Element {
       {/* 비밀번호 변경하기 */}
       <View style={styles.boxContainer}>
         <View style={styles.box}>
-          <Text style={styles.boxText}>비밀번호 변경하기</Text>
-          <TouchableOpacity onPress={goToPasswordChangeScreen}>
+          <TouchableOpacity onPress={goToPasswordChangeScreen} style={styles.buttonContainer}>
+            <Text style={styles.boxText}>비밀번호 변경하기</Text>
             <Image
               source={require('../../img/My/arrowright.png')}
               style={styles.arrowImage}
@@ -133,8 +133,8 @@ function MyScreen({ navigation }): React.JSX.Element {
 
         {/* 로그아웃 */}
         <View style={styles.box}>
-          <Text style={styles.boxText}>로그아웃</Text>
-          <TouchableOpacity onPress={openLogoutModal}>
+          <TouchableOpacity onPress={openLogoutModal} style={styles.buttonContainer}>
+            <Text style={styles.boxText}>로그아웃</Text>
             <Image
               source={require('../../img/My/arrowright.png')}
               style={styles.arrowImage}
@@ -149,8 +149,8 @@ function MyScreen({ navigation }): React.JSX.Element {
       {/* 탈퇴하기 */}
       <View style={styles.boxContainer}>
         <View style={styles.deleteAccountBox}>
-          <Text style={styles.boxText}>탈퇴하기</Text>
-          <TouchableOpacity onPress={goToWithdrawalScreen}>
+          <TouchableOpacity onPress={goToWithdrawalScreen} style={styles.buttonContainer}>
+            <Text style={styles.boxText}>탈퇴하기</Text>
             <Image
               source={require('../../img/My/arrowright.png')}
               style={styles.arrowImage}
@@ -274,6 +274,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'medium',
     color: '#545454',
+  },
+  buttonContainer:{
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
   },
   arrowImage: {
     width: 8,

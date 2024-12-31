@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-
 import MainHeader from '../../components/MainHeader';
 import {
   StyleSheet,
@@ -8,6 +7,7 @@ import {
   View,
   Image,
   ImageBackground,
+  ScrollView,
 } from 'react-native';
 
 function ReportScreen(): React.JSX.Element {
@@ -21,9 +21,8 @@ function ReportScreen(): React.JSX.Element {
   const averageSteps = 5032;
   const historyCount = 6;
   const savedTree = 11;
-  const topPercentage= '21';
+  const topPercentage= 21;
 
-  // 인증 히스토리 내역 예시
   const historyDetails = [
     { content: '제로 웨이스트 매장 방문', count: 1 },
     { content: '텀블러 사용', count: 1 },
@@ -39,9 +38,8 @@ function ReportScreen(): React.JSX.Element {
   };
 
   return (
-    <View style={styles.container}>
-        <MainHeader />
-      {/* 주간/월간 버튼 */}
+    <ScrollView style={styles.container}>
+      <MainHeader />
       <View style={styles.switchContainer}>
         <View style={styles.switchBackground}>
           <TouchableOpacity
@@ -59,15 +57,17 @@ function ReportScreen(): React.JSX.Element {
         </View>
       </View>
 
-      {/* 주간 화면 */}
       {selectedTab === '주간' && (
         <View style={styles.content}>
-          <Text style={styles.dateText}>{year}년 {month}월 {week}</Text>
-          <Text style={styles.usernameText}>
-            <Text style={{ color: '#69E6A2' }}>{username}</Text>님의 지난 주{'\n'}성과보고서를 확인해보세요!
-          </Text>
+          <Text style={styles.dateText}>{year.toString()}년 {month.toString()}월 {week}</Text>
+          <View style={styles.usernameContainer}>
+            <View style={styles.userTextContainer}>
+              <Text style={[styles.usernameText, { color: '#69E6A2' }]}>{username}</Text>
+              <Text style={styles.usernameText}>님의 지난 주</Text>
+            </View>
+            <Text style={styles.usernameText}>성과보고서를 확인해보세요!</Text>
+          </View>
 
-          {/* 지난 주 하루 평균 걸음수 */}
           <View style={styles.boxContainer}>
             <View style={styles.shadowBox}>
               <View style={styles.boxContent}>
@@ -83,7 +83,6 @@ function ReportScreen(): React.JSX.Element {
             </View>
           </View>
 
-          {/* 지난 주 인증 히스토리 (횟수) */}
           <View style={[styles.toggleBoxContainer, isHistoryOpen && styles.historyOpen]}>
             <View style={styles.shadowBox}>
               <View style={styles.historyContent}>
@@ -92,27 +91,25 @@ function ReportScreen(): React.JSX.Element {
                   <Text style={styles.historyTitle}>지난 주 인증 히스토리 (횟수)</Text>
                 </View>
                 <View style={styles.historyCountContainer}>
-                  <Text style={styles.historyCount}>{historyCount}</Text>
+                  <Text style={styles.historyCount}>{historyCount.toLocaleString()}</Text>
                   <Text style={styles.historyText}>회</Text>
                 </View>
               </View>
 
-              {/* 인증 히스토리 토글 버튼 */}
-              <View style={styles.toggleButtonContainer}>
-                <TouchableOpacity onPress={toggleHistory} style={styles.toggleButton}>
+              <TouchableOpacity onPress={toggleHistory} style={styles.toggleButtonContainer}>
+                <View style={styles.toggleButton}>
                   <Image
                     source={isHistoryOpen
                       ? require('../../img/Report/arrowup.png')
                       : require('../../img/Report/arrowdown.png')}
                     style={styles.arrowImage}
                   />
-                </TouchableOpacity>
-                {!isHistoryOpen && (
-                  <Text style={styles.toggleText}>인증 히스토리 보기</Text>
-                )}
-              </View>
+                  <Text style={styles.toggleText}>
+                    {isHistoryOpen ? '' : '인증 히스토리 보기'}
+                  </Text>
+                </View>
+              </TouchableOpacity>
 
-              {/* 인증 히스토리 내역 */}
               {isHistoryOpen && (
                 <View style={styles.historyDetailsContainer}>
                   {historyDetails.map((detail, index) => (
@@ -128,15 +125,17 @@ function ReportScreen(): React.JSX.Element {
         </View>
       )}
 
-      {/* 월간 화면 */}
       {selectedTab === '월간' && (
         <View style={styles.content}>
-          <Text style={styles.dateText}>{year}년 {month}월</Text>
-          <Text style={styles.usernameText}>
-            <Text style={{ color: '#69E6A2' }}>{username}</Text>님의 이번 달{'\n'}성과보고서를 확인해보세요!
-          </Text>
+          <Text style={styles.dateText}>{year.toString()}년 {month.toString()}월</Text>
+          <View style={styles.usernameContainer}>
+            <View style={styles.userTextContainer}>
+              <Text style={[styles.usernameText, { color: '#69E6A2' }]}>{username}</Text>
+              <Text style={styles.usernameText}>님의 이번 달</Text>
+            </View>
+            <Text style={styles.usernameText}>성과보고서를 확인해보세요!</Text>
+          </View>
 
-          {/* 이번 달 내가 지킨 나무 */}
           <View style={styles.boxContainer}>
             <View style={styles.shadowBox}>
               <View style={styles.boxContent}>
@@ -152,7 +151,6 @@ function ReportScreen(): React.JSX.Element {
             </View>
           </View>
 
-          {/* 이번 달 내가 줄인 탄소 배출량 순위 */}
           <View style={styles.boxContainer}>
             <View style={styles.shadowBox}>
               <View style={styles.boxContent}>
@@ -168,7 +166,7 @@ function ReportScreen(): React.JSX.Element {
                   <View style={styles.rankAndEarth}>
                     <ImageBackground source={require('../../img/Report/carbonrankbox.png')} style={styles.rankImage}>
                       <Text style={styles.appText}>앱설런트</Text>
-                      <Text style={styles.rankText}>상위 {topPercentage}%</Text>
+                      <Text style={styles.rankText}>상위 {topPercentage.toString()}%</Text>
                     </ImageBackground>
                     <Image source={require('../../img/Report/carbonearth.png')} style={styles.earthImage} />
                   </View>
@@ -178,7 +176,7 @@ function ReportScreen(): React.JSX.Element {
           </View>
         </View>
       )}
-    </View>
+    </ScrollView>
   );
 }
 
@@ -230,13 +228,17 @@ const styles = StyleSheet.create({
     color: '#545454',
     marginLeft: 21,
   },
+  usernameContainer: {
+    marginLeft: 21,
+    paddingVertical: 10,
+  },
+  userTextContainer: {
+    flexDirection: 'row',
+  },
   usernameText: {
     fontSize: 25,
     fontWeight: 'bold',
     color: '#121212',
-    marginLeft: 21,
-    paddingVertical: 10,
-    height:85,
   },
   boxContainer: {
     width: '100%',
@@ -337,13 +339,16 @@ const styles = StyleSheet.create({
     bottom: 16,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'flex-start',
   },
   toggleButton: {
     marginLeft: 25,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   arrowImage: {
-    width: 10,
-    height: 6.18,
+    width: 14,
+    height: 9,
   },
   toggleText: {
     fontSize: 13,
