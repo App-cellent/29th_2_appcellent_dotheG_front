@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 15,
     fontWeight: 'regular',
-    top: 30,
+    top: '10%',
   },
   cameraFrame: {
     position: 'absolute',
@@ -245,8 +245,7 @@ const styles = StyleSheet.create({
     textShadowRadius: 10,
   },
   captureButton: {
-    position: 'absolute',
-    top: 680,
+    bottom: '10%',
     alignSelf: 'center',
     zIndex: 2,
   },
