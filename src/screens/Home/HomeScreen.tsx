@@ -42,6 +42,10 @@ function HomeScreen(): React.JSX.Element {
         navigation.navigate('TodayQuizGuideScreen');
     }, []);
 
+    const handleNavigateCamera = useCallback(() => {
+        navigation.navigate('CameraScreen');
+    }, []);
+
     const [openQuest, setOpenQuest] = useState(false);
 
     const handleSelectAnswer = () => {
@@ -154,10 +158,12 @@ function HomeScreen(): React.JSX.Element {
                     <Image source={require('../../img/Home/GalleryIcon.png')} style={styles.GalleryIcon} />
                 </View>
 
+                <TouchableOpacity onPress={handleNavigateCamera}>
                 <View style={styles.questOption}>
                     <Text style={styles.optionText}>사진 촬영하기</Text>
                     <Image source={require('../../img/Home/CameraIcon.png')} style={styles.CameraIcon} />
                 </View>
+                </TouchableOpacity>
             </View>
             }
         </View>

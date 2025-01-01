@@ -18,6 +18,8 @@ import TodayQuizWrongScreen from '../screens/Home/TodayQuizWrongScreen';
 import WithdrawalScreen from '../screens/My/WithdrawalScreen';
 import AlarmScreen from '../screens/My/AlarmScreen';
 import PasswordChangeScreen from '../screens/My/PasswordChangeScreen';
+import CameraScreen from '../screens/Quest/CameraScreen';
+import QuestConfirmationScreen from '../screens/Quest/QuestConfirmationScreen';
 
 const StackNavigator = () => {
     const navigation = useNavigation();
@@ -74,6 +76,17 @@ const StackNavigator = () => {
             <Stack.Screen
                 name="PasswordChangeScreen"
                 component={PasswordChangeScreen}
+                options={{ headerShown: false }}
+            />
+
+            <Stack.Screen
+                name="CameraScreen"
+                component={CameraScreen}
+                options={{ headerShown: false }}
+            />
+            <Stack.Screen
+                name="QuestConfirmationScreen"
+                component={QuestConfirmationScreen}
                 options={{ headerShown: false }}
             />
         </Stack.Navigator>
