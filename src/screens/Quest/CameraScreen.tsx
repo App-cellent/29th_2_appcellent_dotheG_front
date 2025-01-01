@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
   },
   bottomBackground: {
     position: 'absolute',
-    top: 600,
+    top: 580,
     bottom: 0,
     left: 25,
     right: 25,
@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
     top: 160,
     left: 25,
     right: 25,
-    height: 440,
+    height: 420,
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'hidden',
@@ -250,8 +250,8 @@ const styles = StyleSheet.create({
     zIndex: 2,
   },
   captureButtonImage: {
-    width: 60,
-    height: 60,
+    width: 56,
+    height: 56,
     resizeMode: 'contain',
   },
 });

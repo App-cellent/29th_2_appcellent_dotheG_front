@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import MainHeader from '../../components/MainHeader';
+import BarGraph from '../../components/BarGraph';
 import {
   StyleSheet,
   Text,
@@ -9,10 +10,13 @@ import {
   ImageBackground,
   ScrollView,
 } from 'react-native';
+import Svg, { Text as SvgText, Defs, LinearGradient, Stop } from 'react-native-svg';
 
 function ReportScreen(): React.JSX.Element {
   const [selectedTab, setSelectedTab] = useState('주간');
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [textWidth, setTextWidth] = useState(0);
+  const usernameFontSize=25;
 
   const year = 2024;
   const month = 10;
@@ -35,6 +39,11 @@ function ReportScreen(): React.JSX.Element {
 
   const toggleHistory = () => {
     setIsHistoryOpen(!isHistoryOpen);
+  };
+
+  const handleTextLayout = (event: any) => {
+    const { width } = event.nativeEvent.layout;
+    setTextWidth(width);
   };
 
   return (
@@ -62,7 +71,33 @@ function ReportScreen(): React.JSX.Element {
           <Text style={styles.dateText}>{year.toString()}년 {month.toString()}월 {week}</Text>
           <View style={styles.usernameContainer}>
             <View style={styles.userTextContainer}>
-              <Text style={[styles.usernameText, { color: '#69E6A2' }]}>{username}</Text>
+              <Svg
+                height={usernameFontSize * 1.2}
+                width={textWidth}
+              >
+                <Defs>
+                  <LinearGradient id="textGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <Stop offset="0%" stopColor="#69E6A2" />
+                    <Stop offset="100%" stopColor="#9BC9FE" />
+                  </LinearGradient>
+                </Defs>
+                <SvgText
+                  fill="url(#textGradient)"
+                  fontSize={usernameFontSize}
+                  fontWeight="bold"
+                  x="0"
+                  y={usernameFontSize}
+                >
+                  {username}
+                </SvgText>
+              </Svg>
+
+              <Text
+                style={[styles.hiddenText, { fontSize: usernameFontSize }]}
+                onLayout={handleTextLayout}
+              >
+                {username}
+              </Text>
               <Text style={styles.usernameText}>님의 지난 주</Text>
             </View>
             <Text style={styles.usernameText}>성과보고서를 확인해보세요!</Text>
@@ -130,7 +165,33 @@ function ReportScreen(): React.JSX.Element {
           <Text style={styles.dateText}>{year.toString()}년 {month.toString()}월</Text>
           <View style={styles.usernameContainer}>
             <View style={styles.userTextContainer}>
-              <Text style={[styles.usernameText, { color: '#69E6A2' }]}>{username}</Text>
+              <Svg
+                height={usernameFontSize * 1.2}
+                width={textWidth}
+              >
+                <Defs>
+                  <LinearGradient id="textGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <Stop offset="0%" stopColor="#69E6A2" />
+                    <Stop offset="100%" stopColor="#9BC9FE" />
+                  </LinearGradient>
+                </Defs>
+                <SvgText
+                  fill="url(#textGradient)"
+                  fontSize={usernameFontSize}
+                  fontWeight="bold"
+                  x="0"
+                  y={usernameFontSize}
+                >
+                  {username}
+                </SvgText>
+              </Svg>
+
+              <Text
+                style={[styles.hiddenText, { fontSize: usernameFontSize }]}
+                onLayout={handleTextLayout}
+              >
+                {username}
+              </Text>
               <Text style={styles.usernameText}>님의 이번 달</Text>
             </View>
             <Text style={styles.usernameText}>성과보고서를 확인해보세요!</Text>
@@ -161,7 +222,7 @@ function ReportScreen(): React.JSX.Element {
                 <View style={styles.rankBox}>
                   <Image source={require('../../img/Report/carbonbackground.png')} style={styles.backgroundImage} />
                   <View style={styles.graphContainer}>
-                    <Image source={require('../../img/Report/carbongraph.png')} style={styles.graphImage} />
+                    <BarGraph />
                   </View>
                   <View style={styles.rankAndEarth}>
                     <ImageBackground source={require('../../img/Report/carbonrankbox.png')} style={styles.rankImage}>
@@ -239,6 +300,10 @@ const styles = StyleSheet.create({
     fontSize: 25,
     fontWeight: 'bold',
     color: '#121212',
+  },
+  hiddenText: {
+    position: 'absolute',
+    opacity: 0,
   },
   boxContainer: {
     width: '100%',
@@ -390,14 +455,9 @@ const styles = StyleSheet.create({
     position: 'relative',
     alignItems: 'center',
     marginTop: 80,
-    marginBottom: 38,
+    marginBottom: 30,
     paddingHorizontal:20,
     zIndex: 2,
-  },
-  graphImage: {
-    width: '100%',
-    minHeight: 160,
-    resizeMode: 'contain',
   },
   rankAndEarth: {
     position: 'absolute',
@@ -411,7 +471,7 @@ const styles = StyleSheet.create({
     height: 70,
   },
   earthImage: {
-    marginTop: 27,
+    marginTop: 22,
     marginLeft:3,
     width: 80,
     height: 55,

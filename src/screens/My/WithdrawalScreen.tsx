@@ -159,7 +159,7 @@ function WithdrawalScreen({ navigation }): React.JSX.Element {
               style={styles.warningIcon}
             />
             <Text style={styles.warningText}>
-              지금 탈퇴하시면 리워드가 함께 사라져 추후에 동일 계정으로 재가입하셔도 만보기와 캐릭터 내역이 복구되지 않아요!
+              지금 탈퇴하시면 리워드가 함께 사라져 추후에 동일 계정으로{'\n'}재가입하셔도 만보기와 캐릭터 내역이 복구되지 않아요!
             </Text>
           </View>
           <View style={styles.warningItem}>
@@ -168,7 +168,7 @@ function WithdrawalScreen({ navigation }): React.JSX.Element {
               style={styles.warningIcon}
             />
             <Text style={styles.warningText}>
-              인증한 퀘스트와 나의 성과 보고서 내용이 사라져요. 재가입하셔도 모든 내역이 복구되지 않아요!
+              인증한 퀘스트와 나의 성과 보고서 내용이 사라져요.{'\n'}재가입하셔도 모든 내역이 복구되지 않아요!
             </Text>
           </View>
         </View>
