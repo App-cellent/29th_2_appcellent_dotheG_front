@@ -30,7 +30,7 @@ function PedometerScreen(): React.JSX.Element {
 
     const [goalYN, setGoalYN] = useState(false);
 
-    const [todayStep, setTodayStep] = useState(2048);
+    const [todayStep, setTodayStep] = useState(10000);
     const [monthStep, setMonthStep] = useState(100398);
     const [accumulateStep, setAccumulateStep] = useState(1000034);
     const carbonEmissions = 5.4;
@@ -39,6 +39,8 @@ function PedometerScreen(): React.JSX.Element {
     useEffect(() => {
         setMonthStep(monthStep.toLocaleString('ko-KR'));
         setAccumulateStep(accumulateStep.toLocaleString('ko-KR'));
+
+        if(todayStep >= targetStep) setGoalYN(true);
     }, []);
 
     const [opacityAnimation] = useState(new Animated.Value(1));
@@ -67,7 +69,7 @@ function PedometerScreen(): React.JSX.Element {
             <MainHeader />
             <View style={styles.topContainer}>
                 <Text style={styles.GreenText}>{formattedDate}</Text>
-                <Svg height="25" width="208">
+                <Svg height="25" width="215">
                     <Defs>
                         <LinearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
                             <Stop offset="0%" stopColor="#69E6A2" stopOpacity="1" />
@@ -93,7 +95,17 @@ function PedometerScreen(): React.JSX.Element {
                     </View>
 
                     <View style={styles.walkingProcessorContainer}>
-
+                        <View style={styles.processorBar}>
+                            <LinearGradientBackground
+                                colors={['rgb(155, 201, 254)', 'rgb(105, 230, 162)']}
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 0 }}
+                                style={[styles.progressBar, {
+                                    width: `${Math.min((todayStep / targetStep) * 100, 100)}%`,
+                                    borderRadius: 10, // 모서리 둥글게 설정
+                                }]}
+                            />
+                        </View>
                     </View>
 
                     <View style={styles.walkingNumberContainer}>
@@ -108,7 +120,7 @@ function PedometerScreen(): React.JSX.Element {
             </View>
 
             <View style={styles.bottomContainer}>
-                {goalYN &&
+                {!goalYN &&
                     <View style={styles.MenuBox}>
                         <Image source={require('../../img/Pedometer/CircleGreen.png')} style={styles.Icon} />
                         <View style={styles.stepContainer}>
@@ -121,7 +133,7 @@ function PedometerScreen(): React.JSX.Element {
                     </View>
                 }
 
-                {!goalYN &&
+                {goalYN &&
                     <Animated.View style={[styles.gradientContainer, { opacity: opacityAnimation }]}>
                     <LinearGradientBackground
                         colors={['rgb(155, 201, 254)', 'rgb(105, 230, 162)']}
@@ -202,21 +214,31 @@ const styles = StyleSheet.create({
     walkingContainer:{
         width: '100%',
         paddingHorizontal: 23,
-        alignItems: 'flex-start',
-    },
-    walkingIconContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
         alignItems: 'center',
-        width: '100%',
     },
     walkingProcessorContainer: {
-        paddingHorizontal: 6,
+        marginHorizontal: 6,
         marginTop: 5,
         width: '100%',
         height: 13,
         borderRadius: 10,
         backgroundColor: colors.lightgray,
+    },
+    processorBar: {
+        flex: 1,
+        height: '100%',
+        borderRadius: 10,
+        overflow: 'hidden',
+    },
+    progressBar: {
+        height: '100%',
+        borderRadius: 10,
+    },
+    walkingIconContainer:{
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        width: '100%',
     },
     walkingNumberContainer: {
         flexDirection: 'row',
@@ -299,6 +321,11 @@ const styles = StyleSheet.create({
         height: 28,
         borderRadius: 15,
         backgroundColor: colors.white,
+        shadowColor: '#000000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 3,
+        elevation: 3,
     },
     GoalButtonText:{
         color: colors.black,
