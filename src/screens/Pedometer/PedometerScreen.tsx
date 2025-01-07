@@ -1,8 +1,10 @@
-import * as React from 'react'
+import React, { useState, useEffect } from 'react';
 import colors from "../../utils/colors";
 import { getFontSize } from '../../utils/fontUtils';
 
 import MainHeader from '../../components/MainHeader';
+import LinearGradientBackground from 'react-native-linear-gradient';
+
 import Svg, { Text as SvgText, Defs, LinearGradient, Stop } from 'react-native-svg';
 import {
   SafeAreaView,
@@ -10,6 +12,7 @@ import {
   StatusBar,
   StyleSheet,
   Text,
+  TouchableOpacity,
   useColorScheme,
   View,
   Image,
@@ -23,6 +26,19 @@ function PedometerScreen(): React.JSX.Element {
         month: 'long',
         day: 'numeric',
     });
+
+    const [goalYN, setGoalYN] = useState(false);
+
+    const [todayStep, setTodayStep] = useState(2048);
+    const [monthStep, setMonthStep] = useState(100398);
+    const [accumulateStep, setAccumulateStep] = useState(1000034);
+    const carbonEmissions = 5.4;
+    const targetStep = 7000;
+
+    useEffect(() => {
+        setMonthStep(monthStep.toLocaleString('ko-KR'));
+        setAccumulateStep(accumulateStep.toLocaleString('ko-KR'));
+    }, []);
 
     return (
         <View style={styles.container}>
@@ -46,7 +62,7 @@ function PedometerScreen(): React.JSX.Element {
                 </Svg>
 
                 <Text style={[styles.SmallText, {marginTop: 15}]}>오늘 걸음수</Text>
-                <Text style={styles.BoldLargeText}>2048</Text>
+                <Text style={styles.BoldLargeText}>{todayStep}</Text>
 
                 <View style={styles.walkingContainer}>
                     <View style={styles.walkingIconContainer}>
@@ -62,7 +78,7 @@ function PedometerScreen(): React.JSX.Element {
                         <Text style={styles.GreenText}>0</Text>
                         <View style={{flexDirection: 'row', alignItems: 'flex-end'}}>
                             <Text style={styles.GrayText}>목표 걸음 </Text>
-                            <Text style={styles.GrayText}>7000</Text>
+                            <Text style={styles.GrayText}>{targetStep}</Text>
                             <Text style={styles.GrayText}>보</Text>
                         </View>
                     </View>
@@ -70,23 +86,50 @@ function PedometerScreen(): React.JSX.Element {
             </View>
 
             <View style={styles.bottomContainer}>
-                <View style={styles.MenuBox}>
-                    <Image source={require('../../img/Pedometer/CircleGreen.png')} style={styles.Icon} />
-                    <View style={styles.stepContainer}>
-                        <View style={{flexDirection: 'row'}}>
-                            <Text style={styles.stepText}>50152</Text>
-                            <Text style={styles.stepText}>걸음</Text>
+                {goalYN &&
+                    <View style={styles.MenuBox}>
+                        <Image source={require('../../img/Pedometer/CircleGreen.png')} style={styles.Icon} />
+                        <View style={styles.stepContainer}>
+                            <View style={{flexDirection: 'row'}}>
+                                <Text style={styles.stepText}>{monthStep}</Text>
+                                <Text style={styles.stepText}>걸음</Text>
+                            </View>
+                            <Text style={styles.SmallGrayText}>주간 걸음 수</Text>
                         </View>
-                        <Text style={styles.SmallGrayText}>주간 걸음 수</Text>
                     </View>
+                }
 
-                </View>
+                {!goalYN &&
+                    <LinearGradientBackground
+                        colors={['rgb(155, 201, 254)', 'rgb(105, 230, 162)']}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 0 }}
+                        style={{borderRadius: 15}}
+                    >
+                    <View style={styles.GoalMenuBox}>
+                        <View style={{flexDirection: 'row'}}>
+                            <Image source={require('../../img/Pedometer/CircleWhite.png')} style={styles.Icon} />
+                            <View style={styles.stepContainer}>
+                                <View style={{flexDirection: 'row'}}>
+                                    <Text style={styles.stepText}>{monthStep}</Text>
+                                    <Text style={styles.stepText}>걸음</Text>
+                                </View>
+                                <Text style={styles.SmallWhiteText}>주간 목표 걸음 수 달성!</Text>
+                            </View>
+                        </View>
+
+                        <TouchableOpacity style={styles.GoalButton}>
+                            <Text style={styles.GoalButtonText}>클릭!</Text>
+                        </TouchableOpacity>
+                    </View>
+                    </LinearGradientBackground>
+                }
 
                 <View style={styles.MenuBox}>
                     <Image source={require('../../img/Pedometer/CircleGreen.png')} style={styles.Icon} />
                     <View style={styles.stepContainer}>
                         <View style={{flexDirection: 'row'}}>
-                            <Text style={styles.stepText}>50152</Text>
+                            <Text style={styles.stepText}>{accumulateStep}</Text>
                             <Text style={styles.stepText}>걸음</Text>
                         </View>
                         <Text style={styles.SmallGrayText}>누적 걸음 수</Text>
@@ -96,7 +139,7 @@ function PedometerScreen(): React.JSX.Element {
                 <View style={[styles.MenuBox, { height: 207, flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-start' }]}>
                     <View style={{flexDirection: 'row'}}>
                         <Text style={styles.BoldSmallText}>걸어서 약 </Text>
-                        <Text style={[styles.BoldSmallText, {color: colors.green}]}>5.5</Text>
+                        <Text style={[styles.BoldSmallText, {color: colors.green}]}>{carbonEmissions}</Text>
                         <Text style={[styles.BoldSmallText, {color: colors.green}]}>kg</Text>
                         <Text style={styles.BoldSmallText}>의</Text>
                     </View>
@@ -178,11 +221,19 @@ const styles = StyleSheet.create({
     MenuBox: {
         backgroundColor: colors.white,
         width: '100%',
-        height: 81,
+        height: 91,
         borderRadius: 15,
         alignItems: 'center',
         flexDirection: 'row',
         paddingLeft: 26,
+    },
+    GoalMenuBox: {
+        width: '100%',
+        height: 91,
+        alignItems: 'center',
+        flexDirection: 'row',
+        paddingHorizontal: 26,
+        justifyContent: 'space-between'
     },
     Icon:{
         height: 36,
@@ -199,12 +250,17 @@ const styles = StyleSheet.create({
         lineHeight: 20,
     },
     earthIcon:{
-        height: 58.65,
-        width: 93.67,
+        height: 67,
+        width: 98,
         marginTop: 14,
     },
     SmallGrayText: {
         color: colors.gray,
+        fontSize: getFontSize(11),
+        fontWeight: '400',
+    },
+    SmallWhiteText:{
+        color: colors.white,
         fontSize: getFontSize(11),
         fontWeight: '400',
     },
@@ -213,6 +269,19 @@ const styles = StyleSheet.create({
         fontSize: getFontSize(18),
         fontWeight: '800',
         lineHeight: 25,
+    },
+    GoalButton:{
+        width: 51,
+        height: 28,
+        borderRadius: 15,
+        backgroundColor: colors.white,
+    },
+    GoalButtonText:{
+        color: colors.black,
+        fontSize: getFontSize(12),
+        fontWeight: '800',
+        lineHeight: 28,
+        textAlign: 'center',
     },
 })
 
