@@ -103,8 +103,8 @@ const styles = StyleSheet.create({
         alignItems: 'center', // 수평 가운데 정렬
     },
     earthImage: {
-        width: 173,
-        height: 110,
+        width: 164,
+        height: 112,
     },
     GreenText: {
         color: colors.green,

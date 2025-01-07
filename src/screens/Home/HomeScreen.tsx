@@ -7,7 +7,6 @@ import MainHeader from '../../components/MainHeader';
 
 import RightArrowIcon from '../../img/Home/RightArrowIcon.svg';
 import SeedIcon from '../../img/Home/SeedIcon.svg';
-import HomeMainIcon from '../../img/Home/HomeMainIcon.svg';
 import CircleThisMonthTreeIcon from '../../img/Home/CircleThisMonthTreeIcon.svg';
 import CircleUserTreeIcon from '../../img/Home/CircleUserTreeIcon.svg';
 import CircleStarIcon from '../../img/Home/CircleStarIcon.svg';
@@ -75,7 +74,9 @@ function HomeScreen(): React.JSX.Element {
                         </View>
                         <Text style={styles.TitleText2}>오늘도 우리 함께 달려보아요:)</Text>
                     </View>
-                    <HomeMainIcon width="100%" height="50%" />
+                    <View style={{justifyContent: 'center', alignItems: 'center', marginTop: 5, marginBottom: 10}}>
+                        <Image source={require('../../img/Home/HomeMainIcon.png')} style={{width: 354, height: 200}}/>
+                    </View>
 
                     <TouchableOpacity onPress={handleNavigateTodayQuiz}>
                     <View style={styles.QuizBox}>
@@ -295,6 +296,7 @@ const styles = StyleSheet.create({
     },
     HalfTitleContainer: {
         flexDirection: 'row',
+        alignItems: 'center',
         marginBottom: 10,
     },
     MediumText: {
