@@ -4,6 +4,7 @@ import { getFontSize } from '../../utils/fontUtils';
 
 import MainHeader from '../../components/MainHeader';
 import LinearGradientBackground from 'react-native-linear-gradient';
+import {Animated} from 'react-native';
 
 import Svg, { Text as SvgText, Defs, LinearGradient, Stop } from 'react-native-svg';
 import {
@@ -39,6 +40,27 @@ function PedometerScreen(): React.JSX.Element {
         setMonthStep(monthStep.toLocaleString('ko-KR'));
         setAccumulateStep(accumulateStep.toLocaleString('ko-KR'));
     }, []);
+
+    const [opacityAnimation] = useState(new Animated.Value(1));
+
+      useEffect(() => {
+        const interval = setInterval(() => {
+          Animated.sequence([
+            Animated.timing(opacityAnimation, {
+              toValue: 0.5,
+              duration: 1000,
+              useNativeDriver: true,
+            }),
+            Animated.timing(opacityAnimation, {
+              toValue: 1,
+              duration: 1000,
+              useNativeDriver: true,
+            }),
+          ]).start();
+        }, 5000);
+
+        return () => clearInterval(interval);  // 컴포넌트 언마운트 시 interval 정리
+      }, [opacityAnimation]);
 
     return (
         <View style={styles.container}>
@@ -100,6 +122,7 @@ function PedometerScreen(): React.JSX.Element {
                 }
 
                 {!goalYN &&
+                    <Animated.View style={[styles.gradientContainer, { opacity: opacityAnimation }]}>
                     <LinearGradientBackground
                         colors={['rgb(155, 201, 254)', 'rgb(105, 230, 162)']}
                         start={{ x: 0, y: 0 }}
@@ -123,6 +146,7 @@ function PedometerScreen(): React.JSX.Element {
                         </TouchableOpacity>
                     </View>
                     </LinearGradientBackground>
+                    </Animated.View>
                 }
 
                 <View style={styles.MenuBox}>
