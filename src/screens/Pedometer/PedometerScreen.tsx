@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import colors from "../../utils/colors";
 import { getFontSize } from '../../utils/fontUtils';
 
+import { startCounter, stopCounter } from 'react-native-accurate-step-counter';
+
 import MainHeader from '../../components/MainHeader';
 import LinearGradientBackground from 'react-native-linear-gradient';
 import {Animated} from 'react-native';
@@ -30,7 +32,7 @@ function PedometerScreen(): React.JSX.Element {
 
     const [goalYN, setGoalYN] = useState(false);
 
-    const [todayStep, setTodayStep] = useState(10000);
+    const [todayStep, setTodayStep] = useState(0);
     const [monthStep, setMonthStep] = useState(100398);
     const [accumulateStep, setAccumulateStep] = useState(1000034);
     const carbonEmissions = 5.4;
@@ -41,6 +43,16 @@ function PedometerScreen(): React.JSX.Element {
         setAccumulateStep(accumulateStep.toLocaleString('ko-KR'));
 
         if(todayStep >= targetStep) setGoalYN(true);
+
+        const config = {
+              default_threshold: 15.0,
+              default_delay: 150000000,
+              cheatInterval: 3000,
+              onStepCountChange: (stepCount) => { setTodayStep(stepCount) },
+              onCheat: () => { console.log("User is Cheating") }
+            }
+        startCounter(config);
+        return () => { stopCounter() }
     }, []);
 
     const [opacityAnimation] = useState(new Animated.Value(1));
