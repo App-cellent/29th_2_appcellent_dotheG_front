@@ -47,7 +47,6 @@ function MyScreen({ navigation }): React.JSX.Element {
   };
 
   const handleLogout = () => {
-    // 로그아웃 처리 로직 추가
     alert("로그아웃 되었습니다.");
     setLogoutModalVisible(false);
   };
@@ -69,81 +68,66 @@ function MyScreen({ navigation }): React.JSX.Element {
   };
 
   useEffect(() => {
-    // 알림 설정 초기화
-    PushNotification.configure({
-      onNotification: function (notification) {
-        console.log("NOTIFICATION:", notification);
-
-        PushNotification.localNotification({
-          channelId: "default-channel",
-          title: notification.title || "알림 제목",
-          message: notification.message || "알림 내용",
-          priority: "high",
-          vibration: 4,
-          playSound: true,
-          soundName: "default",
-        });
-      },
-      requestPermissions: false, // Android는 권한 요청 필요 없음
-    });
-
-    // 알림 채널 생성
     PushNotification.createChannel(
       {
-        channelId: "default-channel", // 채널 ID
-        channelName: "Default Channel", // 채널 이름
-        channelDescription: "A default channel for app notifications", // 채널 설명
-        soundName: "default", // 사운드 설정
-        importance: 4, // 중요도 (최대)
-        vibrate: true, // 진동 허용
+        channelId: "default-channel",
+        channelName: "Default Channel",
       },
       (created) => {
-        if (created) {
-          console.log("알림 채널 생성 성공!");
-        } else {
-          console.log("알림 채널이 이미 존재합니다.");
-        }
+        console.log(created ? "알림 채널 생성 성공!" : "알림 채널이 이미 존재합니다.");
       }
     );
   }, []);
 
-  const scheduleNotification = () => {
-    // 로컬 시간 기반으로 알림 예약
-    PushNotification.localNotificationSchedule({
-      channelId: "default-channel", // 채널 ID
-      title: "예약 알림",
-      message: "푸시 알림이 성공적으로 예약되었습니다.",
-      date: new Date(Date.now() + 10 * 1000), // 한국 시간 기준으로 예약
-      allowWhileIdle: true, // 절전 모드에서도 표시
-      priority: "high",
-      vibration: 4,
-      playSound: true,
-      soundName: "default",
-    });
-  };
-
-  {/*
-  const sendImmediateNotification = () => {
-    PushNotification.localNotification({
-      channelId: "default-channel",
-      title: "테스트 알림",
-      message: "테스트 알림입니다.",
-      priority: "high",
-      vibration: 4,
-      playSound: true,
-      soundName: "default",
-    });
-
-    console.log('즉시 알림이 발송되었습니다.');
-  };
-  */}
-
   useEffect(() => {
     if (alarmEnabled) {
-      scheduleNotification();
-      console.log('알림이 활성화되었습니다.');
+      //즉시 알림
+      PushNotification.localNotification({
+        channelId: "default-channel",
+        title: "테스트 알림",
+        message: "테스트 알림입니다.",
+        priority: "high",
+        vibration: 4,
+        playSound: true,
+        soundName: "default",
+      });
+
+      // 예약 알림
+      PushNotification.localNotificationSchedule({
+        channelId: "default-channel",
+        title: "예약 알림",
+        message: "예약된 알림입니다.",
+        date: new Date(Date.now() + 20 * 1000), // 현재 시간 기준으로 20초 후
+        allowWhileIdle: true,
+        priority: "high",
+        vibration: 4,
+        playSound: true,
+        soundName: "default",
+      });
+
+      // 특정 시간 예약 알림
+      const targetDate = new Date();
+      targetDate.setHours(18, 0, 0, 0); // 시간, 분, 초, 밀리초 지정 (오후 6시로 설정)
+
+      if (targetDate < new Date()) {
+        targetDate.setDate(targetDate.getDate() + 1);
+      }
+
+      PushNotification.localNotificationSchedule({
+        channelId: "default-channel",
+        title: "특정 시간 예약 알림",
+        message: "특정 시간에 예약된 알림입니다.",
+        date: targetDate,
+        allowWhileIdle: true,
+        priority: "high",
+        vibration: 4,
+        playSound: true,
+        soundName: "default",
+      });
+
+      console.log("알림이 활성화되었습니다.");
     } else {
-      console.log('알림이 비활성화되었습니다.');
+      console.log("알림이 비활성화되었습니다.");
     }
   }, [alarmEnabled]);
 
