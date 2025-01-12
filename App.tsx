@@ -8,6 +8,7 @@
 import React, { useState, createContext } from 'react';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import StackNavigator from './src/navigator/StackNavigator';
+import PushNotification from "react-native-push-notification";
 
 function App(): React.JSX.Element {
   const customTheme = {
@@ -17,6 +18,14 @@ function App(): React.JSX.Element {
       background: '#fff',
     },
   };
+
+  PushNotification.configure({
+    onNotification: function (notification) {
+      console.log("NOTIFICATION:", notification);
+    },
+    requestPermissions: Platform.OS === 'ios'
+  });
+
   return (
     <NavigationContainer theme={customTheme}>
         <StackNavigator />
