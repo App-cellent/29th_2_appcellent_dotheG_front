@@ -4557,6 +4557,13 @@ react-is@^16.13.1:
 react-is@^17.0.1:
   version "17.0.2"
 
+react-native-accurate-step-counter@^2.0.4:
+  version "2.0.4"
+  resolved "https://registry.npmjs.org/react-native-accurate-step-counter/-/react-native-accurate-step-counter-2.0.4.tgz"
+  integrity sha512-DHYboQ15QwKw2JUAwDgLG2aEvwYEewaUVL9sWXW4g6O74BtZ+3zKG7FaeBbl9hAfm3yHfD6Vwce+G3/ShSj7Ug==
+  dependencies:
+    react-native-shake "^4.0.2"
+
 react-native-linear-gradient@^2.8.3:
   version "2.8.3"
   resolved "https://registry.npmjs.org/react-native-linear-gradient/-/react-native-linear-gradient-2.8.3.tgz"
@@ -4586,6 +4593,16 @@ react-native-shadow-2@^7.1.1:
   integrity sha512-zmzcVFzys+jMe1UJUKaNsMEpFa2/1o9SoUjweapolcgxq0h935VCSAqxkUwkYpOpxFhK9BmcmYy5xZLO9dnkIw==
   dependencies:
     colord "2.9.2"
+
+react-native-shake@^4.0.2:
+  version "4.0.2"
+  resolved "https://registry.npmjs.org/react-native-shake/-/react-native-shake-4.0.2.tgz"
+  integrity sha512-2niPeI2d5blkbtOwHZ9aoPEue5Uas2IViZKc3jMJ7NIycSQKBw/gRhEYl4mNagCOF6zD6b30lQRBEqhCZvkAoA==
+
+react-native-shake@^6.0.0-beta.3:
+  version "6.0.0-beta.3"
+  resolved "https://registry.npmjs.org/react-native-shake/-/react-native-shake-6.0.0-beta.3.tgz"
+  integrity sha512-OEXAIUj8vI11tYCzcrU5Cgsvl/0yVR2mEzXZNPzHgRXU8C/h1QE2q8giSdjxTNTR/XpNAZeTi7sCn6vSt3eFtQ==
 
 react-native-svg-transformer@^1.5.0:
   version "1.5.0"
