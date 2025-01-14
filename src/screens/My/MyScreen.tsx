@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import MainHeader from '../../components/MainHeader';
+import PushNotification from 'react-native-push-notification';
 
 import {
   StyleSheet,
@@ -12,16 +13,12 @@ import {
 } from 'react-native';
 
 function MyScreen({ navigation }): React.JSX.Element {
-  const [alarmEnabled, setAlarmEnabled] = useState(true);
+  const [alarmEnabled, setAlarmEnabled] = useState(false);
   const [userName, setUserName] = useState("앱설런트");
   const [userId, setUserId] = useState("Appcellent123");
   const [nicknameModalVisible, setNicknameModalVisible] = useState(false);
   const [newNickname, setNewNickname] = useState("");
   const [logoutModalVisible, setLogoutModalVisible] = useState(false);
-
-  const toggleAlarm = () => {
-    setAlarmEnabled(!alarmEnabled);
-  };
 
   const openNicknameModal = () => {
     setNicknameModalVisible(true);
@@ -50,7 +47,6 @@ function MyScreen({ navigation }): React.JSX.Element {
   };
 
   const handleLogout = () => {
-    // 로그아웃 처리 로직 추가
     alert("로그아웃 되었습니다.");
     setLogoutModalVisible(false);
   };
@@ -66,6 +62,74 @@ function MyScreen({ navigation }): React.JSX.Element {
   const goToPasswordChangeScreen = () => {
     navigation.navigate('PasswordChangeScreen');
   };
+
+  const toggleAlarm = () => {
+    setAlarmEnabled(!alarmEnabled);
+  };
+
+  useEffect(() => {
+    PushNotification.createChannel(
+      {
+        channelId: "default-channel",
+        channelName: "Default Channel",
+      },
+      (created) => {
+        console.log(created ? "알림 채널 생성 성공!" : "알림 채널이 이미 존재합니다.");
+      }
+    );
+  }, []);
+
+  useEffect(() => {
+    if (alarmEnabled) {
+      //즉시 알림
+      PushNotification.localNotification({
+        channelId: "default-channel",
+        title: "테스트 알림",
+        message: "테스트 알림입니다.",
+        priority: "high",
+        vibration: 4,
+        playSound: true,
+        soundName: "default",
+      });
+
+      // 예약 알림
+      PushNotification.localNotificationSchedule({
+        channelId: "default-channel",
+        title: "예약 알림",
+        message: "예약된 알림입니다.",
+        date: new Date(Date.now() + 20 * 1000), // 현재 시간 기준으로 20초 후
+        allowWhileIdle: true,
+        priority: "high",
+        vibration: 4,
+        playSound: true,
+        soundName: "default",
+      });
+
+      // 특정 시간 예약 알림
+      const targetDate = new Date();
+      targetDate.setHours(18, 0, 0, 0); // 시간, 분, 초, 밀리초 지정 (오후 6시로 설정)
+
+      if (targetDate < new Date()) {
+        targetDate.setDate(targetDate.getDate() + 1);
+      }
+
+      PushNotification.localNotificationSchedule({
+        channelId: "default-channel",
+        title: "특정 시간 예약 알림",
+        message: "특정 시간에 예약된 알림입니다.",
+        date: targetDate,
+        allowWhileIdle: true,
+        priority: "high",
+        vibration: 4,
+        playSound: true,
+        soundName: "default",
+      });
+
+      console.log("알림이 활성화되었습니다.");
+    } else {
+      console.log("알림이 비활성화되었습니다.");
+    }
+  }, [alarmEnabled]);
 
   return (
     <View style={styles.container}>
