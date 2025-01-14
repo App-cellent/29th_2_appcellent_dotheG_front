@@ -6,7 +6,7 @@ import { startCounter, stopCounter } from 'react-native-accurate-step-counter';
 
 import MainHeader from '../../components/MainHeader';
 import LinearGradientBackground from 'react-native-linear-gradient';
-import {Animated} from 'react-native';
+import SeedIcon from '../../img/Home/SeedIcon.svg';
 
 import Svg, { Text as SvgText, Defs, LinearGradient, Stop } from 'react-native-svg';
 import {
@@ -19,6 +19,9 @@ import {
   useColorScheme,
   View,
   Image,
+  Animated,
+  Modal,
+  Pressable
 } from 'react-native';
 
 function PedometerScreen(): React.JSX.Element {
@@ -31,8 +34,9 @@ function PedometerScreen(): React.JSX.Element {
     });
 
     const [goalYN, setGoalYN] = useState(false);
+    const [modalVisible, setModalVisible] = useState(false);
 
-    const [todayStep, setTodayStep] = useState(0);
+    const [todayStep, setTodayStep] = useState(7777);
     const [monthStep, setMonthStep] = useState(100398);
     const [accumulateStep, setAccumulateStep] = useState(1000034);
     const carbonEmissions = 5.4;
@@ -48,12 +52,17 @@ function PedometerScreen(): React.JSX.Element {
               default_threshold: 15.0,
               default_delay: 150000000,
               cheatInterval: 3000,
-              onStepCountChange: (stepCount) => { setTodayStep(stepCount) },
+              onStepCountChange: (stepCount) => {
+                setTodayStep(stepCount);
+                if(stepCount >= targetStep) {
+                    setGoalYN(true);
+                }
+              },
               onCheat: () => { console.log("User is Cheating") }
             }
         startCounter(config);
         return () => { stopCounter() }
-    }, []);
+    }, [todayStep]);
 
     const [opacityAnimation] = useState(new Animated.Value(1));
 
@@ -71,7 +80,7 @@ function PedometerScreen(): React.JSX.Element {
               useNativeDriver: true,
             }),
           ]).start();
-        }, 5000);
+        }, 3000);
 
         return () => clearInterval(interval);  // 컴포넌트 언마운트 시 interval 정리
       }, [opacityAnimation]);
@@ -145,33 +154,36 @@ function PedometerScreen(): React.JSX.Element {
                     </View>
                 }
 
-                {goalYN &&
-                    <Animated.View style={[styles.gradientContainer, { opacity: opacityAnimation }]}>
+                {goalYN && (
+                  <Animated.View style={[styles.gradientContainer, { opacity: opacityAnimation }]}>
                     <LinearGradientBackground
-                        colors={['rgb(155, 201, 254)', 'rgb(105, 230, 162)']}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 0 }}
-                        style={{borderRadius: 15}}
+                      colors={['rgb(155, 201, 254)', 'rgb(105, 230, 162)']}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 0 }}
+                      style={{ borderRadius: 15 }}
                     >
-                    <View style={styles.GoalMenuBox}>
-                        <View style={{flexDirection: 'row'}}>
-                            <Image source={require('../../img/Pedometer/CircleWhite.png')} style={styles.Icon} />
-                            <View style={styles.stepContainer}>
-                                <View style={{flexDirection: 'row'}}>
-                                    <Text style={styles.stepText}>{monthStep}</Text>
-                                    <Text style={styles.stepText}>걸음</Text>
-                                </View>
-                                <Text style={styles.SmallWhiteText}>주간 목표 걸음 수 달성!</Text>
+                      <View style={styles.GoalMenuBox}>
+                        <View style={{ flexDirection: 'row' }}>
+                          <Image source={require('../../img/Pedometer/CircleWhite.png')} style={styles.Icon} />
+                          <View style={styles.stepContainer}>
+                            <View style={{ flexDirection: 'row' }}>
+                              <Text style={styles.stepText}>{monthStep}</Text>
+                              <Text style={styles.stepText}>걸음</Text>
                             </View>
+                            <Text style={styles.SmallWhiteText}>주간 목표 걸음 수 달성!</Text>
+                          </View>
                         </View>
 
-                        <TouchableOpacity style={styles.GoalButton}>
-                            <Text style={styles.GoalButtonText}>클릭!</Text>
+                        <TouchableOpacity
+                          style={styles.GoalButton}
+                          onPress={() => setModalVisible(true)} // 여기서 modalVisible을 true로 설정
+                        >
+                          <Text style={styles.GoalButtonText}>클릭!</Text>
                         </TouchableOpacity>
-                    </View>
+                      </View>
                     </LinearGradientBackground>
-                    </Animated.View>
-                }
+                  </Animated.View>
+                )}
 
                 <View style={styles.MenuBox}>
                     <Image source={require('../../img/Pedometer/CircleGreen.png')} style={styles.Icon} />
@@ -198,6 +210,24 @@ function PedometerScreen(): React.JSX.Element {
                     </View>
                 </View>
             </View>
+            { modalVisible &&
+              <Pressable style={styles.modalContainer} onPress={() => setModalVisible(false)}>
+                <Pressable style={styles.modalView} onPress={e => e.stopPropagation()}>
+                    <View style={styles.rowContainer}>
+                      <SeedIcon width={15} height={20} />
+                      <Text style={styles.modalLargeText}>리워드 획득!</Text>
+                      <SeedIcon width={15} height={20} />
+                  </View>
+                  <View style={styles.modalSmallTextContainer}>
+                      <Text style={styles.modalSmallText}>주간 목표달성으로 열매 20개를</Text>
+                      <Text style={styles.modalSmallText}>획득했어요!</Text>
+                  </View>
+                    <TouchableOpacity style={styles.modalButton} onPress={() => setModalVisible(false)}>
+                        <Text style={styles.modalButtonText}>확인</Text>
+                    </TouchableOpacity>
+                </Pressable>
+              </Pressable>
+            }
         </View>
     );
 }
@@ -210,6 +240,71 @@ const styles = StyleSheet.create({
         flex: 1.5,
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    rowContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        height: 44,
+    },
+    modalContainer: {
+        position: 'absolute',
+        top: 0,
+        bottom: 0,
+        left: 0,
+        right: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.2)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 10,
+    },
+    modalView: {
+        backgroundColor: colors.white,
+        borderRadius: 15,
+        paddingHorizontal: 16,
+        paddingVertical: 33,
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 0,
+            blur: 10,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 2,
+        elevation: 5,
+        width: 299,
+        height: 279,
+    },
+    modalLargeText: {
+        textAlign: 'center',
+        fontSize: getFontSize(23),
+        fontWeight: '800',
+        color: colors.black,
+        marginBottom: 10,
+        paddingHorizontal: 13,
+    },
+    modalSmallText: {
+        textAlign: 'center',
+        fontSize: getFontSize(15),
+        fontWeight: '400',
+        color: colors.lightblack,
+        lineHeight: 22,
+    },
+    modalButton: {
+        marginTop: 40,
+        backgroundColor: colors.green,
+        borderRadius: 15,
+        paddingVertical: 10,
+        elevation: 2,
+        width: "100%",
+    },
+    modalButtonText: {
+        color: colors.white,
+        fontWeight: '400',
+        textAlign: 'center',
+        fontSize: getFontSize(18),
+        lineHeight: 34,
     },
     bottomContainer:{
         flex: 3,
@@ -326,7 +421,10 @@ const styles = StyleSheet.create({
         color: colors.black,
         fontSize: getFontSize(18),
         fontWeight: '800',
-        lineHeight: 25,
+        lineHeight: 22,
+    },
+    modalSmallTextContainer:{
+        alignItems: 'center'
     },
     GoalButton:{
         width: 51,
