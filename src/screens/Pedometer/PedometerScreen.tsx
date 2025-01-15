@@ -274,8 +274,8 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 2,
         elevation: 5,
-        width: 299,
-        height: 279,
+        width: 289,
+        height: 269,
     },
     modalLargeText: {
         textAlign: 'center',
@@ -284,6 +284,7 @@ const styles = StyleSheet.create({
         color: colors.black,
         marginBottom: 10,
         paddingHorizontal: 13,
+        paddingTop: 5,
     },
     modalSmallText: {
         textAlign: 'center',
@@ -429,11 +430,11 @@ const styles = StyleSheet.create({
     },
     GoalButton:{
         position: 'absolute',
-        left: '85%',  // 가로 중앙
-        top: '50%',   // 세로 중앙
+        left: '85%',
+        top: '50%',
         transform: [
-            { translateX: -25.5 },  // width의 절반만큼 왼쪽으로
-            { translateY: -14 }     // height의 절반만큼 위로
+            { translateX: -25.5 },
+            { translateY: -14 }
         ],
         width: 51,
         height: 28,
