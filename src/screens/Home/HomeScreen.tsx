@@ -183,6 +183,7 @@ const styles = StyleSheet.create({
     },
     scrollContainer: {
         backgroundColor: colors.lightgray,
+        height: "140%",
     },
     SeedsContainer: {
         paddingHorizontal: 16,

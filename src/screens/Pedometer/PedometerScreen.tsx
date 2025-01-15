@@ -155,34 +155,35 @@ function PedometerScreen(): React.JSX.Element {
                 }
 
                 {goalYN && (
-                  <Animated.View style={[styles.gradientContainer, { opacity: opacityAnimation }]}>
-                    <LinearGradientBackground
-                      colors={['rgb(155, 201, 254)', 'rgb(105, 230, 162)']}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 0 }}
-                      style={{ borderRadius: 15 }}
-                    >
-                      <View style={styles.GoalMenuBox}>
-                        <View style={{ flexDirection: 'row' }}>
-                          <Image source={require('../../img/Pedometer/CircleWhite.png')} style={styles.Icon} />
-                          <View style={styles.stepContainer}>
-                            <View style={{ flexDirection: 'row' }}>
-                              <Text style={styles.stepText}>{monthStep}</Text>
-                              <Text style={styles.stepText}>걸음</Text>
+                  <View>  {/* 최상위 View를 추가 */}
+                    <Animated.View style={[styles.gradientContainer, { opacity: opacityAnimation }]}>
+                      <LinearGradientBackground
+                        colors={['rgb(155, 201, 254)', 'rgb(105, 230, 162)']}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 0 }}
+                        style={{ borderRadius: 15 }}
+                      >
+                        <View style={styles.GoalMenuBox}>
+                          <View style={{ flexDirection: 'row' }}>
+                            <Image source={require('../../img/Pedometer/CircleWhite.png')} style={styles.Icon} />
+                            <View style={styles.stepContainer}>
+                              <View style={{ flexDirection: 'row' }}>
+                                <Text style={styles.stepText}>{monthStep}</Text>
+                                <Text style={styles.stepText}>걸음</Text>
+                              </View>
+                              <Text style={styles.SmallWhiteText}>주간 목표 걸음 수 달성!</Text>
                             </View>
-                            <Text style={styles.SmallWhiteText}>주간 목표 걸음 수 달성!</Text>
                           </View>
                         </View>
-
-                        <TouchableOpacity
-                          style={styles.GoalButton}
-                          onPress={() => setModalVisible(true)} // 여기서 modalVisible을 true로 설정
-                        >
-                          <Text style={styles.GoalButtonText}>클릭!</Text>
-                        </TouchableOpacity>
-                      </View>
-                    </LinearGradientBackground>
-                  </Animated.View>
+                      </LinearGradientBackground>
+                    </Animated.View>
+                    <TouchableOpacity
+                      style={styles.GoalButton}
+                      onPress={() => setModalVisible(true)}
+                    >
+                      <Text style={styles.GoalButtonText}>클릭!</Text>
+                    </TouchableOpacity>
+                  </View>
                 )}
 
                 <View style={styles.MenuBox}>
@@ -196,7 +197,7 @@ function PedometerScreen(): React.JSX.Element {
                     </View>
                 </View>
 
-                <View style={[styles.MenuBox, { height: 207, flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-start' }]}>
+                <View style={[styles.MenuBox, { height: 207, flexDirection: 'column',justifyContent: 'center', alignItems: 'flex-start' }]}>
                     <View style={{flexDirection: 'row'}}>
                         <Text style={styles.BoldSmallText}>걸어서 약 </Text>
                         <Text style={[styles.BoldSmallText, {color: colors.green}]}>{carbonEmissions}</Text>
@@ -204,8 +205,8 @@ function PedometerScreen(): React.JSX.Element {
                         <Text style={styles.BoldSmallText}>의</Text>
                     </View>
                     <Text style={styles.BoldSmallText}>탄소 배출량을 줄였어요!</Text>
-                    <Text style={[styles.SmallGrayText, {lineHeight: 25}]}>버스의 33km 이동 탄소 배출량을 기준으로 환산했어요.</Text>
-                    <View style={{alignItems: 'center'}}>
+                    <Text style={[styles.SmallGrayText, {lineHeight: 25}]}>자동차가 1km 가는데 약 200g의 탄소를 배출해요.</Text>
+                    <View style={{alignSelf: 'center'}}>
                         <Image source={require('../../img/Home/GradientEarth.png')} style={[styles.earthIcon]}/>
                     </View>
                 </View>
@@ -273,8 +274,8 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 2,
         elevation: 5,
-        width: 299,
-        height: 279,
+        width: 289,
+        height: 269,
     },
     modalLargeText: {
         textAlign: 'center',
@@ -283,6 +284,7 @@ const styles = StyleSheet.create({
         color: colors.black,
         marginBottom: 10,
         paddingHorizontal: 13,
+        paddingTop: 5,
     },
     modalSmallText: {
         textAlign: 'center',
@@ -427,6 +429,13 @@ const styles = StyleSheet.create({
         alignItems: 'center'
     },
     GoalButton:{
+        position: 'absolute',
+        left: '85%',
+        top: '50%',
+        transform: [
+            { translateX: -25.5 },
+            { translateY: -14 }
+        ],
         width: 51,
         height: 28,
         borderRadius: 15,
