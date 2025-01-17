@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, Dimensions, ScrollView } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity, Dimensions, ScrollView, Alert } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { LinearGradient } from 'react-native-linear-gradient';
 
@@ -13,6 +13,7 @@ const QuestConfirmationScreen = () => {
   const month = String(today.getMonth() + 1).padStart(2, '0');
   const date = String(today.getDate()).padStart(2, '0');
   const [selectedQuest, setSelectedQuest] = useState(null);
+  const [dailyConfirmCount, setDailyConfirmCount] = useState(0);
 
   const quests = [
     { id: 1, title: '카페에서 텀블러를 사용했어요.', description: '탄소를 10g 절감할 수 있어요.' },
@@ -25,8 +26,18 @@ const QuestConfirmationScreen = () => {
   };
 
   const handleCompleteQuest = () => {
-    console.log('Quest completed!');
-    navigation.navigate('Main');
+    if (dailyConfirmCount >= 3) {
+      Alert.alert('알림', '오늘의 퀘스트 인증 한도(3회)를 초과했습니다. 내일 다시 시도해주세요.');
+      navigation.navigate('Main');
+    } else if (selectedQuest === null) {
+      Alert.alert('알림', '퀘스트를 선택해주세요.');
+      return;
+    } else{
+      setDailyConfirmCount(dailyConfirmCount + 1);
+      Alert.alert('알림', '퀘스트 인증이 완료되었습니다.');
+      setSelectedQuest(null);
+      navigation.navigate('Main');
+    }
   };
 
   const dynamicStyles = StyleSheet.create({
