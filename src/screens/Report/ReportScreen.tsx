@@ -15,6 +15,8 @@ import Svg, { Text as SvgText, Defs, LinearGradient, Stop } from 'react-native-s
 function ReportScreen(): React.JSX.Element {
   const [selectedTab, setSelectedTab] = useState('주간');
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [isMonthlyHistoryOpen, setIsMonthlyHistoryOpen] = useState(false);
+  const [isInfoVisible, setIsInfoVisible] = useState(false);
   const [textWidth, setTextWidth] = useState(0);
   const usernameFontSize=25;
 
@@ -24,12 +26,18 @@ function ReportScreen(): React.JSX.Element {
   const username = '앱설런트';
   const averageSteps = 5032;
   const historyCount = 6;
+  const monthlyHistoryCount = 8;
   const savedTree = 11;
   const topPercentage= 21;
 
   const historyDetails = [
     { content: '제로 웨이스트 매장 방문', count: 1 },
     { content: '텀블러 사용', count: 1 },
+    { content: '만보기 목표 달성', count: 4 },
+  ];
+  const monthlyHistoryDetails = [
+    { content: '제로 웨이스트 매장 방문', count: 2 },
+    { content: '텀블러 사용', count: 2 },
     { content: '만보기 목표 달성', count: 4 },
   ];
 
@@ -39,6 +47,14 @@ function ReportScreen(): React.JSX.Element {
 
   const toggleHistory = () => {
     setIsHistoryOpen(!isHistoryOpen);
+  };
+
+  const toggleMonthlyHistory = () => {
+    setIsMonthlyHistoryOpen(!isMonthlyHistoryOpen);
+  };
+
+  const toggleInfoView = () => {
+    setIsInfoVisible(!isInfoVisible);
   };
 
   const handleTextLayout = (event: any) => {
@@ -192,7 +208,7 @@ function ReportScreen(): React.JSX.Element {
               >
                 {username}
               </Text>
-              <Text style={styles.usernameText}>님의 이번 달</Text>
+              <Text style={styles.usernameText}>님의 지난 달</Text>
             </View>
             <Text style={styles.usernameText}>성과보고서를 확인해보세요!</Text>
           </View>
@@ -202,13 +218,31 @@ function ReportScreen(): React.JSX.Element {
               <View style={styles.boxContent}>
                 <View style={styles.logoAndTitle}>
                   <Image source={require('../../img/Report/savetreelogo.png')} style={styles.logoImage} />
-                  <Text style={styles.boxTitle}>이번 달 내가 지킨 나무</Text>
+                  <Text style={styles.boxTitle}>지난 달 내가 지킨 나무</Text>
                 </View>
+                <TouchableOpacity onPress={toggleInfoView} style={styles.infoIconContainer}>
+                  <Image source={require('../../img/Report/savetreeinfo.png')} style={styles.infoIcon} />
+                </TouchableOpacity>
                 <View style={styles.countContainer}>
                   <Text style={styles.countNum}>{savedTree.toLocaleString()}</Text>
                   <Text style={styles.countText}>그루</Text>
                 </View>
               </View>
+              {isInfoVisible && (
+                <View style={styles.infoBox}>
+                  <TouchableOpacity
+                    onPress={() => setIsInfoVisible(false)} // infoBox 숨기기
+                    style={styles.closeInfoContainer}
+                  >
+                    <Image
+                      source={require('../../img/Report/savetreeinfoexit.png')} // exit 아이콘
+                      style={styles.closeInfo}
+                    />
+                  </TouchableOpacity>
+                  <Text style={styles.infoText}>내가 줄인 이산화탄소의 양을</Text>
+                  <Text style={styles.infoText}>나무 그루로 확인해볼 수 있어요!</Text>
+                </View>
+              )}
             </View>
           </View>
 
@@ -217,7 +251,7 @@ function ReportScreen(): React.JSX.Element {
               <View style={styles.boxContent}>
                 <View style={styles.logoAndTitle}>
                   <Image source={require('../../img/Report/savecarbonlogo.png')} style={styles.logoImage} />
-                  <Text style={styles.boxTitle}>이번 달 내가 줄인 탄소 배출량 순위</Text>
+                  <Text style={styles.boxTitle}>지난 달 내가 줄인 탄소 배출량 순위</Text>
                 </View>
                 <View style={styles.rankBox}>
                   <Image source={require('../../img/Report/carbonbackground.png')} style={styles.backgroundImage} />
@@ -233,6 +267,46 @@ function ReportScreen(): React.JSX.Element {
                   </View>
                 </View>
               </View>
+            </View>
+          </View>
+
+          <View style={[styles.toggleBoxContainer, isMonthlyHistoryOpen && styles.historyOpen]}>
+            <View style={styles.shadowBox}>
+              <View style={styles.historyContent}>
+                <View style={styles.logoAndTitle}>
+                  <Image source={require('../../img/Report/historylogo.png')} style={styles.logoImage} />
+                  <Text style={styles.historyTitle}>지난 달 인증 히스토리 (횟수)</Text>
+                </View>
+                <View style={styles.historyCountContainer}>
+                  <Text style={styles.historyCount}>{monthlyHistoryCount.toLocaleString()}</Text>
+                  <Text style={styles.historyText}>회</Text>
+                </View>
+              </View>
+
+              <TouchableOpacity onPress={toggleMonthlyHistory} style={styles.toggleButtonContainer}>
+                <View style={styles.toggleButton}>
+                  <Image
+                    source={isMonthlyHistoryOpen
+                      ? require('../../img/Report/arrowup.png')
+                      : require('../../img/Report/arrowdown.png')}
+                    style={styles.arrowImage}
+                  />
+                  <Text style={styles.toggleText}>
+                    {isMonthlyHistoryOpen ? '' : '인증 히스토리 보기'}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+
+              {isMonthlyHistoryOpen && (
+                <View style={styles.historyDetailsContainer}>
+                  {monthlyHistoryDetails.map((detail, index) => (
+                    <View key={index} style={styles.historyDetail}>
+                      <Text style={styles.historyDetailContent}>{detail.content}</Text>
+                      <Text style={styles.historyDetailCount}>{detail.count}회</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
             </View>
           </View>
         </View>
@@ -365,6 +439,7 @@ const styles = StyleSheet.create({
     width: '100%',
     minHeight: 127,
     marginTop: 23,
+    marginBottom: 23,
     paddingHorizontal: 16,
   },
   historyOpen: {
@@ -490,6 +565,44 @@ const styles = StyleSheet.create({
     color: '#545454',
     marginBottom:10,
   },
+  infoIconContainer: {
+    position: 'absolute',
+    right: 15,
+    top: 12,
+  },
+  infoIcon: {
+    width: 15,
+    height: 15,
+  },
+  infoBox: {
+    position: 'absolute',
+    right: 15,
+    top: 32,
+    width: 'auto',
+    height: 45,
+    padding: 12,
+    backgroundColor: '#ffffff',
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: '#C9C9C9',
+    justifyContent: 'center',
+    zIndex: 3,
+  },
+  infoText: {
+    fontSize: 8,
+    fontWeight:'medium',
+    color: '#C9C9C9',
+  },
+  closeInfoContainer: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    zIndex: 4,
+  },
+  closeInfo: {
+    width: 8,
+    height: 8,
+  }
 });
 
 export default ReportScreen;
