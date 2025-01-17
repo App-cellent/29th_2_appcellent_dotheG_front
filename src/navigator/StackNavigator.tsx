@@ -21,6 +21,15 @@ import PasswordChangeScreen from '../screens/My/PasswordChangeScreen';
 import CameraScreen from '../screens/Quest/CameraScreen';
 import QuestConfirmationScreen from '../screens/Quest/QuestConfirmationScreen';
 
+import ListScreen from '../screens/Character/ListScreen';
+import DrawScreen from '../screens/Character/DrawScreen';
+import AnimalDrawScreen from '../screens/Character/AnimalDrawScreen';
+import LoadingScreen from '../screens/Character/LoadingScreen';
+import ResultScreen from '../screens/Character/ResultScreen';
+
+import WelcomeScreen from '../screens/User/WelcomeScreen';
+import PwChangeCompleteScreen from '../screens/User/PwChangeCompleteScreen';
+
 const StackNavigator = () => {
     const navigation = useNavigation();
     const Stack = createNativeStackNavigator();
@@ -87,6 +96,43 @@ const StackNavigator = () => {
             <Stack.Screen
                 name="QuestConfirmationScreen"
                 component={QuestConfirmationScreen}
+                options={{ headerShown: false }}
+            />
+
+            <Stack.Screen
+                name="ListScreen"
+                component={ListScreen}
+                options={{ headerShown: false }}
+            />
+            <Stack.Screen
+                name="DrawScreen"
+                component={DrawScreen}
+                options={{ headerShown: false }}
+            />
+            <Stack.Screen
+                name="AnimalDrawScreen"
+                component={AnimalDrawScreen}
+                options={{ headerShown: false }}
+            />
+            <Stack.Screen
+                name="LoadingScreen"
+                component={LoadingScreen}
+                options={{ headerShown: false }}
+            />
+            <Stack.Screen
+                name="ResultScreen"
+                component={ResultScreen}
+                options={{ headerShown: false }}
+            />
+
+            <Stack.Screen
+                name="WelcomeScreen"
+                component={WelcomeScreen}
+                options={{ headerShown: false }}
+            />
+            <Stack.Screen
+                name="PwChangeCompleteScreen"
+                component={PwChangeCompleteScreen}
                 options={{ headerShown: false }}
             />
         </Stack.Navigator>
