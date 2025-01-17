@@ -231,11 +231,11 @@ function ReportScreen(): React.JSX.Element {
               {isInfoVisible && (
                 <View style={styles.infoBox}>
                   <TouchableOpacity
-                    onPress={() => setIsInfoVisible(false)} // infoBox 숨기기
+                    onPress={() => setIsInfoVisible(false)}
                     style={styles.closeInfoContainer}
                   >
                     <Image
-                      source={require('../../img/Report/savetreeinfoexit.png')} // exit 아이콘
+                      source={require('../../img/Report/savetreeinfoexit.png')}
                       style={styles.closeInfo}
                     />
                   </TouchableOpacity>

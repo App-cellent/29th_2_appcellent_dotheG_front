@@ -24,8 +24,10 @@ import {
   Image,
   ImageBackground,
   Dimensions,
-  TouchableOpacity
+  TouchableOpacity,
+  Alert
 } from 'react-native';
+import { launchImageLibrary } from 'react-native-image-picker';
 
 const { height } = Dimensions.get('window');
 
@@ -36,6 +38,8 @@ function HomeScreen(): React.JSX.Element {
     const username = '앱설런트';
     const thismonthtree = '5';
     const usertree = '21';
+
+    const [selectedImage, setSelectedImage] = useState(null);
 
     const handleNavigateTodayQuiz = useCallback(async () => {
         navigation.navigate('TodayQuizGuideScreen');
@@ -50,6 +54,34 @@ function HomeScreen(): React.JSX.Element {
     const handleSelectAnswer = () => {
         setOpenQuest(!openQuest);
     };
+
+    const handleSelectImage = () => {
+        launchImageLibrary(
+            { mediaType: 'photo', quality: 0.5 },
+            (response) => {
+                if (response.errorMessage) {
+                    console.log('ImagePicker Error: ', response.errorMessage);
+                } else {
+                    if (!response.assets || response.assets.length === 0) {
+                        console.log('Image not selected.');
+                        return;
+                    }
+
+                    const selectedFile = response.assets[0];
+                    const fileName = selectedFile.fileName ? selectedFile.fileName.toLowerCase() : '';
+
+                    if (fileName.includes('screenshot')) {
+                        Alert.alert('알림', '스크린샷은 업로드할 수 없습니다. 직접 촬영한 사진을 선택해주세요.');
+                        return;
+                    }
+
+                    setSelectedImage(selectedFile);
+                    navigation.navigate('QuestConfirmationScreen', { photoPath: selectedFile.uri });
+                }
+            }
+        );
+    };
+
 
     return (
         <View style={styles.container}>
@@ -154,10 +186,12 @@ function HomeScreen(): React.JSX.Element {
 
             {openQuest &&
             <View style={styles.openQuestOption}>
+                <TouchableOpacity onPress={handleSelectImage}>
                 <View style={[styles.questOption, {borderBottomWidth: 1, borderBottomColor: '#C9C9C9'}]}>
                     <Text style={styles.optionText}>갤러리</Text>
                     <Image source={require('../../img/Home/GalleryIcon.png')} style={styles.GalleryIcon} />
                 </View>
+                </TouchableOpacity>
 
                 <TouchableOpacity onPress={handleNavigateCamera}>
                 <View style={styles.questOption}>

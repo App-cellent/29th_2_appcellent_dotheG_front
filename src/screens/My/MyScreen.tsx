@@ -19,6 +19,10 @@ function MyScreen({ navigation }): React.JSX.Element {
   const [nicknameModalVisible, setNicknameModalVisible] = useState(false);
   const [newNickname, setNewNickname] = useState("");
   const [logoutModalVisible, setLogoutModalVisible] = useState(false);
+  const [dailySteps, setDailySteps] = useState(7000);
+  const [weeklySteps, setWeeklySteps] = useState(50000);
+  const DAILY_GOAL = 7000;
+  const WEEKLY_GOAL = 50000;
 
   const openNicknameModal = () => {
     setNicknameModalVisible(true);
@@ -110,24 +114,28 @@ function MyScreen({ navigation }): React.JSX.Element {
     });
 
     // 데일리 목표 알림
-    PushNotification.localNotification({
-      channelId: "default-channel",
-      title: "만보기 데일리 목표 달성",
-      message: "오늘 목표 걸음 수를 달성했어요. 리워드를 획득하세요!",
-      allowWhileIdle: true,
-      playSound: true,
-      soundName: "default",
-    });
+    if (dailySteps >= DAILY_GOAL) {
+      PushNotification.localNotification({
+        channelId: "default-channel",
+        title: "만보기 데일리 목표 달성",
+        message: "오늘 목표 걸음 수를 달성했어요. 리워드를 획득하세요!",
+        allowWhileIdle: true,
+        playSound: true,
+        soundName: "default",
+      });
+    }
 
     // 주간 목표 알림
-    PushNotification.localNotification({
-      channelId: "default-channel",
-      title: "만보기 주간 목표 달성",
-      message: "이번 주 목표 걸음 수를 달성했어요. 리워드를 획득하세요!",
-      allowWhileIdle: true,
-      playSound: true,
-      soundName: "default",
-    });
+    if (weeklySteps >= WEEKLY_GOAL) {
+      PushNotification.localNotification({
+        channelId: "default-channel",
+        title: "만보기 주간 목표 달성",
+        message: "이번 주 목표 걸음 수를 달성했어요. 리워드를 획득하세요!",
+        allowWhileIdle: true,
+        playSound: true,
+        soundName: "default",
+      });
+    }
 
     // 오늘의 퀘스트 알림
     PushNotification.localNotificationSchedule({
