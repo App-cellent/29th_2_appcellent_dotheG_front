@@ -11,7 +11,6 @@ import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
 import com.facebook.react.defaults.DefaultReactNativeHost
 import com.facebook.react.soloader.OpenSourceMergedSoMapping
 import com.facebook.soloader.SoLoader
-import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage;
 
 class MainApplication : Application(), ReactApplication {
 

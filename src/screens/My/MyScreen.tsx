@@ -77,59 +77,109 @@ function MyScreen({ navigation }): React.JSX.Element {
         console.log(created ? "알림 채널 생성 성공!" : "알림 채널이 이미 존재합니다.");
       }
     );
-  }, []);
 
-  useEffect(() => {
     if (alarmEnabled) {
-      //즉시 알림
-      PushNotification.localNotification({
-        channelId: "default-channel",
-        title: "테스트 알림",
-        message: "테스트 알림입니다.",
-        priority: "high",
-        vibration: 4,
-        playSound: true,
-        soundName: "default",
-      });
-
-      // 예약 알림
-      PushNotification.localNotificationSchedule({
-        channelId: "default-channel",
-        title: "예약 알림",
-        message: "예약된 알림입니다.",
-        date: new Date(Date.now() + 20 * 1000), // 현재 시간 기준으로 20초 후
-        allowWhileIdle: true,
-        priority: "high",
-        vibration: 4,
-        playSound: true,
-        soundName: "default",
-      });
-
-      // 특정 시간 예약 알림
-      const targetDate = new Date();
-      targetDate.setHours(18, 0, 0, 0); // 시간, 분, 초, 밀리초 지정 (오후 6시로 설정)
-
-      if (targetDate < new Date()) {
-        targetDate.setDate(targetDate.getDate() + 1);
-      }
-
-      PushNotification.localNotificationSchedule({
-        channelId: "default-channel",
-        title: "특정 시간 예약 알림",
-        message: "특정 시간에 예약된 알림입니다.",
-        date: targetDate,
-        allowWhileIdle: true,
-        priority: "high",
-        vibration: 4,
-        playSound: true,
-        soundName: "default",
-      });
-
+      scheduleNotifications();
       console.log("알림이 활성화되었습니다.");
     } else {
       console.log("알림이 비활성화되었습니다.");
     }
   }, [alarmEnabled]);
+
+  const scheduleNotifications = () => {
+    // 월간 성과보고서 알림
+    PushNotification.localNotificationSchedule({
+      channelId: "default-channel",
+      title: "월간 성과보고서 확인",
+      message: `${userName}님의 지난 달 성과보고서를 확인해보세요!`,
+      date: getNextMonthlyDate(1, 10), // 매월 1일 10시
+      allowWhileIdle: true,
+      playSound: true,
+      soundName: "default",
+    });
+
+    // 주간 성과보고서 알림
+    PushNotification.localNotificationSchedule({
+      channelId: "default-channel",
+      title: "주간 성과보고서 확인",
+      message: `${userName}님의 지난 주 성과보고서를 확인해보세요!`,
+      date: getNextWeeklyDate(1, 10), // 매주 월요일 10시
+      allowWhileIdle: true,
+      playSound: true,
+      soundName: "default",
+    });
+
+    // 데일리 목표 알림
+    PushNotification.localNotification({
+      channelId: "default-channel",
+      title: "만보기 데일리 목표 달성",
+      message: "오늘 목표 걸음 수를 달성했어요. 리워드를 획득하세요!",
+      allowWhileIdle: true,
+      playSound: true,
+      soundName: "default",
+    });
+
+    // 주간 목표 알림
+    PushNotification.localNotification({
+      channelId: "default-channel",
+      title: "만보기 주간 목표 달성",
+      message: "이번 주 목표 걸음 수를 달성했어요. 리워드를 획득하세요!",
+      allowWhileIdle: true,
+      playSound: true,
+      soundName: "default",
+    });
+
+    // 오늘의 퀘스트 알림
+    PushNotification.localNotificationSchedule({
+      channelId: "default-channel",
+      title: "오늘의 퀘스트",
+      message: "오늘의 친환경 활동을 할 시간이에요!",
+      date: getTodayAt(18), // 매일 18시
+      allowWhileIdle: true,
+      playSound: true,
+      soundName: "default",
+    });
+
+    // 오늘의 퀴즈 알림
+    PushNotification.localNotificationSchedule({
+      channelId: "default-channel",
+      title: "오늘의 퀴즈",
+      message: "오늘의 퀴즈를 풀어 리워드를 획득하세요!",
+      date: getTodayAt(20), // 매일 20시
+      allowWhileIdle: true,
+      playSound: true,
+      soundName: "default",
+    });
+  };
+
+  const getNextMonthlyDate = (day, hour) => {
+    const now = new Date();
+    const target = new Date(now.getFullYear(), now.getMonth(), day, hour);
+    if (now > target) {
+      target.setMonth(target.getMonth() + 1);
+    }
+    return target;
+  };
+
+  const getNextWeeklyDate = (dayOfWeek, hour) => {
+    const now = new Date();
+    const target = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate() + ((dayOfWeek - now.getDay() + 7) % 7),
+      hour
+    );
+    return target;
+  };
+
+  const getTodayAt = (hour) => {
+    const now = new Date();
+    const target = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour);
+    if (now > target) {
+      target.setDate(target.getDate() + 1);
+    }
+    return target;
+  };
 
   return (
     <View style={styles.container}>
