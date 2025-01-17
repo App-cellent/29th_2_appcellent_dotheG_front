@@ -1,9 +1,4 @@
 import React from "react";
-
-import DoTheG from '../img/Navigator/DoTheG.svg';
-import AlarmIcon from '../img/Navigator/AlarmIcon.svg';
-import LeftArrowIcon from '../img/Navigator/LeftArrowIcon.svg';
-
 import {
   TouchableOpacity,
   SafeAreaView,
@@ -14,15 +9,26 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
+import { useNavigation } from "@react-navigation/native";
+
+import DoTheG from '../img/Navigator/DoTheG.svg';
+import AlarmIcon from '../img/Navigator/AlarmIcon.svg';
+import LeftArrowIcon from '../img/Navigator/LeftArrowIcon.svg';
 
 const MainHeader: React.FC<GradientButtonProps> = () => {
+    const navigation = useNavigation();
+
+    const goToAlarmScreen = () => {
+      navigation.navigate("AlarmScreen");
+    };
+
     return (
     <View style={styles.customHeader}>
         <View style={styles.headerLeft}>
             <DoTheG />
         </View>
         <View style={styles.headerRight}>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={goToAlarmScreen}>
                 <AlarmIcon />
             </TouchableOpacity>
         </View>
