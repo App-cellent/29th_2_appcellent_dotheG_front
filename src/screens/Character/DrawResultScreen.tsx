@@ -1,9 +1,9 @@
-import * as React from 'react'
+import * as React from 'react';
 import { StyleSheet, Text, View, Image, ImageBackground } from 'react-native';
 
 import CharacterRarity from '../../components/CharacterRarity';
 
-function ResultScreen(): React.JSX.Element {
+function DrawResultScreen(): React.JSX.Element {
     return(
         <View style={styles.container}>
             <ImageBackground
@@ -55,4 +55,4 @@ const styles = StyleSheet.create({
     }
 })
 
-export default ResultScreen;
+export default DrawResultScreen;

@@ -1,7 +1,19 @@
-import * as React from 'react'
+import * as React from 'react';
+import { useEffect } from 'react';
 import { StyleSheet, Text, View, ImageBackground } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
-function LoadingScreen(): React.JSX.Element {
+function DrawLoadingScreen(): React.JSX.Element {
+    const navigation = useNavigation();
+
+    useEffect(() => {
+        const loading = setTimeout(() => {
+            navigation.navigate('DrawResultScreen');
+        }, 1000);
+
+        return () => clearTimeout(loading);
+    }, [navigation]);
+
     return(
         <View style={styles.container}>
             <ImageBackground
@@ -42,4 +54,4 @@ const styles = StyleSheet.create({
     },
 })
 
-export default LoadingScreen;
+export default DrawLoadingScreen;
