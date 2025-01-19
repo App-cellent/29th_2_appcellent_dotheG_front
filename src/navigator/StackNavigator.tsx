@@ -21,14 +21,21 @@ import PasswordChangeScreen from '../screens/My/PasswordChangeScreen';
 import CameraScreen from '../screens/Quest/CameraScreen';
 import QuestConfirmationScreen from '../screens/Quest/QuestConfirmationScreen';
 
+// Character
+import CharacterScreen from '../screens/Character/CharacterScreen';
 import ListScreen from '../screens/Character/ListScreen';
 import DrawScreen from '../screens/Character/DrawScreen';
 import AnimalDrawScreen from '../screens/Character/AnimalDrawScreen';
-import LoadingScreen from '../screens/Character/LoadingScreen';
-import ResultScreen from '../screens/Character/ResultScreen';
+import DrawLoadingScreen from '../screens/Character/DrawLoadingScreen';
+import DrawResultScreen from '../screens/Character/DrawResultScreen';
 
+// User
+import LoginScreen from '../screens/User/LoginScreen';
+import SignupScreen from '../screens/User/SignupScreen';
 import WelcomeScreen from '../screens/User/WelcomeScreen';
-import PwChangeCompleteScreen from '../screens/User/PwChangeCompleteScreen';
+import FindIdPwScreen from '../screens/User/FindIdPwScreen';
+import ChangePwScreen from '../screens/User/ChangePwScreen';
+import ChangePwCompleteScreen from '../screens/User/ChangePwCompleteScreen';
 
 const StackNavigator = () => {
     const navigation = useNavigation();
@@ -99,6 +106,12 @@ const StackNavigator = () => {
                 options={{ headerShown: false }}
             />
 
+            {/* Character */}
+            <Stack.Screen
+                name="CharacterScreen"
+                component={CharacterScreen}
+                options={{ headerShown: false }}
+            />
             <Stack.Screen
                 name="ListScreen"
                 component={ListScreen}
@@ -115,24 +128,45 @@ const StackNavigator = () => {
                 options={{ headerShown: false }}
             />
             <Stack.Screen
-                name="LoadingScreen"
-                component={LoadingScreen}
+                name="DrawLoadingScreen"
+                component={DrawLoadingScreen}
                 options={{ headerShown: false }}
             />
             <Stack.Screen
-                name="ResultScreen"
-                component={ResultScreen}
+                name="DrawResultScreen"
+                component={DrawResultScreen}
                 options={{ headerShown: false }}
             />
 
+            {/* User */}
+            <Stack.Screen
+                name="LoginScreen"
+                component={LoginScreen}
+                options={{ headerShown: false }}
+            />
+            <Stack.Screen
+                name="SignupScreen"
+                component={SignupScreen}
+                options={{ headerShown: false }}
+            />
             <Stack.Screen
                 name="WelcomeScreen"
                 component={WelcomeScreen}
                 options={{ headerShown: false }}
             />
             <Stack.Screen
+                name="FindIdPwScreen"
+                component={FindIdPwScreen}
+                options={{ headerShown: false }}
+            />
+            <Stack.Screen
+                name="ChangePwScreen"
+                component={ChangePwScreen}
+                options={{ headerShown: false }}
+            />
+            <Stack.Screen
                 name="PwChangeCompleteScreen"
-                component={PwChangeCompleteScreen}
+                component={ChangePwCompleteScreen}
                 options={{ headerShown: false }}
             />
         </Stack.Navigator>

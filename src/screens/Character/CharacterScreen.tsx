@@ -1,4 +1,4 @@
-import * as React from 'react'
+import * as React from 'react';
 import { useNavigation } from '@react-navigation/native';
 import colors from "../../utils/colors";
 import LinearGradient from 'react-native-linear-gradient';

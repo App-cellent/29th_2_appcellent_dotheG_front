@@ -2,7 +2,7 @@ import * as React from 'react'
 import { useNavigation } from '@react-navigation/native';
 import { StyleSheet, Text, View, ImageBackground, TouchableOpacity } from 'react-native';
 
-function PwChangeCompleteScreen(): React.JSX.Element {
+function ChangePwCompleteScreen(): React.JSX.Element {
     const navigation = useNavigation();
 
     return(
@@ -45,4 +45,4 @@ const styles = StyleSheet.create({
     },
 })
 
-export default PwChangeCompleteScreen;
+export default ChangePwCompleteScreen;
