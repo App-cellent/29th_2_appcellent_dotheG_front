@@ -165,7 +165,7 @@ const StackNavigator = () => {
                 options={{ headerShown: false }}
             />
             <Stack.Screen
-                name="PwChangeCompleteScreen"
+                name="ChangePwCompleteScreen"
                 component={ChangePwCompleteScreen}
                 options={{ headerShown: false }}
             />

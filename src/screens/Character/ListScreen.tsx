@@ -11,7 +11,6 @@ import {
     TouchableOpacity, 
     FlatList, 
     Modal,
-    Touchable, 
 } from 'react-native';
 
 import CharacterRarity from '../../components/CharacterRarity';
