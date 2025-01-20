@@ -57,6 +57,24 @@ function CharacterScreen(): React.JSX.Element {
                         />
                     </View>
                 </View>
+
+                {/* for test.. */}
+                <TouchableOpacity onPress={() => navigation.navigate('LoginScreen')}>
+                    <Text style={{ textAlign: 'center' }}>LoginScreen</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => navigation.navigate('SignupScreen')}>
+                    <Text style={{ textAlign: 'center' }}>SignupScreen</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => navigation.navigate('FindIdPwScreen')}>
+                    <Text style={{ textAlign: 'center' }}>FindIdPwScreen</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => navigation.navigate('ChangePwScreen')}>
+                    <Text style={{ textAlign: 'center' }}>ChangePwScreen</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => navigation.navigate('ChangePwCompleteScreen')}>
+                    <Text style={{ textAlign: 'center' }}>ChangePwCompleteScreen</Text>
+                </TouchableOpacity>
+                {/* for test.. */}
             </LinearGradient>
         </View>
     );
