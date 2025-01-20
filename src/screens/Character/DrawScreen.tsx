@@ -13,6 +13,8 @@ import {
 
 import GradientButton from "../../components/GradientButton";
 
+import { REACT_APP_API_URL } from '@env';
+
 function DrawScreen(): React.JSX.Element {
     const navigation = useNavigation();
 
