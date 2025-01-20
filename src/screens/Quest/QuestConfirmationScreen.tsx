@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, Dimensions, ScrollView, Alert } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { LinearGradient } from 'react-native-linear-gradient';
+import axios from "axios";
+import { REACT_APP_API_URL, ACCESS_TOKEN } from '@env';
 
 const QuestConfirmationScreen = () => {
   const navigation = useNavigation();
@@ -15,6 +17,18 @@ const QuestConfirmationScreen = () => {
   const [selectedQuest, setSelectedQuest] = useState(null);
   const [dailyConfirmCount, setDailyConfirmCount] = useState(0);
 
+  const quests = [
+      { id: 1, title: '텀블러 사용', reward: 2 },
+      { id: 2, title: '자전거 이용', reward: 2 },
+      { id: 3, title: '쓰레기 분리배출', reward: 2 },
+      { id: 4, title: '에코백 사용', reward: 2 },
+      { id: 5, title: '잔반 남기지 않기', reward: 2 },
+      { id: 11, title: '플로깅/줍깅', reward: 5 },
+      { id: 12, title: '친환경 브랜드 이용', reward: 5 },
+      { id: 13, title: '제로 웨이스트 샵 방문', reward: 5 },
+      { id: 14, title: '반려 식물 키우기', reward: 5 },
+  ];
+  /*
   const quests = [
     { id: 1, title: '카페에서 텀블러를 사용했어요.', description: '탄소를 10g 절감할 수 있어요.' },
     { id: 2, title: '자전거를 탔어요.', description: '자전거로 2km 이동 시 탄소를 10g 절감할 수 있어요.' },
@@ -39,6 +53,66 @@ const QuestConfirmationScreen = () => {
       navigation.navigate('Main');
     }
   };
+  */
+  const handleCompleteQuest = async () => {
+    if (dailyConfirmCount >= 3) {
+      Alert.alert('알림', '오늘의 퀘스트 인증 한도(3회)를 초과했습니다. 내일 다시 시도해주세요.');
+      navigation.navigate('Main');
+    } else if (selectedQuest === null) {
+      Alert.alert('알림', '퀘스트를 선택해주세요.');
+      return;
+    } else {
+      try {
+        // 이미지 업로드 및 퀘스트 인증
+        await uploadPhotoToBackend(photoPath);  // 이미지 업로드
+
+        // 인증 카운트 업데이트
+        setDailyConfirmCount(dailyConfirmCount + 1);
+        Alert.alert('알림', '퀘스트 인증이 완료되었습니다.');
+        setSelectedQuest(null);  // 인증 후 선택된 퀘스트 초기화
+        navigation.navigate('Main');  // 메인 화면으로 이동
+      } catch (error) {
+        console.error('퀘스트 인증 중 오류가 발생했습니다.', error);
+        Alert.alert('알림', '퀘스트 인증에 실패했습니다.');
+      }
+    }
+  };
+
+  // 이미지 업로드 함수
+  const uploadPhotoToBackend = (photoPath) => {
+    const formData = new FormData();
+    const token = ACCESS_TOKEN;
+
+    formData.append('photo', {
+      uri: photoPath,  // 로컬 파일 경로
+      type: 'image/jpeg',  // 파일 타입 (JPEG 형식으로 가정)
+      name: 'questPhoto.jpg',  // 파일 이름
+    });
+
+    return axios.post(`${REACT_APP_API_URL}/upload/analyze`, formData, {
+      headers: {
+        access: token, // 토큰 포함
+      },
+    })
+    .then(response => {
+      console.log('파일 업로드 성공:', response.data);
+      // 응답에서 activityId(data)를 가져옴
+      const questId = response.data.data;
+
+      if (response.data.success) {
+        // 응답에서 받은 questId로 퀘스트를 선택
+        setSelectedQuest(questId); // 해당 퀘스트를 선택 상태로 설정
+        return true;  // 업로드 성공 시 true 반환
+      } else {
+        throw new Error('업로드 실패');
+      }
+    })
+    .catch(error => {
+      console.error('파일 업로드 실패:', error);
+      throw error;  // 오류 발생 시 예외 처리
+    });
+  };
+
 
   const dynamicStyles = StyleSheet.create({
     photo: {
@@ -73,13 +147,12 @@ const QuestConfirmationScreen = () => {
       {/* 퀘스트 목록 */}
       <ScrollView style={styles.scrollView}>
         {quests.map((quest) => (
-          <TouchableOpacity
+          <View
             key={quest.id}
             style={[
               styles.questButton,
               selectedQuest === quest.id && styles.selectedQuestButton,
             ]}
-            onPress={() => handleSelectQuest(quest.id)}
           >
             <Image
               source={
@@ -91,9 +164,8 @@ const QuestConfirmationScreen = () => {
             />
             <View style={styles.questTextContainer}>
               <Text style={styles.questTitle}>{quest.title}</Text>
-              <Text style={styles.questDescription}>{quest.description}</Text>
             </View>
-          </TouchableOpacity>
+          </View>
         ))}
       </ScrollView>
 
@@ -176,21 +248,22 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#C9C9C9',
     height: 68,
+    alignItems: 'center',
   },
   selectedQuestButton: {
     borderColor: '#69E6A2',
   },
   checkbox: {
-    position: 'absolute',
+    //position: 'absolute',
     width: 16,
     height: 16,
-    marginRight: 7.65,
+    //marginRight: 7.65,
     marginLeft: 18,
-    marginTop: 17,
+    //marginTop: 24,
   },
   questTextContainer: {
     flex: 1,
-    marginLeft: 40,
+    marginLeft: 7.65,
     justifyContent: 'center',
   },
   questTitle: {

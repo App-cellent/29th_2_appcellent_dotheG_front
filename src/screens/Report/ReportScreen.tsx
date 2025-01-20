@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import MainHeader from '../../components/MainHeader';
 import BarGraph from '../../components/BarGraph';
+import axios from "axios";
+import { REACT_APP_API_URL, ACCESS_TOKEN } from '@env';
 import {
   StyleSheet,
   Text,

@@ -1,6 +1,8 @@
 import React, { useState,useEffect } from 'react';
 import MainHeader from '../../components/MainHeader';
 import PushNotification from 'react-native-push-notification';
+import axios from "axios";
+import { REACT_APP_API_URL, ACCESS_TOKEN } from '@env';
 
 import {
   StyleSheet,
@@ -13,7 +15,7 @@ import {
 } from 'react-native';
 
 function MyScreen({ navigation }): React.JSX.Element {
-  const [alarmEnabled, setAlarmEnabled] = useState(false);
+  const [alarmEnabled, setAlarmEnabled] = useState(true);
   const [userName, setUserName] = useState("앱설런트");
   const [userId, setUserId] = useState("Appcellent123");
   const [nicknameModalVisible, setNicknameModalVisible] = useState(false);
@@ -24,6 +26,35 @@ function MyScreen({ navigation }): React.JSX.Element {
   const DAILY_GOAL = 7000;
   const WEEKLY_GOAL = 50000;
 
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      const token = ACCESS_TOKEN;
+      try {
+        const response = await fetch(`${REACT_APP_API_URL}/mypage/info`, {
+          method: 'GET',
+          headers: {
+            access: token,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("받은 사용자 데이터:", data);
+        setUserName(data.data.userName);
+        setUserId(data.data.userLogin);
+        //setAlarmEnabled(data.data.user);
+      } catch (error) {
+        console.error("사용자 정보 가져오기 중 오류 발생", error);
+      }
+    };
+
+    fetchUserInfo();
+  }, []);
+
+
   const openNicknameModal = () => {
     setNicknameModalVisible(true);
   };
@@ -32,6 +63,46 @@ function MyScreen({ navigation }): React.JSX.Element {
     setNicknameModalVisible(false);
   };
 
+  const handleChangeNickname = async () => {
+    if (newNickname.trim()) {
+      const token = ACCESS_TOKEN; // 사용할 토큰
+
+      try {
+        // 닉네임 변경을 위한 fetch 요청
+        const response = await fetch(
+          `${REACT_APP_API_URL}/mypage/changeName?newName=${newNickname}`,
+          {
+            method: 'PATCH', // PATCH 요청으로 변경
+            headers: {
+              access: token
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json(); // 서버 응답 데이터 처리
+        console.log("받은 응답:", data);
+        if (data.success) {
+          setUserName(newNickname); // 닉네임을 업데이트
+          setNewNickname(""); // 입력 필드 초기화
+          setNicknameModalVisible(false); // 모달 닫기
+          alert("닉네임이 변경되었습니다.");
+        } else {
+          alert("닉네임 변경에 실패했습니다.");
+        }
+      } catch (error) {
+        console.error("닉네임 변경 중 오류가 발생했습니다.", error);
+        alert("서버 오류로 닉네임 변경에 실패했습니다.");
+      }
+    } else {
+      alert("닉네임을 입력해주세요.");
+    }
+  };
+
+  /*
   const handleChangeNickname = () => {
     if (newNickname.trim()) {
       setUserName(newNickname);
@@ -41,6 +112,7 @@ function MyScreen({ navigation }): React.JSX.Element {
       alert("닉네임을 입력해주세요.");
     }
   };
+  */
 
   const openLogoutModal = () => {
     setLogoutModalVisible(true);
@@ -67,9 +139,41 @@ function MyScreen({ navigation }): React.JSX.Element {
     navigation.navigate('PasswordChangeScreen');
   };
 
+  const toggleAlarm = async () => {
+    const token = ACCESS_TOKEN; // 사용할 토큰
+
+    try {
+      // 알림 설정 변경을 위한 PATCH 요청
+      const response = await fetch(`${REACT_APP_API_URL}/mypage/toggleNoti`, {
+        method: 'PATCH',
+        headers: {
+          access: token,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const data = await response.json(); // 서버 응답 데이터 처리
+      console.log('알림 설정 변경 응답:', data);
+      if (data.success) {
+        setAlarmEnabled(!alarmEnabled); // 알림 설정 상태 변경
+        console.log("알림 설정이 성공적으로 변경되었습니다.");
+      } else {
+        alert("알림 설정 변경에 실패했습니다.");
+      }
+    } catch (error) {
+      console.error("알림 설정 변경 중 오류가 발생했습니다.", error);
+      alert("서버 오류로 알림 설정 변경에 실패했습니다.");
+    }
+  };
+
+  /*
   const toggleAlarm = () => {
     setAlarmEnabled(!alarmEnabled);
   };
+  */
 
   useEffect(() => {
     PushNotification.createChannel(

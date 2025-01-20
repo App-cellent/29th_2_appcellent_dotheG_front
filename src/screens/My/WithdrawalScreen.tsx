@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import axios from "axios";
+import { REACT_APP_API_URL, ACCESS_TOKEN } from '@env';
 import {
   StyleSheet,
   Text,
