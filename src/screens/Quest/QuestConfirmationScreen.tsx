@@ -14,7 +14,8 @@ const QuestConfirmationScreen = () => {
   const year = today.getFullYear();
   const month = String(today.getMonth() + 1).padStart(2, '0');
   const date = String(today.getDate()).padStart(2, '0');
-  const [selectedQuest, setSelectedQuest] = useState(null);
+  //const [selectedQuest, setSelectedQuest] = useState(null);
+  const [selectedQuest, setSelectedQuest] = useState(1);
   const [dailyConfirmCount, setDailyConfirmCount] = useState(0);
 
   const quests = [
@@ -54,6 +55,8 @@ const QuestConfirmationScreen = () => {
     }
   };
   */
+
+  /*
   const handleCompleteQuest = async () => {
     if (dailyConfirmCount >= 3) {
       Alert.alert('알림', '오늘의 퀘스트 인증 한도(3회)를 초과했습니다. 내일 다시 시도해주세요.');
@@ -89,7 +92,7 @@ const QuestConfirmationScreen = () => {
       name: 'questPhoto.jpg',  // 파일 이름
     });
 
-    return axios.post(`${REACT_APP_API_URL}/upload/analyze`, formData, {
+    return axios.post(`${REACT_APP_API_URL}/upload/certification`, formData, {
       headers: {
         access: token, // 토큰 포함
       },
@@ -111,6 +114,68 @@ const QuestConfirmationScreen = () => {
       console.error('파일 업로드 실패:', error);
       throw error;  // 오류 발생 시 예외 처리
     });
+  };
+  */
+
+  const handleCompleteQuest = async () => {
+    const formData = new FormData();
+    const token = ACCESS_TOKEN;
+
+    formData.append('photo', {
+      uri: photoPath,  // 로컬 파일 경로
+      type: 'file',  // 파일 타입
+      name: 'activityImage',  // 파일 이름
+    });
+
+    if (dailyConfirmCount >= 3) {
+      Alert.alert('알림', '오늘의 퀘스트 인증 한도(3회)를 초과했습니다. 내일 다시 시도해주세요.');
+      navigation.navigate('Main');
+    } else if (selectedQuest === null) {
+      Alert.alert('알림', '퀘스트를 선택해주세요.');
+      return;
+    } else {
+      try {
+        // 백엔드로 퀘스트 인증 요청 보내기
+        const response = await fetch(`${REACT_APP_API_URL}/upload/certification`, {
+          method: 'POST',
+          headers: {
+            access: token,
+          },
+          body: formData,
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+          // 인증 성공 처리
+          setDailyConfirmCount(dailyConfirmCount + 1);
+          Alert.alert('알림', '퀘스트 인증이 완료되었습니다.');
+          setSelectedQuest(null); // 인증 후 선택된 퀘스트 초기화
+          navigation.navigate('Main'); // 메인 화면으로 이동
+        } else {
+          // 다양한 실패 케이스 처리
+          switch (response.status) {
+            case 404:
+              if (result.message === '유저를 찾을 수 없습니다.') {
+                Alert.alert('알림', '유저를 찾을 수 없습니다. 다시 시도해주세요.');
+              } else if (result.message === '해당 활동이 등록되어있지 않습니다.') {
+                Alert.alert('알림', '해당 활동이 등록되어있지 않습니다.');
+              }
+              break;
+            case 422:
+              if (result.message === '이미지 처리에 실패했습니다.') {
+                Alert.alert('알림', '이미지 처리에 실패했습니다. 다시 시도해주세요.');
+              }
+              break;
+            default:
+              Alert.alert('알림', '퀘스트 인증에 실패했습니다. 나중에 다시 시도해주세요.');
+          }
+        }
+      } catch (error) {
+        console.error('퀘스트 인증 중 오류가 발생했습니다.', error);
+        Alert.alert('알림', '퀘스트 인증 중 오류가 발생했습니다. 다시 시도해주세요.');
+      }
+    }
   };
 
 
