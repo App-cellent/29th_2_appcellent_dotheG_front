@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useEffect } from 'react';
-import { StyleSheet, Text, View, ImageBackground } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { StyleSheet, Text, View, ImageBackground } from 'react-native';
 
 function DrawLoadingScreen(): React.JSX.Element {
     const navigation = useNavigation();

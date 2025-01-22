@@ -46,7 +46,7 @@ function CharacterScreen(): React.JSX.Element {
                     <View style={styles.squareContainer}>
                         <View style={styles.leafContainer}>
                             <Image
-                                source={require('../../img/Character/leaf.png')}
+                                source={require('../../img/Character/apple.png')}
                                 style={styles.leafImg}
                             />
                             <Text style={styles.leafNum}>261</Text>
@@ -65,14 +65,8 @@ function CharacterScreen(): React.JSX.Element {
                 <TouchableOpacity onPress={() => navigation.navigate('SignupScreen')}>
                     <Text style={{ textAlign: 'center' }}>SignupScreen</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => navigation.navigate('FindIdPwScreen')}>
-                    <Text style={{ textAlign: 'center' }}>FindIdPwScreen</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => navigation.navigate('ChangePwScreen')}>
-                    <Text style={{ textAlign: 'center' }}>ChangePwScreen</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => navigation.navigate('ChangePwCompleteScreen')}>
-                    <Text style={{ textAlign: 'center' }}>ChangePwCompleteScreen</Text>
+                <TouchableOpacity onPress={() => navigation.navigate('WelcomeScreen')}>
+                    <Text style={{ textAlign: 'center' }}>WelcomeScreen</Text>
                 </TouchableOpacity>
                 {/* for test.. */}
             </LinearGradient>
