@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 import LinearGradient from 'react-native-linear-gradient';
 import { 
     StyleSheet, 
@@ -12,8 +13,14 @@ import {
 
 import GradientButton from '../../components/GradientButton';
 
+type RootStackParamList = {
+    DrawLoadingScreen: { characterData: any };
+};
+
+type NavigationProp = StackNavigationProp<RootStackParamList, 'DrawLoadingScreen'>;
+
 function AnimalDrawScreen(): React.JSX.Element {
-    const navigation = useNavigation();
+    const navigation = useNavigation<NavigationProp>();
 
     const animals = [
         { id: 1, label: '두더지', fruit: 35 },
@@ -23,6 +30,26 @@ function AnimalDrawScreen(): React.JSX.Element {
     ];
 
     const [selectedOption, setSelectedOption] = useState<number | null>(null);
+
+    const handleNext = async () => {
+        if (selectedOption !== null) {
+            const selectedAnimal = animals.find(animal => animal.id === selectedOption);
+            if (selectedAnimal) {
+                const response = await fetch('/characters/draw', {
+                    method: 'POST',
+                    body: JSON.stringify({ drawType: 'ANIMAL', animalName: selectedAnimal.label }),
+                    headers: { 'Content-Type': 'application/json' },
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    navigation.navigate('DrawLoadingScreen', { characterData: result.data });
+                } else {
+                    alert(result.message);
+                }
+            }
+        }
+    };
 
     return(
         <View style={styles.container}>
@@ -77,7 +104,7 @@ function AnimalDrawScreen(): React.JSX.Element {
                     <View style={styles.buttonContainer}>
                         <GradientButton
                             height={56} width={350} text="다음"
-                            onPress={() => navigation.navigate('DrawLoadingScreen')}
+                            onPress={handleNext}
                         />
                     </View>
                 </View>
@@ -164,3 +191,7 @@ const styles = StyleSheet.create({
 })
 
 export default AnimalDrawScreen;
+
+function alert(message: any) {
+    throw new Error('Function not implemented.');
+}
