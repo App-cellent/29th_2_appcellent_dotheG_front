@@ -1,9 +1,9 @@
-import * as React from 'react'
+import React from 'react'
 import LinearGradient from 'react-native-linear-gradient';
 import { Text, StyleSheet } from 'react-native';
 
 interface CharacterRarityLevel {
-    rarity: number;
+    rarity: number; // 희귀도 (1~4)
 }
 
 const CharacterRarity: React.FC<CharacterRarityLevel> = ({ rarity }) => {
