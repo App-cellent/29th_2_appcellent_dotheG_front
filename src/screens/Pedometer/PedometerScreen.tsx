@@ -26,6 +26,8 @@ import {
 
 function PedometerScreen(): React.JSX.Element {
     const currentDate = new Date();
+    const apiUrl = process.env.REACT_APP_API_URL;
+    const accessToken = process.env.ACCESS_TOKEN;
 
     const formattedDate = currentDate.toLocaleDateString('ko-KR', {
         year: 'numeric',
@@ -36,15 +38,55 @@ function PedometerScreen(): React.JSX.Element {
     const [goalYN, setGoalYN] = useState(false);
     const [modalVisible, setModalVisible] = useState(false);
 
-    const [todayStep, setTodayStep] = useState(7777);
-    const [monthStep, setMonthStep] = useState(100398);
-    const [accumulateStep, setAccumulateStep] = useState(1000034);
-    const carbonEmissions = 5.4;
+    const [todayStep, setTodayStep] = useState(0);
+    const [weekStep, setWeekStep] = useState(0);
+    const [totalStep, setTotalStep] = useState(0);
+    const [carbonReduction, setCarbonReduction] = useState(0.0);
     const targetStep = 7000;
 
     useEffect(() => {
-        setMonthStep(monthStep.toLocaleString('ko-KR'));
-        setAccumulateStep(accumulateStep.toLocaleString('ko-KR'));
+        const fetchStepData = async () => {
+            try {
+                const response = await fetch(`${apiUrl}/steps/summary?timestamp=${new Date().getTime()}`, {
+                    method: 'GET',
+                    headers: {
+                        "Cache-Control":'no-store',
+                        "Content-Type":"application/json",
+                        access: `${accessToken}`,
+                    },
+                });
+
+                // 응답 상태
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                if (result.success) {
+                    console.log(result.data);
+                    setTodayStep(result.data.today);
+                    setWeekStep(result.data.week);
+                    setTotalStep(result.data.total);
+                    setCarbonReduction(result.data.carbonReduction);
+
+                } else {
+                    console.error(result.message);
+                }
+            } catch (error) {
+                console.error('Error fetching today quiz data:', error);
+                setTodayStep(result.data);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchStepData();
+    }, []);
+
+    useEffect(() => {
+        setWeekStep(weekStep.toLocaleString('ko-KR'));
+        setTotalStep(totalStep.toLocaleString('ko-KR'));
 
         if(todayStep >= targetStep) setGoalYN(true);
 
@@ -146,7 +188,7 @@ function PedometerScreen(): React.JSX.Element {
                         <Image source={require('../../img/Pedometer/CircleGreen.png')} style={styles.Icon} />
                         <View style={styles.stepContainer}>
                             <View style={{flexDirection: 'row'}}>
-                                <Text style={styles.stepText}>{monthStep}</Text>
+                                <Text style={styles.stepText}>{weekStep}</Text>
                                 <Text style={styles.stepText}>걸음</Text>
                             </View>
                             <Text style={styles.SmallGrayText}>주간 걸음 수</Text>
@@ -168,7 +210,7 @@ function PedometerScreen(): React.JSX.Element {
                             <Image source={require('../../img/Pedometer/CircleWhite.png')} style={styles.Icon} />
                             <View style={styles.stepContainer}>
                               <View style={{ flexDirection: 'row' }}>
-                                <Text style={styles.stepText}>{monthStep}</Text>
+                                <Text style={styles.stepText}>{weekStep}</Text>
                                 <Text style={styles.stepText}>걸음</Text>
                               </View>
                               <Text style={styles.SmallWhiteText}>주간 목표 걸음 수 달성!</Text>
@@ -190,7 +232,7 @@ function PedometerScreen(): React.JSX.Element {
                     <Image source={require('../../img/Pedometer/CircleGreen.png')} style={styles.Icon} />
                     <View style={styles.stepContainer}>
                         <View style={{flexDirection: 'row'}}>
-                            <Text style={styles.stepText}>{accumulateStep}</Text>
+                            <Text style={styles.stepText}>{totalStep}</Text>
                             <Text style={styles.stepText}>걸음</Text>
                         </View>
                         <Text style={styles.SmallGrayText}>누적 걸음 수</Text>
@@ -200,7 +242,7 @@ function PedometerScreen(): React.JSX.Element {
                 <View style={[styles.MenuBox, { height: 207, flexDirection: 'column',justifyContent: 'center', alignItems: 'flex-start' }]}>
                     <View style={{flexDirection: 'row'}}>
                         <Text style={styles.BoldSmallText}>걸어서 약 </Text>
-                        <Text style={[styles.BoldSmallText, {color: colors.green}]}>{carbonEmissions}</Text>
+                        <Text style={[styles.BoldSmallText, {color: colors.green}]}>{carbonReduction}</Text>
                         <Text style={[styles.BoldSmallText, {color: colors.green}]}>kg</Text>
                         <Text style={styles.BoldSmallText}>의</Text>
                     </View>
