@@ -1,7 +1,19 @@
 import * as React from 'react'
+import { useEffect } from 'react';
+import { useNavigation } from '@react-navigation/native';
 import { StyleSheet, Text, View, ImageBackground } from 'react-native';
 
 function WelcomeScreen(): React.JSX.Element {
+    const navigation = useNavigation();
+    
+    useEffect(() => {
+        const loading = setTimeout(() => {
+            navigation.navigate('HomeScreen');
+        }, 1000);
+    
+        return () => clearTimeout(loading);
+    }, [navigation]);
+    
     return(
         <View style={styles.container}>
             <ImageBackground

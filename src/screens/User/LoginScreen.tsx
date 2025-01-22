@@ -1,7 +1,6 @@
 import * as React from 'react'
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import LinearGradient from 'react-native-linear-gradient';
 import { 
     StyleSheet,
     Text,
@@ -9,12 +8,37 @@ import {
     View,
     TouchableOpacity, 
     TextInput,
+    Animated
 } from 'react-native';
 
 import GradientButton from '../../components/GradientButton';
 
 function LoginScreen(): React.JSX.Element {
     const navigation = useNavigation();
+    const [isChecked, setIsChecked] = useState(false);
+
+    const speechBubbleAnimated = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+        Animated.loop(
+            Animated.sequence([
+                Animated.timing(speechBubbleAnimated, {
+                    toValue: -3,
+                    duration: 700,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(speechBubbleAnimated, {
+                    toValue: 0,
+                    duration: 700,
+                    useNativeDriver: true,
+                }),
+            ])
+        ).start();
+    }, [speechBubbleAnimated]);
+
+    const autoLoginCheck = () => {
+        setIsChecked(!isChecked);
+    };
 
     return(
         <View style={styles.container}>
@@ -30,6 +54,7 @@ function LoginScreen(): React.JSX.Element {
                 style={styles.inputText}
                 placeholder="아이디를 입력해주세요"
                 placeholderTextColor="#C9C9C9"
+                keyboardType="default"
             />
             <TextInput
                 style={styles.inputText}
@@ -39,12 +64,18 @@ function LoginScreen(): React.JSX.Element {
             />
 
             <View style={styles.option}>
-                <View style={styles.checkContainer}>
+                <TouchableOpacity 
+                    style={styles.checkContainer} 
+                    onPress={autoLoginCheck}
+                >
                     <Image 
-                        source={require('../../img/User/checkIconGray.png')}
+                        source={isChecked 
+                            ? require('../../img/User/checkIcon.png') 
+                            : require('../../img/User/checkIconGray.png')}
+                        style={styles.checkIcon}
                     />
                     <Text style={styles.checkText}>자동로그인</Text>
-                </View>
+                </TouchableOpacity>
                 <TouchableOpacity
                     onPress={() => navigation.navigate('FindIdPwScreen')}
                 >
@@ -63,9 +94,9 @@ function LoginScreen(): React.JSX.Element {
                 <Text style={styles.signupText}>회원가입</Text>
             </TouchableOpacity>
 
-            <Image
+            <Animated.Image
                 source={require('../../img/User/speechBubble.png')}
-                style={styles.speechBubble}
+                style={[styles.speechBubble, { transform: [{ translateY: speechBubbleAnimated }] }]}
             />
             <Image
                 source={require('../../img/User/naverIcon.png')}
@@ -81,8 +112,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     appLogo: {
-        width: 77,
-        height: 77,
+        width: 130,
+        height: 130,
         marginTop: 100,
         marginBottom: 16,
     },
@@ -114,14 +145,18 @@ const styles = StyleSheet.create({
     },
     checkContainer: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
         alignItems: 'center',
+        justifyContent: 'center',
+    },
+    checkIcon: {
+        width: 16,
+        height: 16,
     },
     checkText: {
         color: '#C9C9C9',
         fontSize: 12,
         fontWeight: 500,
-        lineHeight: 20,
+        lineHeight: 16,
         marginLeft: 4,
         marginRight: 116,
     },

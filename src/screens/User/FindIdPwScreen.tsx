@@ -8,7 +8,7 @@ import {
 function FindIdPwScreen(): React.JSX.Element {
     return(
         <View style={styles.container}>
-            <Text>screen</Text>
+            <Text></Text>
         </View>
     );
 }

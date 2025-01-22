@@ -10,6 +10,7 @@ import {
 
 import BottomTabNavigator from './BottomTabNavigator';
 
+import HomeScreen from '../screens/Home/HomeScreen';
 import TodayQuizGuideScreen from '../screens/Home/TodayQuizGuideScreen';
 import TodayQuizScreen from '../screens/Home/TodayQuizScreen';
 import TodayQuizCorrectScreen from '../screens/Home/TodayQuizCorrectScreen';
@@ -34,7 +35,6 @@ import LoginScreen from '../screens/User/LoginScreen';
 import SignupScreen from '../screens/User/SignupScreen';
 import WelcomeScreen from '../screens/User/WelcomeScreen';
 import FindIdPwScreen from '../screens/User/FindIdPwScreen';
-import ChangePwScreen from '../screens/User/ChangePwScreen';
 import ChangePwCompleteScreen from '../screens/User/ChangePwCompleteScreen';
 
 const StackNavigator = () => {
@@ -50,6 +50,12 @@ const StackNavigator = () => {
             <Stack.Screen
                 name="Main"
                 component={BottomTabNavigator}
+                options={{ headerShown: false }}
+            />
+
+            <Stack.Screen
+                name="HomeScreen"
+                component={HomeScreen}
                 options={{ headerShown: false }}
             />
 
@@ -157,11 +163,6 @@ const StackNavigator = () => {
             <Stack.Screen
                 name="FindIdPwScreen"
                 component={FindIdPwScreen}
-                options={{ headerShown: false }}
-            />
-            <Stack.Screen
-                name="ChangePwScreen"
-                component={ChangePwScreen}
                 options={{ headerShown: false }}
             />
             <Stack.Screen
