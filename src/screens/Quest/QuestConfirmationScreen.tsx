@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, Dimensions, ScrollView, Alert } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { LinearGradient } from 'react-native-linear-gradient';
-import axios from "axios";
-import { REACT_APP_API_URL, ACCESS_TOKEN } from '@env';
 
 const QuestConfirmationScreen = () => {
   const navigation = useNavigation();
@@ -17,6 +15,9 @@ const QuestConfirmationScreen = () => {
   //const [selectedQuest, setSelectedQuest] = useState(null);
   const [selectedQuest, setSelectedQuest] = useState(1);
   const [dailyConfirmCount, setDailyConfirmCount] = useState(0);
+
+  const apiUrl = process.env.REACT_APP_API_URL;
+  const accessToken = process.env.ACCESS_TOKEN;
 
   const quests = [
       { id: 1, title: '텀블러 사용', reward: 2 },
@@ -119,62 +120,53 @@ const QuestConfirmationScreen = () => {
 
   const handleCompleteQuest = async () => {
     const formData = new FormData();
-    const token = ACCESS_TOKEN;
+    const correctedPhotoPath = `file://${photoPath}`;
 
-    formData.append('photo', {
-      uri: photoPath,  // 로컬 파일 경로
-      type: 'file',  // 파일 타입
-      name: 'activityImage',  // 파일 이름
+    formData.append('activityImage', {
+      uri: correctedPhotoPath,
+      type: 'image/jpeg',
+      name: 'activityImage.jpg',
     });
 
     if (dailyConfirmCount >= 3) {
       Alert.alert('알림', '오늘의 퀘스트 인증 한도(3회)를 초과했습니다. 내일 다시 시도해주세요.');
       navigation.navigate('Main');
-    } else if (selectedQuest === null) {
+      return;
+    }
+
+    if (!selectedQuest) {
       Alert.alert('알림', '퀘스트를 선택해주세요.');
       return;
-    } else {
-      try {
-        // 백엔드로 퀘스트 인증 요청 보내기
-        const response = await fetch(`${REACT_APP_API_URL}/upload/certification`, {
-          method: 'POST',
-          headers: {
-            access: token,
-          },
-          body: formData,
-        });
+    }
 
-        const result = await response.json();
+    try {
+      console.log('FormData:', formData);
+      console.log('Corrected Photo Path:', correctedPhotoPath);
 
-        if (response.ok && result.success) {
-          // 인증 성공 처리
-          setDailyConfirmCount(dailyConfirmCount + 1);
-          Alert.alert('알림', '퀘스트 인증이 완료되었습니다.');
-          setSelectedQuest(null); // 인증 후 선택된 퀘스트 초기화
-          navigation.navigate('Main'); // 메인 화면으로 이동
-        } else {
-          // 다양한 실패 케이스 처리
-          switch (response.status) {
-            case 404:
-              if (result.message === '유저를 찾을 수 없습니다.') {
-                Alert.alert('알림', '유저를 찾을 수 없습니다. 다시 시도해주세요.');
-              } else if (result.message === '해당 활동이 등록되어있지 않습니다.') {
-                Alert.alert('알림', '해당 활동이 등록되어있지 않습니다.');
-              }
-              break;
-            case 422:
-              if (result.message === '이미지 처리에 실패했습니다.') {
-                Alert.alert('알림', '이미지 처리에 실패했습니다. 다시 시도해주세요.');
-              }
-              break;
-            default:
-              Alert.alert('알림', '퀘스트 인증에 실패했습니다. 나중에 다시 시도해주세요.');
-          }
-        }
-      } catch (error) {
-        console.error('퀘스트 인증 중 오류가 발생했습니다.', error);
-        Alert.alert('알림', '퀘스트 인증 중 오류가 발생했습니다. 다시 시도해주세요.');
+      const response = await fetch(`${apiUrl}/upload/certification?timestamp=${new Date().getTime()}`, {
+        method: 'POST',
+        headers: {
+          "Cache-Control":'no-store',
+          access: `${accessToken}`,
+        },
+        body: formData,
+      });
+
+      const responseText = await response.text();
+      console.log('Response Text:', responseText);
+      const result = JSON.parse(responseText);
+
+      if (response.ok && result.success) {
+        setDailyConfirmCount(dailyConfirmCount + 1);
+        Alert.alert('알림', '퀘스트 인증이 완료되었습니다.');
+        setSelectedQuest(null);
+        navigation.navigate('Main');
+      } else {
+        Alert.alert('알림', result.message || '퀘스트 인증에 실패했습니다.');
       }
+    } catch (error) {
+      console.error('퀘스트 인증 중 오류:', error);
+      Alert.alert('알림', '퀘스트 인증 중 오류가 발생했습니다. 다시 시도해주세요.');
     }
   };
 
