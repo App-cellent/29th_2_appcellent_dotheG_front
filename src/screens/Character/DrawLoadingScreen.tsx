@@ -1,7 +1,14 @@
 import * as React from 'react';
 import { useEffect } from 'react';
-import { StyleSheet, Text, View, ImageBackground } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { StyleSheet, Text, View, ImageBackground } from 'react-native';
+
+type RootStackParamList = {
+    DrawResultScreen: undefined;
+};
+
+type NavigationProp = StackNavigationProp<RootStackParamList, 'DrawResultScreen'>;
 
 function DrawLoadingScreen(): React.JSX.Element {
     const navigation = useNavigation();

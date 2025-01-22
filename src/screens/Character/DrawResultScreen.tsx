@@ -1,9 +1,10 @@
 import * as React from 'react';
+import { useNavigation } from '@react-navigation/native';
 import { StyleSheet, Text, View, Image, ImageBackground } from 'react-native';
 
 import CharacterRarity from '../../components/CharacterRarity';
 
-function DrawResultScreen(): React.JSX.Element {
+function DrawResultScreen({ characterName, characterImage, rarity }): React.JSX.Element {
     return(
         <View style={styles.container}>
             <ImageBackground
@@ -15,10 +16,10 @@ function DrawResultScreen(): React.JSX.Element {
                     {'가 나왔어요!'}
                 </Text>
                 <Image
-                    source={require('../../img/Character/bonus/[17]earth.png')}
+                    source={{ uri: chraracter.image }}
                     style={styles.characterImg}
                 />
-                <Text style={[styles.text, styles.marginBottom9]}>파란 지구</Text>
+                <Text style={[styles.text, styles.marginBottom9]}>{characterName}</Text>
                 <CharacterRarity rarity={4} />
             </ImageBackground>
         </View>

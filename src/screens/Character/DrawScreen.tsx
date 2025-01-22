@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import LinearGradient from 'react-native-linear-gradient';
 import { 
     StyleSheet, 
@@ -9,20 +10,28 @@ import {
     Image, 
     TouchableOpacity, 
     Modal, 
+    Alert,
 } from 'react-native';
 
 import GradientButton from "../../components/GradientButton";
 
-import { REACT_APP_API_URL } from '@env';
+import { ACCESS_TOKEN } from '@env';
+
+type RootStackParamList = {
+    DrawLoadingScreen: { characterData: any };
+    AnimalDrawScreen: undefined;
+};
+
+type NavigationProp = StackNavigationProp<RootStackParamList, 'DrawLoadingScreen'>;
 
 function DrawScreen(): React.JSX.Element {
-    const navigation = useNavigation();
+    const navigation = useNavigation<NavigationProp>();
 
     const options = [
-        { id: 1, label: '동물 정해서\n뽑기', modalTitle: '동물 정해서 뽑기', fruit: 35 },
-        { id: 2, label: '랜덤 뽑기', modalTitle: '랜덤 캐릭터 뽑기', fruit: 20 },
-        { id: 3, label: '희귀도1 뽑기', modalTitle: '희귀도1 캐릭터 뽑기', fruit: 19 },
-        { id: 4, label: '희귀도2 뽑기', modalTitle: '희귀도2 캐릭터 뽑기', fruit: 25 },
+        { id: 1, label: '동물 정해서\n뽑기', modalTitle: '동물 정해서 뽑기', fruit: 35, },
+        { id: 2, label: '랜덤 뽑기', modalTitle: '랜덤 캐릭터 뽑기', fruit: 20, },
+        { id: 3, label: '희귀도1 뽑기', modalTitle: '희귀도1 캐릭터 뽑기', fruit: 19, },
+        { id: 4, label: '희귀도2 뽑기', modalTitle: '희귀도2 캐릭터 뽑기', fruit: 25, },
         { id: 5, label: '희귀도3 뽑기', modalTitle: '희귀도3 캐릭터 뽑기', fruit: 35 },
         { id: 6, label: '희귀도4 뽑기', modalTitle: '희귀도4 캐릭터 뽑기', fruit: 55 },
     ];
@@ -33,17 +42,58 @@ function DrawScreen(): React.JSX.Element {
     const handleNext = () => {
         if (selectedOption !== null) {
             setModalVisible(true);
+        } else {
+            Alert.alert('선택 오류', '옵션을 선택해주세요.');
         }
     };
 
-    const handleConfirm = () => {
+    const handleConfirm = async () => {
         setModalVisible(false);
-        if (selectedOption === 1) {
-            navigation.navigate('AnimalDrawScreen');
-        } else {
-            navigation.navigate('DrawLoadingScreen');
+        const selected = options.find(option => option.id === selectedOption);
+
+        if (selected) {
+            let drawType = '';
+            let animalName = '';
+
+            if (selected.id === 1) {
+                navigation.navigate('AnimalDrawScreen');
+                return;
+            } else if (selected.id === 2) {
+                drawType = 'RANDOM';
+            } else if (selected.id === 3) {
+                drawType = 'RANK_1';
+            } else if (selected.id === 4) {
+                drawType = 'RANK_2';
+            } else if (selected.id === 5) {
+                drawType = 'RANK_3';
+            } else if (selected.id === 6) {
+                drawType = 'RANK_4';
+            }
+            
+            try {
+                const response = await fetch('/characters/draw', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        access: ACCESS_TOKEN,
+                    },
+                    body: JSON.stringify({ drawType, animalName }),
+                });
+
+            const result = await response.json();
+            if (response.ok) {
+                // 성공 응답 처리
+                navigation.navigate('DrawLoadingScreen', { characterData: result.data });
+            } else {
+                // 오류 응답 처리
+                Alert.alert(result.message);
+            }
+        } catch (error) {
+            console.error('API 요청 실패:', error);
+            Alert.alert('네트워크 오류', '서버와 통신 중 문제가 발생했습니다. 다시 시도해주세요.');
         }
     }
+};
 
     return(
         <View style={styles.container}>
@@ -190,6 +240,7 @@ const styles = StyleSheet.create({
         color: '#545454',
         fontSize: 18,
         fontWeight: '600',
+        lineHeight: 30,
     },
     fruitContainer: {
         flexDirection: 'row',

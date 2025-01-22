@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import colors from "../../utils/colors";
 import LinearGradient from 'react-native-linear-gradient';
@@ -7,7 +7,8 @@ import {
   Text,
   Image,
   View,
-  TouchableOpacity,
+  TouchableOpacity, 
+  ActivityIndicator, 
 } from 'react-native';
 
 import CharacterRarity from '../../components/CharacterRarity';
@@ -15,6 +16,57 @@ import GradientButton from "../../components/GradientButton";
 
 function CharacterScreen(): React.JSX.Element {
     const navigation = useNavigation();
+    const [character, setCharacter] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+    const apiUrl = process.env.REACT_APP_API_URL;
+    const accessToken = process.env.ACCESS_TOKEN;
+
+    useEffect(() => {
+        const fetchCharacterData = async () => {
+            try {
+                console.log('Access Token:', accessToken);
+                
+                const response = await fetch(`${apiUrl}/characters/main?timestamp=${new Date().getTime()}`, {
+                    method: 'GET',
+                    headers: {
+                        "Cache-Control":'no-store',
+                        "Content-Type":"application/json",
+                        access: `${accessToken}`,
+                    },
+                });
+
+                // 응답 상태
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                if (result.success) {
+                    setCharacter(result.data);
+                    console.log('success');
+                } else {
+                    console.error(result.message);
+                    setCharacter(null);
+                }
+            } catch (error) {
+                console.error('Error fetching character data:', error);
+                setCharacter(null);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchCharacterData();
+    }, [apiUrl, accessToken]);
+
+    if (loading) {
+        return (
+            <View style={styles.container}>
+                <ActivityIndicator size="large" />
+            </View>
+        );
+    }
 
     return (
         <View style={styles.container}>
@@ -37,19 +89,29 @@ function CharacterScreen(): React.JSX.Element {
                 </View>
 
                 <View style={styles.bodyContainer}>
+                    {/* 캐릭터 이미지 */}
                     <Image
-                        source={require('../../img/Character/bonus/[17]earth.png')}
+                        source={character && character.characterImageUrl 
+                            ? { uri: character.characterImageUrl } 
+                            : require('../../img/Character/nullCharacter.png')}
                         style={styles.characterImg}
                     />
-                    <Text style={styles.characterName}>파란 지구</Text>
-                    <CharacterRarity rarity={4}></CharacterRarity>
+                    {/* 캐릭터 이름 */}
+                    <Text style={styles.characterName}>
+                        {character ? character.characterName : 'No Character'}
+                    </Text>
+                    {/* 캐릭터 희귀도 */}
+                    <CharacterRarity rarity={character ? character.characterRarity : null} />
                     <View style={styles.squareContainer}>
                         <View style={styles.leafContainer}>
                             <Image
-                                source={require('../../img/Character/leaf.png')}
+                                source={require('../../img/Character/apple.png')}
                                 style={styles.leafImg}
                             />
-                            <Text style={styles.leafNum}>261</Text>
+                            {/* 남은 리워드 수 */}
+                            <Text style={styles.leafNum}>
+                                {character ? character.userReward : '0'}
+                            </Text>
                         </View>
                         <GradientButton
                             height={64} width={280} text="캐릭터 뽑기"
@@ -65,14 +127,8 @@ function CharacterScreen(): React.JSX.Element {
                 <TouchableOpacity onPress={() => navigation.navigate('SignupScreen')}>
                     <Text style={{ textAlign: 'center' }}>SignupScreen</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => navigation.navigate('FindIdPwScreen')}>
-                    <Text style={{ textAlign: 'center' }}>FindIdPwScreen</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => navigation.navigate('ChangePwScreen')}>
-                    <Text style={{ textAlign: 'center' }}>ChangePwScreen</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => navigation.navigate('ChangePwCompleteScreen')}>
-                    <Text style={{ textAlign: 'center' }}>ChangePwCompleteScreen</Text>
+                <TouchableOpacity onPress={() => navigation.navigate('WelcomeScreen')}>
+                    <Text style={{ textAlign: 'center' }}>WelcomeScreen</Text>
                 </TouchableOpacity>
                 {/* for test.. */}
             </LinearGradient>
@@ -105,13 +161,6 @@ const styles = StyleSheet.create({
         height: 184,
         marginTop: 116,
         marginBottom: 40,
-        // android 그림자
-        // elevation: 3,
-        // ios 그림자
-        // shadowColor: '#000000',
-        // shadowOffset: {width: 2, height: 2},
-        // shadowOpacity: 0.3,
-        // shadowRadius: 3,
     },
     characterName: {
         color: '#121212',

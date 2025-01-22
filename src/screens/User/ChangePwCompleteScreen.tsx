@@ -1,6 +1,13 @@
-import * as React from 'react'
+import * as React from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { StyleSheet, Text, View, ImageBackground, Image, TouchableOpacity } from 'react-native';
+import { 
+    StyleSheet, 
+    Text, 
+    View, 
+    ImageBackground, 
+    Image, 
+    TouchableOpacity 
+} from 'react-native';
 
 function ChangePwCompleteScreen(): React.JSX.Element {
     const navigation = useNavigation();
@@ -8,7 +15,10 @@ function ChangePwCompleteScreen(): React.JSX.Element {
     return(
         <View style={styles.container}>
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()}>
+                <TouchableOpacity  
+                    onPress={() => navigation.navigate('LoginScreen')}
+                    style={styles.closeIconContainer}
+                >
                     <Image
                         source={require('../../img/User/closeIcon.png')}
                         style={styles.closeIcon}
@@ -32,28 +42,33 @@ function ChangePwCompleteScreen(): React.JSX.Element {
 const styles = StyleSheet.create({
     container:{
         flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     header: {
         position: 'absolute',
         width: '100%',
+        top: 0,
+        height: 60,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        paddingHorizontal: 16,
+        paddingHorizontal: 20,
         borderBottomWidth: 1,
         borderBottomColor: '#E0E0E0',
-        height: 56,
+    },
+    closeIconContainer: {
+        position: 'absolute',
+        left: 22,
+        bottom: 18.92,
+        zIndex: 1,
     },
     closeIcon: {
-        width: 18,
-        height: 18,
-        position: 'absolute',
-        left: 10,
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: 10,
+        width: 18.34,
+        height: 18.08,
     },
     headerText: {
+        flex: 1,
         color: '#393939',
         fontSize: 20,
         fontWeight: 700,
