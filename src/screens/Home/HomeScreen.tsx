@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import colors from "../../utils/colors";
 import { getFontSize } from '../../utils/fontUtils';
@@ -33,16 +33,98 @@ const { height } = Dimensions.get('window');
 
 function HomeScreen(): React.JSX.Element {
     const navigation = useNavigation();
+    const apiUrl = process.env.REACT_APP_API_URL;
+    const accessToken = process.env.ACCESS_TOKEN;
 
-    const seed = '361';
-    const username = '앱설런트';
-    const thismonthtree = '5';
-    const usertree = '21';
+    const [userName, setUserName] = useState('');
+    const [userReward, setUserReward] = useState(0);
+    const [mainChar, setMainChar] = useState(null);
+    const [monthSavedTree, setMonthSavedTree] = useState(0.0);
+    const [totalSavedTree, setTotalSavedTree] = useState(0.0);
+    const [dailyActivity, setDailyActivity] = useState(4);
+    const [specialActivity, setSpecialActivity] = useState(14);
+
+    const [quizYN, setQuizYN] = useState();
+
+    useEffect(() => {
+        const fetchHomeData = async () => {
+            try {
+                const response = await fetch(`${apiUrl}/mainpage/getInfo?timestamp=${new Date().getTime()}`, {
+                    method: 'GET',
+                    headers: {
+                        "Cache-Control":'no-store',
+                        "Content-Type":"application/json",
+                        access: `${accessToken}`,
+                    },
+                });
+
+                // 응답 상태
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                if (result.success) {
+                    console.log(result.data);
+                    setUserName(result.data.userName);
+                    setUserReward(result.data.userReward);
+                    setMainChar(result.data.mainChar);
+                    setMonthSavedTree(result.data.monthSavedTree);
+                    setTotalSavedTree(result.data.totalSavedTree);
+                    setDailyActivity(result.data.dailyActivity);
+                    setSpecialActivity(result.data.specialActivity);
+                } else {
+                    console.error(result.message);
+                }
+            } catch (error) {
+                console.error('Error fetching Home User data:', error);
+                setTodayStep(result.data);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+    const fetchQuizYNData = async () => {
+        try {
+            const response = await fetch(`${apiUrl}/quiz?timestamp=${new Date().getTime()}`, {
+                method: 'GET',
+                headers: {
+                    "Cache-Control":'no-store',
+                    "Content-Type":"application/json",
+                    access: `${accessToken}`,
+                },
+            });
+
+            // 응답 상태
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+
+            if (result.success) {
+                console.log(result.data);
+                setQuizYN(result.data);
+            } else {
+                console.error(result.message);
+            }
+        } catch (error) {
+            console.error('Error fetching quizYN:', error);
+            setTodayStep(result.data);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+        fetchHomeData();
+        fetchQuizYNData();
+    }, []);
 
     const [selectedImage, setSelectedImage] = useState(null);
 
     const handleNavigateTodayQuiz = useCallback(async () => {
-        navigation.navigate('TodayQuizGuideScreen');
+        if(!quizYN) navigation.navigate('TodayQuizGuideScreen');
     }, []);
 
     const handleNavigateCamera = useCallback(() => {
@@ -96,12 +178,12 @@ function HomeScreen(): React.JSX.Element {
                 <View style={styles.HomeMainContainer}>
                     <View style={styles.SeedsContainer}>
                         <SeedIcon width={15} height={20} />
-                        <Text style={styles.SeedsText}>{seed}</Text>
+                        <Text style={styles.SeedsText}>{userReward}</Text>
                     </View>
                     <View style={styles.HomeTextContainer}>
                         <View style={styles.MainTextContainer}>
                             <Text style={styles.TitleText1}>반가워요, </Text>
-                            <Text style={styles.YellowText}>{username}</Text>
+                            <Text style={styles.YellowText}>{userName}</Text>
                             <Text style={styles.TitleText1}> 님!</Text>
                         </View>
                         <Text style={styles.TitleText2}>오늘도 우리 함께 달려보아요:)</Text>
@@ -119,18 +201,23 @@ function HomeScreen(): React.JSX.Element {
                 </View>
                 </ImageBackground>
 
+                { quizYN &&
+
+
+                }
+
                 <View style={[styles.CenteredCountContainer, {height: 153}]}>
                     <View style={styles.TreeBox}>
                         <CircleThisMonthTreeIcon width={36} height={36} />
                         <View style={styles.TreeDetailBox}>
-                            <Text style={styles.BoldSmallText}>{thismonthtree}그루</Text>
+                            <Text style={styles.BoldSmallText}>{monthSavedTree}그루</Text>
                             <Text style={styles.GrayText}>이번 달 지킨 나무</Text>
                         </View>
                     </View>
                     <View style={styles.TreeBox}>
                         <CircleUserTreeIcon width={36} height={36} />
                         <View style={styles.TreeDetailBox}>
-                            <Text style={styles.BoldSmallText}>{usertree}그루</Text>
+                            <Text style={styles.BoldSmallText}>{totalSavedTree}그루</Text>
                             <Text style={styles.GrayText}>지금까지 지킨 나무</Text>
                         </View>
                     </View>
