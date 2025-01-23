@@ -74,7 +74,7 @@ function PedometerScreen(): React.JSX.Element {
                     console.error(result.message);
                 }
             } catch (error) {
-                console.error('Error fetching today quiz data:', error);
+                console.error('Error fetching step data:', error);
                 setTodayStep(result.data);
             } finally {
                 setLoading(false);
@@ -103,6 +103,40 @@ function PedometerScreen(): React.JSX.Element {
               onCheat: () => { console.log("User is Cheating") }
             }
         startCounter(config);
+
+        const fetchStepUpdate = async () => {
+            try {
+                const response = await fetch(`${apiUrl}/steps/update?steps=${todayStep}`, {
+                    method: 'PATCH',
+                    headers: {
+                        "Cache-Control":'no-store',
+                        "Content-Type":"application/json",
+                        access: `${accessToken}`,
+                    },
+                });
+
+                // 응답 상태
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                if (result.success) {
+                    console.log("완료");
+                } else {
+                    console.error(result.message);
+                }
+            } catch (error) {
+                console.error('Error fetching step update:', error);
+                setTodayStep(result.data);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchStepUpdate();
+
         return () => { stopCounter() }
     }, [todayStep]);
 
@@ -289,67 +323,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         height: 44,
     },
-    modalContainer: {
-        position: 'absolute',
-        top: 0,
-        bottom: 0,
-        left: 0,
-        right: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.2)',
-        justifyContent: 'center',
-        alignItems: 'center',
-        zIndex: 10,
-    },
-    modalView: {
-        backgroundColor: colors.white,
-        borderRadius: 15,
-        paddingHorizontal: 16,
-        paddingVertical: 33,
-        alignItems: 'center',
-        justifyContent: 'center',
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 0,
-            blur: 10,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 2,
-        elevation: 5,
-        width: 289,
-        height: 269,
-    },
-    modalLargeText: {
-        textAlign: 'center',
-        fontSize: getFontSize(23),
-        fontWeight: '800',
-        color: colors.black,
-        marginBottom: 10,
-        paddingHorizontal: 13,
-        paddingTop: 5,
-    },
-    modalSmallText: {
-        textAlign: 'center',
-        fontSize: getFontSize(15),
-        fontWeight: '400',
-        color: colors.lightblack,
-        lineHeight: 22,
-    },
-    modalButton: {
-        marginTop: 40,
-        backgroundColor: colors.green,
-        borderRadius: 15,
-        paddingVertical: 10,
-        elevation: 2,
-        width: "100%",
-    },
-    modalButtonText: {
-        color: colors.white,
-        fontWeight: '400',
-        textAlign: 'center',
-        fontSize: getFontSize(18),
-        lineHeight: 34,
-    },
+
     bottomContainer:{
         flex: 3,
         backgroundColor: colors.lightgray,
