@@ -25,7 +25,8 @@ import {
   ImageBackground,
   Dimensions,
   TouchableOpacity,
-  Alert
+  Alert,
+  Pressable
 } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 
@@ -45,6 +46,7 @@ function HomeScreen(): React.JSX.Element {
     const [specialActivity, setSpecialActivity] = useState(14);
 
     const [quizYN, setQuizYN] = useState();
+    const [modalVisible, setModalVisible] = useState(false);
 
     useEffect(() => {
         const fetchHomeData = async () => {
@@ -125,6 +127,7 @@ function HomeScreen(): React.JSX.Element {
 
     const handleNavigateTodayQuiz = useCallback(async () => {
         if(!quizYN) navigation.navigate('TodayQuizGuideScreen');
+        else setModalVisible(true);
     }, []);
 
     const handleNavigateCamera = useCallback(() => {
@@ -201,11 +204,6 @@ function HomeScreen(): React.JSX.Element {
                 </View>
                 </ImageBackground>
 
-                { quizYN &&
-
-
-                }
-
                 <View style={[styles.CenteredCountContainer, {height: 153}]}>
                     <View style={styles.TreeBox}>
                         <CircleThisMonthTreeIcon width={36} height={36} />
@@ -270,6 +268,19 @@ function HomeScreen(): React.JSX.Element {
                     <FloatingButton width={71} height={71}/>
                 </TouchableOpacity>
             </View>
+
+            {modalVisible &&
+              <Pressable style={styles.modalContainer} onPress={() => setModalVisible(false)}>
+                <Pressable style={styles.modalView} onPress={e => e.stopPropagation()}>
+                    <View style={styles.rowContainer}>
+                      <Text style={styles.modalLargeText}>이미 </Text>
+                      <Text style={[styles.modalLargeText, {color: colors.green}]}>오늘의 퀴즈를 </Text>
+                      <Text style={styles.modalLargeText}> 풀었어요!</Text>
+                    </View>
+                    <Text style={styles.modalSmallText}>내일 한 번 더 도전해보세요:)</Text>
+                </Pressable>
+              </Pressable>
+            }
 
             {openQuest &&
             <View style={styles.openQuestOption}>
@@ -469,6 +480,51 @@ const styles = StyleSheet.create({
     CameraIcon: {
         width: 23,
         height: 17,
+    },
+    rowContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+     modalContainer: {
+        position: 'absolute',
+        top: 0,
+        bottom: 0,
+        left: 0,
+        right: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.2)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 10,
+    },
+    modalView: {
+        backgroundColor: colors.white,
+        borderRadius: 15,
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 0,
+            blur: 10,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 2,
+        elevation: 5,
+        width: 285,
+        height: 162,
+    },
+    modalLargeText: {
+        textAlign: 'center',
+        fontSize: getFontSize(20),
+        fontWeight: '800',
+        color: colors.black,
+    },
+    modalSmallText: {
+        textAlign: 'center',
+        fontSize: getFontSize(15),
+        fontWeight: '400',
+        color: colors.lightblack,
+        marginTop: 10,
     },
 });
 
