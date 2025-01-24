@@ -37,6 +37,8 @@ function HomeScreen(): React.JSX.Element {
     const apiUrl = process.env.REACT_APP_API_URL;
     const accessToken = process.env.ACCESS_TOKEN;
 
+    const [showTreeInfo, setShowTreeInfo] = useState(true);
+
     const [userName, setUserName] = useState('');
     const [userReward, setUserReward] = useState(0);
     const [mainChar, setMainChar] = useState(null);
@@ -47,6 +49,56 @@ function HomeScreen(): React.JSX.Element {
 
     const [quizYN, setQuizYN] = useState();
     const [modalVisible, setModalVisible] = useState(false);
+
+    const TreeInfo = () => {
+        setShowTreeInfo(!showTreeInfo);
+    }
+
+    const [dailyQuest, setDailyQuest] = useState(null);
+    const [specialQuest, setSpecialQuest] = useState(null);
+
+    const dailyQuests = [
+        '텀블러 사용하기',
+        '자전거 이용하기',
+        '쓰레기 분리배출하기',
+        '에코백 사용하기',
+        '잔반 남기지 않기',
+        '오늘의 만보기 \n7000보 달성하기'
+    ];
+
+    const specialQuests = [
+        '플로깅/줍깅',
+        '친환경 브랜드 이용하기',
+        '제로 웨이스트 샵 방문하기',
+        '반려 식물 키우기'
+    ];
+
+    const getRandomQuest = (quests) => {
+        const randomIndex = Math.floor(Math.random() * quests.length);
+        return quests[randomIndex];
+    };
+
+    const refreshQuests = () => {
+        setDailyQuest(getRandomQuest(dailyQuests));
+        setSpecialQuest(getRandomQuest(specialQuests));
+    };
+
+    useEffect(() => {
+        // 화면이 로드될 때 퀘스트 초기화
+        refreshQuests();
+
+        const now = new Date();
+        const midnight = new Date(now);
+        midnight.setHours(24, 0, 0, 0);
+
+        const timeUntilMidnight = midnight - now;
+
+        const timeoutId = setTimeout(() => {
+            refreshQuests();
+            setInterval(refreshQuests, 24 * 60 * 60 * 1000);
+        }, timeUntilMidnight);
+        return () => clearTimeout(timeoutId);
+    }, []);
 
     useEffect(() => {
         const fetchHomeData = async () => {
@@ -192,7 +244,10 @@ function HomeScreen(): React.JSX.Element {
                         <Text style={styles.TitleText2}>오늘도 우리 함께 달려보아요:)</Text>
                     </View>
                     <View style={{justifyContent: 'center', alignItems: 'center', marginTop: 5, marginBottom: 10}}>
-                        <Image source={require('../../img/Home/HomeMainIcon.png')} style={{width: 354, height: 200}}/>
+                        <View style={styles.MainBackgroundWrapper}>
+                            <Image source={require('../../img/Home/HomeCharBackground.png')} style={styles.MainBackground} />
+                            <Image source={require('../../img/Character/mole/[1]mole1.png')} style={styles.MainChar} />
+                        </View>
                     </View>
 
                     <TouchableOpacity onPress={handleNavigateTodayQuiz}>
@@ -205,6 +260,16 @@ function HomeScreen(): React.JSX.Element {
                 </ImageBackground>
 
                 <View style={[styles.CenteredCountContainer, {height: 153}]}>
+                        <TouchableOpacity onPress={TreeInfo} style={styles.InfoContainer}>
+                            <Image source={require('../../img/Home/InfoIcon.png')} style={styles.InfoIcon} />
+                              {showTreeInfo && (
+                                  <View style={styles.InfoBox}>
+                                    <Image source={require('../../img/Home/CloseIcon.png')} style={{ width: 7, height: 7, position: 'absolute', alignSelf: 'flex-end', top: 12.5, right: 12.5 }}/>
+                                    <Text style={styles.InfoText}>내가 줄인 이산화탄소의 양을</Text>
+                                    <Text style={styles.InfoText}>나무 그루로 확인해볼 수 있어요!</Text>
+                                  </View>
+                              )}
+                        </TouchableOpacity>
                     <View style={styles.TreeBox}>
                         <CircleThisMonthTreeIcon width={36} height={36} />
                         <View style={styles.TreeDetailBox}>
@@ -228,8 +293,7 @@ function HomeScreen(): React.JSX.Element {
                                 <CircleQuestionIcon width={21} />
                                 <Text style={[styles.BoldSmallText, {marginLeft: 7}]}>데일리 퀘스트</Text>
                             </View>
-                            <Text style={styles.MediumText}>오늘의 만보기</Text>
-                            <Text style={styles.MediumText}>7000보 달성하기</Text>
+                            <Text style={styles.MediumText}>{dailyQuest}</Text>
 
                             <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 8 }}>
                                 <PedometerIcon width={39} />
@@ -242,8 +306,7 @@ function HomeScreen(): React.JSX.Element {
                                 <CircleStarIcon width={21} />
                                 <Text style={[styles.BoldSmallText, {marginLeft: 7}]}>스페셜 퀘스트</Text>
                             </View>
-                            <Text style={styles.MediumText}>우리 집 근처</Text>
-                            <Text style={styles.MediumText}>친환경샵 1번 방문하기</Text>
+                            <Text style={styles.MediumText}>{specialQuest}</Text>
 
                             <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 8 }}>
                                 <QuestIcon width={56} />
@@ -309,9 +372,27 @@ const styles = StyleSheet.create({
     },
     backgroundImage: {
         width: '100%',
-        height: height * 0.6,
+        height: height * 0.62,
     },
     HomeMainContainer: {
+    },
+    MainBackgroundWrapper: {
+        position: 'relative',
+        width: '95%',
+        height: 200,
+    },
+    MainBackground: {
+        width: '100%',
+        height: '100%',
+        resizeMode: 'cover',
+    },
+    MainChar: {
+        position: 'absolute',
+        bottom: '50%',
+        left: '50%',
+        transform: [{ translateX: -114 }, { translateY: +98 }],
+        width: 228,
+        height: 196,
     },
     scrollContainer: {
         backgroundColor: colors.lightgray,
@@ -335,6 +416,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     QuizBox: {
+        top: 20,
         marginHorizontal: 16,
         marginTop: 12,
         backgroundColor: colors.white,
@@ -353,6 +435,32 @@ const styles = StyleSheet.create({
         marginHorizontal: 16,
         justifyContent: 'space-evenly',
         bottom: 67,
+    },
+    InfoContainer: {
+      position: 'absolute',
+      top: 10,
+      right: 0,
+      alignItems: 'flex-end',
+      paddingTop: 5,
+      paddingRight: 16,
+    },
+    InfoIcon: {
+      width: 16,
+      height: 16,
+      marginBottom: 5,
+    },
+    InfoBox: {
+      marginLeft: 8,
+      width: 166,
+      padding: 12.5,
+      borderColor: colors.gray,
+      borderRadius: 3,
+      borderWidth: 1,
+    },
+    InfoText: {
+      color: colors.gray,
+      fontSize: getFontSize(10),
+      fontWeight: '400',
     },
     MainTextContainer: {
         justifyContent: 'center',
@@ -423,7 +531,7 @@ const styles = StyleSheet.create({
     MenuBoxHalf: {
         backgroundColor: colors.white,
         width: '48%',
-        height: 152,
+        height: 162,
         borderRadius: 15,
         padding: 20,
     },
