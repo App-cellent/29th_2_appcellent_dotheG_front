@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import colors from "../../utils/colors";
 import { getFontSize } from '../../utils/fontUtils';
@@ -25,7 +25,8 @@ import {
   ImageBackground,
   Dimensions,
   TouchableOpacity,
-  Alert
+  Alert,
+  Pressable
 } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 
@@ -33,16 +34,152 @@ const { height } = Dimensions.get('window');
 
 function HomeScreen(): React.JSX.Element {
     const navigation = useNavigation();
+    const apiUrl = process.env.REACT_APP_API_URL;
+    const accessToken = process.env.ACCESS_TOKEN;
 
-    const seed = '361';
-    const username = '앱설런트';
-    const thismonthtree = '5';
-    const usertree = '21';
+    const [showTreeInfo, setShowTreeInfo] = useState(true);
+
+    const [userName, setUserName] = useState('');
+    const [userReward, setUserReward] = useState(0);
+    const [mainChar, setMainChar] = useState(null);
+    const [monthSavedTree, setMonthSavedTree] = useState(0.0);
+    const [totalSavedTree, setTotalSavedTree] = useState(0.0);
+    const [dailyActivity, setDailyActivity] = useState(4);
+    const [specialActivity, setSpecialActivity] = useState(14);
+
+    const [quizYN, setQuizYN] = useState();
+    const [modalVisible, setModalVisible] = useState(false);
+
+    const TreeInfo = () => {
+        setShowTreeInfo(!showTreeInfo);
+    }
+
+    const [dailyQuest, setDailyQuest] = useState(null);
+    const [specialQuest, setSpecialQuest] = useState(null);
+
+    const dailyQuests = [
+        '텀블러 사용하기',
+        '자전거 이용하기',
+        '쓰레기 분리배출하기',
+        '에코백 사용하기',
+        '잔반 남기지 않기',
+        '오늘의 만보기 \n7000보 달성하기'
+    ];
+
+    const specialQuests = [
+        '플로깅/줍깅',
+        '친환경 브랜드 이용하기',
+        '제로 웨이스트 샵 방문하기',
+        '반려 식물 키우기'
+    ];
+
+    const getRandomQuest = (quests) => {
+        const randomIndex = Math.floor(Math.random() * quests.length);
+        return quests[randomIndex];
+    };
+
+    const refreshQuests = () => {
+        setDailyQuest(getRandomQuest(dailyQuests));
+        setSpecialQuest(getRandomQuest(specialQuests));
+    };
+
+    useEffect(() => {
+        // 화면이 로드될 때 퀘스트 초기화
+        refreshQuests();
+
+        const now = new Date();
+        const midnight = new Date(now);
+        midnight.setHours(24, 0, 0, 0);
+
+        const timeUntilMidnight = midnight - now;
+
+        const timeoutId = setTimeout(() => {
+            refreshQuests();
+            setInterval(refreshQuests, 24 * 60 * 60 * 1000);
+        }, timeUntilMidnight);
+        return () => clearTimeout(timeoutId);
+    }, []);
+
+    useEffect(() => {
+        const fetchHomeData = async () => {
+            try {
+                const response = await fetch(`${apiUrl}/mainpage/getInfo?timestamp=${new Date().getTime()}`, {
+                    method: 'GET',
+                    headers: {
+                        "Cache-Control":'no-store',
+                        "Content-Type":"application/json",
+                        access: `${accessToken}`,
+                    },
+                });
+
+                // 응답 상태
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                if (result.success) {
+                    console.log(result.data);
+                    setUserName(result.data.userName);
+                    setUserReward(result.data.userReward);
+                    setMainChar(result.data.mainChar);
+                    setMonthSavedTree(result.data.monthSavedTree);
+                    setTotalSavedTree(result.data.totalSavedTree);
+                    setDailyActivity(result.data.dailyActivity);
+                    setSpecialActivity(result.data.specialActivity);
+                } else {
+                    console.error(result.message);
+                }
+            } catch (error) {
+                console.error('Error fetching Home User data:', error);
+                setTodayStep(result.data);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+    const fetchQuizYNData = async () => {
+        try {
+            const response = await fetch(`${apiUrl}/quiz?timestamp=${new Date().getTime()}`, {
+                method: 'GET',
+                headers: {
+                    "Cache-Control":'no-store',
+                    "Content-Type":"application/json",
+                    access: `${accessToken}`,
+                },
+            });
+
+            // 응답 상태
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+
+            if (result.success) {
+                console.log(result.data);
+                setQuizYN(result.data);
+            } else {
+                console.error(result.message);
+            }
+        } catch (error) {
+            console.error('Error fetching quizYN:', error);
+            setTodayStep(result.data);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+        fetchHomeData();
+        fetchQuizYNData();
+    }, []);
 
     const [selectedImage, setSelectedImage] = useState(null);
 
     const handleNavigateTodayQuiz = useCallback(async () => {
-        navigation.navigate('TodayQuizGuideScreen');
+        if(!quizYN) navigation.navigate('TodayQuizGuideScreen');
+        else setModalVisible(true);
     }, []);
 
     const handleNavigateCamera = useCallback(() => {
@@ -96,18 +233,21 @@ function HomeScreen(): React.JSX.Element {
                 <View style={styles.HomeMainContainer}>
                     <View style={styles.SeedsContainer}>
                         <SeedIcon width={15} height={20} />
-                        <Text style={styles.SeedsText}>{seed}</Text>
+                        <Text style={styles.SeedsText}>{userReward}</Text>
                     </View>
                     <View style={styles.HomeTextContainer}>
                         <View style={styles.MainTextContainer}>
                             <Text style={styles.TitleText1}>반가워요, </Text>
-                            <Text style={styles.YellowText}>{username}</Text>
+                            <Text style={styles.YellowText}>{userName}</Text>
                             <Text style={styles.TitleText1}> 님!</Text>
                         </View>
                         <Text style={styles.TitleText2}>오늘도 우리 함께 달려보아요:)</Text>
                     </View>
                     <View style={{justifyContent: 'center', alignItems: 'center', marginTop: 5, marginBottom: 10}}>
-                        <Image source={require('../../img/Home/HomeMainIcon.png')} style={{width: 354, height: 200}}/>
+                        <View style={styles.MainBackgroundWrapper}>
+                            <Image source={require('../../img/Home/HomeCharBackground.png')} style={styles.MainBackground} />
+                            <Image source={require('../../img/Character/mole/[1]mole1.png')} style={styles.MainChar} />
+                        </View>
                     </View>
 
                     <TouchableOpacity onPress={handleNavigateTodayQuiz}>
@@ -120,17 +260,27 @@ function HomeScreen(): React.JSX.Element {
                 </ImageBackground>
 
                 <View style={[styles.CenteredCountContainer, {height: 153}]}>
+                        <TouchableOpacity onPress={TreeInfo} style={styles.InfoContainer}>
+                            <Image source={require('../../img/Home/InfoIcon.png')} style={styles.InfoIcon} />
+                              {showTreeInfo && (
+                                  <View style={styles.InfoBox}>
+                                    <Image source={require('../../img/Home/CloseIcon.png')} style={{ width: 7, height: 7, position: 'absolute', alignSelf: 'flex-end', top: 12.5, right: 12.5 }}/>
+                                    <Text style={styles.InfoText}>내가 줄인 이산화탄소의 양을</Text>
+                                    <Text style={styles.InfoText}>나무 그루로 확인해볼 수 있어요!</Text>
+                                  </View>
+                              )}
+                        </TouchableOpacity>
                     <View style={styles.TreeBox}>
                         <CircleThisMonthTreeIcon width={36} height={36} />
                         <View style={styles.TreeDetailBox}>
-                            <Text style={styles.BoldSmallText}>{thismonthtree}그루</Text>
+                            <Text style={styles.BoldSmallText}>{monthSavedTree}그루</Text>
                             <Text style={styles.GrayText}>이번 달 지킨 나무</Text>
                         </View>
                     </View>
                     <View style={styles.TreeBox}>
                         <CircleUserTreeIcon width={36} height={36} />
                         <View style={styles.TreeDetailBox}>
-                            <Text style={styles.BoldSmallText}>{usertree}그루</Text>
+                            <Text style={styles.BoldSmallText}>{totalSavedTree}그루</Text>
                             <Text style={styles.GrayText}>지금까지 지킨 나무</Text>
                         </View>
                     </View>
@@ -143,8 +293,7 @@ function HomeScreen(): React.JSX.Element {
                                 <CircleQuestionIcon width={21} />
                                 <Text style={[styles.BoldSmallText, {marginLeft: 7}]}>데일리 퀘스트</Text>
                             </View>
-                            <Text style={styles.MediumText}>오늘의 만보기</Text>
-                            <Text style={styles.MediumText}>7000보 달성하기</Text>
+                            <Text style={styles.MediumText}>{dailyQuest}</Text>
 
                             <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 8 }}>
                                 <PedometerIcon width={39} />
@@ -157,8 +306,7 @@ function HomeScreen(): React.JSX.Element {
                                 <CircleStarIcon width={21} />
                                 <Text style={[styles.BoldSmallText, {marginLeft: 7}]}>스페셜 퀘스트</Text>
                             </View>
-                            <Text style={styles.MediumText}>우리 집 근처</Text>
-                            <Text style={styles.MediumText}>친환경샵 1번 방문하기</Text>
+                            <Text style={styles.MediumText}>{specialQuest}</Text>
 
                             <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 8 }}>
                                 <QuestIcon width={56} />
@@ -183,6 +331,19 @@ function HomeScreen(): React.JSX.Element {
                     <FloatingButton width={71} height={71}/>
                 </TouchableOpacity>
             </View>
+
+            {modalVisible &&
+              <Pressable style={styles.modalContainer} onPress={() => setModalVisible(false)}>
+                <Pressable style={styles.modalView} onPress={e => e.stopPropagation()}>
+                    <View style={styles.rowContainer}>
+                      <Text style={styles.modalLargeText}>이미 </Text>
+                      <Text style={[styles.modalLargeText, {color: colors.green}]}>오늘의 퀴즈를 </Text>
+                      <Text style={styles.modalLargeText}> 풀었어요!</Text>
+                    </View>
+                    <Text style={styles.modalSmallText}>내일 한 번 더 도전해보세요:)</Text>
+                </Pressable>
+              </Pressable>
+            }
 
             {openQuest &&
             <View style={styles.openQuestOption}>
@@ -211,9 +372,27 @@ const styles = StyleSheet.create({
     },
     backgroundImage: {
         width: '100%',
-        height: height * 0.6,
+        height: height * 0.62,
     },
     HomeMainContainer: {
+    },
+    MainBackgroundWrapper: {
+        position: 'relative',
+        width: '95%',
+        height: 200,
+    },
+    MainBackground: {
+        width: '100%',
+        height: '100%',
+        resizeMode: 'cover',
+    },
+    MainChar: {
+        position: 'absolute',
+        bottom: '50%',
+        left: '50%',
+        transform: [{ translateX: -114 }, { translateY: +98 }],
+        width: 228,
+        height: 196,
     },
     scrollContainer: {
         backgroundColor: colors.lightgray,
@@ -237,6 +416,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     QuizBox: {
+        top: 20,
         marginHorizontal: 16,
         marginTop: 12,
         backgroundColor: colors.white,
@@ -255,6 +435,32 @@ const styles = StyleSheet.create({
         marginHorizontal: 16,
         justifyContent: 'space-evenly',
         bottom: 67,
+    },
+    InfoContainer: {
+      position: 'absolute',
+      top: 10,
+      right: 0,
+      alignItems: 'flex-end',
+      paddingTop: 5,
+      paddingRight: 16,
+    },
+    InfoIcon: {
+      width: 16,
+      height: 16,
+      marginBottom: 5,
+    },
+    InfoBox: {
+      marginLeft: 8,
+      width: 166,
+      padding: 12.5,
+      borderColor: colors.gray,
+      borderRadius: 3,
+      borderWidth: 1,
+    },
+    InfoText: {
+      color: colors.gray,
+      fontSize: getFontSize(10),
+      fontWeight: '400',
     },
     MainTextContainer: {
         justifyContent: 'center',
@@ -325,7 +531,7 @@ const styles = StyleSheet.create({
     MenuBoxHalf: {
         backgroundColor: colors.white,
         width: '48%',
-        height: 152,
+        height: 162,
         borderRadius: 15,
         padding: 20,
     },
@@ -382,6 +588,51 @@ const styles = StyleSheet.create({
     CameraIcon: {
         width: 23,
         height: 17,
+    },
+    rowContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+     modalContainer: {
+        position: 'absolute',
+        top: 0,
+        bottom: 0,
+        left: 0,
+        right: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.2)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 10,
+    },
+    modalView: {
+        backgroundColor: colors.white,
+        borderRadius: 15,
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 0,
+            blur: 10,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 2,
+        elevation: 5,
+        width: 285,
+        height: 162,
+    },
+    modalLargeText: {
+        textAlign: 'center',
+        fontSize: getFontSize(20),
+        fontWeight: '800',
+        color: colors.black,
+    },
+    modalSmallText: {
+        textAlign: 'center',
+        fontSize: getFontSize(15),
+        fontWeight: '400',
+        color: colors.lightblack,
+        marginTop: 10,
     },
 });
 
