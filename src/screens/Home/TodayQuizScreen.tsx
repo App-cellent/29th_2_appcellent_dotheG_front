@@ -23,6 +23,8 @@ const { height } = Dimensions.get('window');
 
 function TodayQuizScreen(): React.JSX.Element {
     const navigation = useNavigation();
+    const apiUrl = process.env.REACT_APP_API_URL;
+    const accessToken = process.env.ACCESS_TOKEN;
 
     const currentDate = new Date();
 
@@ -35,6 +37,41 @@ function TodayQuizScreen(): React.JSX.Element {
     const handleNavigateQuizPress = useCallback(async () => {
         navigation.navigate('TodayQuizWrongScreen');
     }, [navigation]);
+
+    useEffect(() => {
+        const fetchQuizData = async () => {
+            try {
+                const response = await fetch(`${apiUrl}/quiz/getQuiz?timestamp=${new Date().getTime()}`, {
+                    method: 'GET',
+                    headers: {
+                        "Cache-Control":'no-store',
+                        "Content-Type":"application/json",
+                        access: `${accessToken}`,
+                    },
+                });
+
+                // 응답 상태
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                if (result.success) {
+                    console.log(result.data);
+                } else {
+                    console.error(result.message);
+                }
+            } catch (error) {
+                console.error('Error fetching today quiz data:', error);
+                setTodayYN(result.data);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchQuizData();
+    }, []);
 
     const [selectedAnswer, setSelectedAnswer] = useState(null);
 

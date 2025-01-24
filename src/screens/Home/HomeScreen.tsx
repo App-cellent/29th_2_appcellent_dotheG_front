@@ -192,7 +192,10 @@ function HomeScreen(): React.JSX.Element {
                         <Text style={styles.TitleText2}>오늘도 우리 함께 달려보아요:)</Text>
                     </View>
                     <View style={{justifyContent: 'center', alignItems: 'center', marginTop: 5, marginBottom: 10}}>
-                        <Image source={require('../../img/Home/HomeMainIcon.png')} style={{width: 354, height: 200}}/>
+                        <View style={styles.MainBackgroundWrapper}>
+                            <Image source={require('../../img/Home/HomeCharBackground.png')} style={styles.MainBackground} />
+                            <Image source={require('../../img/Character/mole/[1]mole1.png')} style={styles.MainChar} />
+                        </View>
                     </View>
 
                     <TouchableOpacity onPress={handleNavigateTodayQuiz}>
@@ -309,9 +312,27 @@ const styles = StyleSheet.create({
     },
     backgroundImage: {
         width: '100%',
-        height: height * 0.6,
+        height: height * 0.62,
     },
     HomeMainContainer: {
+    },
+    MainBackgroundWrapper: {
+        position: 'relative',
+        width: '95%',
+        height: 200,
+    },
+    MainBackground: {
+        width: '100%',
+        height: '100%',
+        resizeMode: 'cover',
+    },
+    MainChar: {
+        position: 'absolute',
+        bottom: '50%',
+        left: '50%',
+        transform: [{ translateX: -114 }, { translateY: +98 }],
+        width: 228,
+        height: 196,
     },
     scrollContainer: {
         backgroundColor: colors.lightgray,
@@ -335,6 +356,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     QuizBox: {
+        top: 20,
         marginHorizontal: 16,
         marginTop: 12,
         backgroundColor: colors.white,
