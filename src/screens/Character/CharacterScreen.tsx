@@ -18,6 +18,7 @@ function CharacterScreen(): React.JSX.Element {
     const navigation = useNavigation();
     const [character, setCharacter] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+
     const apiUrl = process.env.REACT_APP_API_URL;
     const accessToken = process.env.ACCESS_TOKEN;
 
@@ -35,7 +36,7 @@ function CharacterScreen(): React.JSX.Element {
                     },
                 });
 
-                // 응답 상태
+                // response status
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
@@ -44,7 +45,7 @@ function CharacterScreen(): React.JSX.Element {
 
                 if (result.success) {
                     setCharacter(result.data);
-                    console.log('success');
+                    console.log('Success');
                 } else {
                     console.error(result.message);
                     setCharacter(null);
