@@ -54,6 +54,52 @@ function HomeScreen(): React.JSX.Element {
         setShowTreeInfo(!showTreeInfo);
     }
 
+    const [dailyQuest, setDailyQuest] = useState(null);
+    const [specialQuest, setSpecialQuest] = useState(null);
+
+    const dailyQuests = [
+        '텀블러 사용하기',
+        '자전거 이용하기',
+        '쓰레기 분리배출하기',
+        '에코백 사용하기',
+        '잔반 남기지 않기',
+        '오늘의 만보기 \n7000보 달성하기'
+    ];
+
+    const specialQuests = [
+        '플로깅/줍깅',
+        '친환경 브랜드 이용하기',
+        '제로 웨이스트 샵 방문하기',
+        '반려 식물 키우기'
+    ];
+
+    const getRandomQuest = (quests) => {
+        const randomIndex = Math.floor(Math.random() * quests.length);
+        return quests[randomIndex];
+    };
+
+    const refreshQuests = () => {
+        setDailyQuest(getRandomQuest(dailyQuests));
+        setSpecialQuest(getRandomQuest(specialQuests));
+    };
+
+    useEffect(() => {
+        // 화면이 로드될 때 퀘스트 초기화
+        refreshQuests();
+
+        const now = new Date();
+        const midnight = new Date(now);
+        midnight.setHours(24, 0, 0, 0);
+
+        const timeUntilMidnight = midnight - now;
+
+        const timeoutId = setTimeout(() => {
+            refreshQuests();
+            setInterval(refreshQuests, 24 * 60 * 60 * 1000);
+        }, timeUntilMidnight);
+        return () => clearTimeout(timeoutId);
+    }, []);
+
     useEffect(() => {
         const fetchHomeData = async () => {
             try {
@@ -247,8 +293,7 @@ function HomeScreen(): React.JSX.Element {
                                 <CircleQuestionIcon width={21} />
                                 <Text style={[styles.BoldSmallText, {marginLeft: 7}]}>데일리 퀘스트</Text>
                             </View>
-                            <Text style={styles.MediumText}>오늘의 만보기</Text>
-                            <Text style={styles.MediumText}>7000보 달성하기</Text>
+                            <Text style={styles.MediumText}>{dailyQuest}</Text>
 
                             <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 8 }}>
                                 <PedometerIcon width={39} />
@@ -261,8 +306,7 @@ function HomeScreen(): React.JSX.Element {
                                 <CircleStarIcon width={21} />
                                 <Text style={[styles.BoldSmallText, {marginLeft: 7}]}>스페셜 퀘스트</Text>
                             </View>
-                            <Text style={styles.MediumText}>우리 집 근처</Text>
-                            <Text style={styles.MediumText}>친환경샵 1번 방문하기</Text>
+                            <Text style={styles.MediumText}>{specialQuest}</Text>
 
                             <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 8 }}>
                                 <QuestIcon width={56} />
@@ -487,7 +531,7 @@ const styles = StyleSheet.create({
     MenuBoxHalf: {
         backgroundColor: colors.white,
         width: '48%',
-        height: 152,
+        height: 162,
         borderRadius: 15,
         padding: 20,
     },
