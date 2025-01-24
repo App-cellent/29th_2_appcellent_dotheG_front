@@ -9,8 +9,10 @@ import React, { useState, createContext } from 'react';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import StackNavigator from './src/navigator/StackNavigator';
 import PushNotification from "react-native-push-notification";
+import {enableScreens} from 'react-native-screens';
 
 function App(): React.JSX.Element {
+    enableScreens();
   const customTheme = {
     ...DefaultTheme,
     colors: {

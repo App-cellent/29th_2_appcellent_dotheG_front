@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import colors from "../../utils/colors";
 import { getFontSize } from '../../utils/fontUtils';
 
@@ -37,29 +37,42 @@ function PedometerScreen(): React.JSX.Element {
 
     const [todayGoalYN, setTodayGoalYN] = useState(false);
     const [weekGoalYN, setWeekGoalYN] = useState(false);
-    const [modalVisible, setModalVisible] = useState(false);
+    const [todayModalVisible, setTodayModalVisible] = useState(false);
+    const [weekModalVisible, setWeekModalVisible] = useState(false);
 
     const [todayStep, setTodayStep] = useState(0);
     const [weekStep, setWeekStep] = useState(0);
     const [totalStep, setTotalStep] = useState(0);
     const [carbonReduction, setCarbonReduction] = useState(0.0);
-    const todayTargetStep = 0;
+    const todayTargetStep = 7000;
     const monthTargetStep = 50000;
 
+    const [todayReward, setTodayReward] = useState(false);
+    const [weekReward, setWeekReward] = useState(false);
+    const [todayRewardState, setTodayRewardState] = useState(false);
+    const [weekRewardState, setWeekRewardState] = useState(false);
+
+    const confirmTargetStep = () => {
+        if (todayStep >= todayTargetStep) setTodayGoalYN(true);
+        else setTodayGoalYN(false);
+        if (weekStep >= monthTargetStep) setWeekGoalYN(true);
+        else setWeekGoalYN(false);
+    }
+
     useEffect(() => {
-        if(todayStep >= todayTargetStep) setTodayGoalYN(true);
+        confirmTargetStep();
+
         const fetchStepData = async () => {
             try {
                 const response = await fetch(`${apiUrl}/steps/summary?timestamp=${new Date().getTime()}`, {
                     method: 'GET',
                     headers: {
-                        "Cache-Control":'no-store',
-                        "Content-Type":"application/json",
+                        "Cache-Control": 'no-store',
+                        "Content-Type": "application/json",
                         access: `${accessToken}`,
                     },
                 });
 
-                // 응답 상태
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
@@ -68,17 +81,15 @@ function PedometerScreen(): React.JSX.Element {
 
                 if (result.success) {
                     console.log(result.data);
-                    setTodayStep(result.data.today);
-                    setWeekStep(result.data.week);
-                    setTotalStep(result.data.total);
-                    setCarbonReduction(result.data.carbonReduction);
-
+                    setTodayStep(result.data.today);  // 오늘 걸음수
+                    setWeekStep(result.data.week);     // 주간 걸음수
+                    setTotalStep(result.data.total);   // 총 걸음수
+                    setCarbonReduction(result.data.carbonReduction);  // 탄소 감소량
                 } else {
                     console.error(result.message);
                 }
             } catch (error) {
                 console.error('Error fetching step data:', error);
-                setTodayStep(result.data);
             } finally {
                 setLoading(false);
             }
@@ -87,36 +98,47 @@ function PedometerScreen(): React.JSX.Element {
         fetchStepData();
     }, []);
 
-    useEffect(() => {
-        setWeekStep(weekStep.toLocaleString('ko-KR'));
-        setTotalStep(totalStep.toLocaleString('ko-KR'));
+    const stepRef = useRef(todayStep);
+    const [lastStepCount, setLastStepCount] = useState(0);
 
+    useEffect(() => {
         const config = {
-              default_threshold: 15.0,
-              default_delay: 150000000,
-              cheatInterval: 3000,
-              onStepCountChange: (stepCount) => {
-                setTodayStep(stepCount);
-                if(stepCount >= todayTargetStep) {
+            default_threshold: 15.0,
+            default_delay: 150000000,
+            cheatInterval: 3000,
+            onStepCountChange: (stepCount) => {
+                if (stepCount > lastStepCount) {
+                    setTodayStep(stepCount);
+                    setLastStepCount(stepCount);
+                }
+
+                if (stepCount >= todayTargetStep) {
                     setWeekGoalYN(true);
                 }
-              },
-              onCheat: () => { console.log("User is Cheating") }
+            },
+            onCheat: () => {
+                console.log("User is Cheating");
             }
+        };
+
         startCounter(config);
 
-        const fetchStepUpdate = async () => {
+        return () => { stopCounter(); };
+    }, [lastStepCount]);
+
+    useEffect(() => {
+        const fetchUpdateSteps = async (steps) => {
             try {
-                const response = await fetch(`${apiUrl}/steps/update?steps=${todayStep}`, {
+                const stepsInt = parseInt(steps, 10);
+                const response = await fetch(`${apiUrl}/steps/update?steps=60000`, {
                     method: 'PATCH',
                     headers: {
-                        "Cache-Control":'no-store',
-                        "Content-Type":"application/json",
+                        "Cache-Control": 'no-store',
+                        "Content-Type": "application/json",
                         access: `${accessToken}`,
                     },
                 });
 
-                // 응답 상태
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
@@ -124,22 +146,131 @@ function PedometerScreen(): React.JSX.Element {
                 const result = await response.json();
 
                 if (result.success) {
-                    console.log("완료");
+                    const summaryResponse = await fetch(`${apiUrl}/steps/summary?timestamp=${new Date().getTime()}`, {
+                        method: 'GET',
+                        headers: {
+                            "Cache-Control": 'no-store',
+                            "Content-Type": "application/json",
+                            access: `${accessToken}`,
+                        },
+                    });
+
+                    const summaryResult = await summaryResponse.json();
+
+                    if (summaryResult.success) {
+                        setTodayStep(summaryResult.data.today);
+                        setWeekStep(summaryResult.data.week);
+                        setTotalStep(summaryResult.data.total);
+                        setCarbonReduction(summaryResult.data.carbonReduction);
+                        confirmTargetStep();
+                    }
                 } else {
                     console.error(result.message);
                 }
             } catch (error) {
-                console.error('Error fetching step update:', error);
-                setTodayStep(result.data);
+                console.error('Error updating and fetching steps:', error);
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchStepUpdate();
-
-        return () => { stopCounter() }
+        if (todayStep > 0) {
+            fetchUpdateSteps(todayStep);
+        }
     }, [todayStep]);
+
+    useEffect(() => {
+        const fetchRewardState = async () => {
+            try {
+                const response = await fetch(`${apiUrl}/steps/reward/state`, {
+                    method: 'GET',
+                    headers: {
+                        "Cache-Control": 'no-store',
+                        "Content-Type": "application/json",
+                        access: `${accessToken}`,
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                if (result.success) {
+                    const { today, weekly } = result.data;
+                    setTodayReward(today);  // 리워드 상태 업데이트
+                    setWeekReward(weekly);
+                } else {
+                    console.error(result.message);
+                }
+            } catch (error) {
+                console.error('Error fetching reward state:', error);
+            }
+        };
+
+        fetchRewardState();
+    }, [todayStep, weekStep]);
+
+    const fetchTodayReward = async () => {
+        try {
+            const response = await fetch(`${apiUrl}/steps/reward/today`, {
+                method: 'PATCH',
+                headers: {
+                    "Cache-Control": 'no-store',
+                    "Content-Type": "application/json",
+                    access: `${accessToken}`,
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+
+            if (result.success) {
+                console.log(result.message);
+                setTodayReward(true);  // 리워드 지급 후 상태 변경
+            } else {
+                console.error(result.message);
+            }
+        } catch (error) {
+            console.error('Error fetching today reward:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchWeekReward = async () => {
+        try {
+            const response = await fetch(`${apiUrl}/steps/reward/weekly`, {
+                method: 'PATCH',
+                headers: {
+                    "Cache-Control": 'no-store',
+                    "Content-Type": "application/json",
+                    access: `${accessToken}`,
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+
+            if (result.success) {
+                console.log(result.message);
+                setWeekReward(true);  // 리워드 지급 후 상태 변경
+            } else {
+                console.error(result.message);
+            }
+        } catch (error) {
+            console.error('Error fetching week reward:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const [opacityAnimation] = useState(new Animated.Value(1));
 
@@ -193,16 +324,18 @@ function PedometerScreen(): React.JSX.Element {
                             <Image source={require('../../img/Pedometer/RunningGray.png')} style={{width: 19.02, height: 14}}/>
                         )}
 
-                        { todayGoalYN && (
+                        {todayGoalYN && (
                             <View>
-                            <TouchableOpacity
-                              style={styles.GoalBubble}
-                              onPress={() => setModalVisible(true)}
-                            >
-                                <Image source={require('../../img/Pedometer/Bubble.png')} style={[styles.BubbleIcon, {width: 51, height: 35}]}/>
-                                <Text style={styles.BubbleText}>클릭!</Text>
-                            </TouchableOpacity>
-                            <Image source={require('../../img/Pedometer/GoalGradient.png')} style={[styles.runningIcon, {width: 29.82, height: 22}]}/>
+                                { !todayReward ? (
+                                    <TouchableOpacity
+                                        style={styles.GoalBubble}
+                                        onPress={() => setTodayModalVisible(true)}
+                                    >
+                                        <Image source={require('../../img/Pedometer/Bubble.png')} style={[styles.BubbleIcon, {width: 51, height: 35}]}/>
+                                        <Text style={styles.BubbleText}>클릭!</Text>
+                                    </TouchableOpacity>
+                                ) : null }
+                                <Image source={require('../../img/Pedometer/GoalGradient.png')} style={[styles.runningIcon, {width: 29.82, height: 22}]}/>
                             </View>
                         )}
 
@@ -216,7 +349,7 @@ function PedometerScreen(): React.JSX.Element {
                                 end={{ x: 1, y: 0 }}
                                 style={[styles.progressBar, {
                                     width: `${Math.min((todayStep / todayTargetStep) * 100, 100)}%`,
-                                    borderRadius: 10, // 모서리 둥글게 설정
+                                    borderRadius: 10,
                                 }]}
                             />
                         </View>
@@ -270,12 +403,16 @@ function PedometerScreen(): React.JSX.Element {
                         </View>
                       </LinearGradientBackground>
                     </Animated.View>
-                    <TouchableOpacity
-                      style={styles.GoalButton}
-                      onPress={() => setModalVisible(true)}
-                    >
-                      <Text style={styles.GoalButtonText}>클릭!</Text>
-                    </TouchableOpacity>
+                    {weekGoalYN && !weekReward && (
+                        <View>
+                            <TouchableOpacity
+                              style={styles.GoalButton}
+                              onPress={() => setWeekModalVisible(true)}
+                            >
+                              <Text style={styles.GoalButtonText}>클릭!</Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
                   </View>
                 )}
 
@@ -305,8 +442,8 @@ function PedometerScreen(): React.JSX.Element {
                 </View>
             </View>
 
-            { modalVisible && weekGoalYN && (
-              <Pressable style={styles.modalContainer} onPress={() => setModalVisible(false)}>
+            { weekModalVisible && weekGoalYN && !weekReward && (
+              <Pressable style={styles.modalContainer} onPress={() => setWeekModalVisible(false)}>
                 <Pressable style={styles.modalView} onPress={e => e.stopPropagation()}>
                     <View style={styles.rowContainer}>
                       <SeedIcon width={15} height={20} />
@@ -314,18 +451,21 @@ function PedometerScreen(): React.JSX.Element {
                       <SeedIcon width={15} height={20} />
                   </View>
                   <View style={styles.modalSmallTextContainer}>
-                      <Text style={styles.modalSmallText}>주간 목표달성으로 열매 20개를</Text>
+                      <Text style={styles.modalSmallText}>주간 목표달성으로 열매 10개를</Text>
                       <Text style={styles.modalSmallText}>획득했어요!</Text>
                   </View>
-                    <TouchableOpacity style={styles.modalButton} onPress={() => setModalVisible(false)}>
+                    <TouchableOpacity style={styles.modalButton} onPress={() => {
+                        setWeekModalVisible(false);
+                        fetchWeekReward();
+                        }}>
                         <Text style={styles.modalButtonText}>확인</Text>
                     </TouchableOpacity>
                 </Pressable>
               </Pressable>
             )}
 
-            { modalVisible && todayGoalYN && (
-              <Pressable style={styles.modalContainer} onPress={() => setModalVisible(false)}>
+            { todayModalVisible && todayGoalYN && !todayReward && (
+              <Pressable style={styles.modalContainer} onPress={() => setTodayModalVisible(false)}>
                 <Pressable style={styles.modalView} onPress={e => e.stopPropagation()}>
                     <View style={styles.rowContainer}>
                       <SeedIcon width={15} height={20} />
@@ -333,10 +473,13 @@ function PedometerScreen(): React.JSX.Element {
                       <SeedIcon width={15} height={20} />
                   </View>
                   <View style={styles.modalSmallTextContainer}>
-                      <Text style={styles.modalSmallText}>일일 목표달성으로 열매 20개를</Text>
+                      <Text style={styles.modalSmallText}>일일 목표달성으로 열매 3개를</Text>
                       <Text style={styles.modalSmallText}>획득했어요!</Text>
                   </View>
-                    <TouchableOpacity style={styles.modalButton} onPress={() => setModalVisible(false)}>
+                    <TouchableOpacity style={styles.modalButton} onPress={() => {
+                        setTodayModalVisible(false);
+                        fetchTodayReward();
+                        }}>
                         <Text style={styles.modalButtonText}>확인</Text>
                     </TouchableOpacity>
                 </Pressable>
@@ -546,8 +689,8 @@ const styles = StyleSheet.create({
         left: '85%',
         top: '50%',
         transform: [
-            { translateX: -25.5 },
-            { translateY: -14 }
+            { translateX: -15 },
+            { translateY: -57 },
         ],
         width: 51,
         height: 28,
