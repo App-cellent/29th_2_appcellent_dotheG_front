@@ -37,6 +37,8 @@ function HomeScreen(): React.JSX.Element {
     const apiUrl = process.env.REACT_APP_API_URL;
     const accessToken = process.env.ACCESS_TOKEN;
 
+    const [showTreeInfo, setShowTreeInfo] = useState(true);
+
     const [userName, setUserName] = useState('');
     const [userReward, setUserReward] = useState(0);
     const [mainChar, setMainChar] = useState(null);
@@ -47,6 +49,10 @@ function HomeScreen(): React.JSX.Element {
 
     const [quizYN, setQuizYN] = useState();
     const [modalVisible, setModalVisible] = useState(false);
+
+    const TreeInfo = () => {
+        setShowTreeInfo(!showTreeInfo);
+    }
 
     useEffect(() => {
         const fetchHomeData = async () => {
@@ -208,6 +214,16 @@ function HomeScreen(): React.JSX.Element {
                 </ImageBackground>
 
                 <View style={[styles.CenteredCountContainer, {height: 153}]}>
+                        <TouchableOpacity onPress={TreeInfo} style={styles.InfoContainer}>
+                            <Image source={require('../../img/Home/InfoIcon.png')} style={styles.InfoIcon} />
+                              {showTreeInfo && (
+                                  <View style={styles.InfoBox}>
+                                    <Image source={require('../../img/Home/CloseIcon.png')} style={{ width: 7, height: 7, position: 'absolute', alignSelf: 'flex-end', top: 12.5, right: 12.5 }}/>
+                                    <Text style={styles.InfoText}>내가 줄인 이산화탄소의 양을</Text>
+                                    <Text style={styles.InfoText}>나무 그루로 확인해볼 수 있어요!</Text>
+                                  </View>
+                              )}
+                        </TouchableOpacity>
                     <View style={styles.TreeBox}>
                         <CircleThisMonthTreeIcon width={36} height={36} />
                         <View style={styles.TreeDetailBox}>
@@ -375,6 +391,32 @@ const styles = StyleSheet.create({
         marginHorizontal: 16,
         justifyContent: 'space-evenly',
         bottom: 67,
+    },
+    InfoContainer: {
+      position: 'absolute',
+      top: 10,
+      right: 0,
+      alignItems: 'flex-end',
+      paddingTop: 5,
+      paddingRight: 16,
+    },
+    InfoIcon: {
+      width: 16,
+      height: 16,
+      marginBottom: 5,
+    },
+    InfoBox: {
+      marginLeft: 8,
+      width: 166,
+      padding: 12.5,
+      borderColor: colors.gray,
+      borderRadius: 3,
+      borderWidth: 1,
+    },
+    InfoText: {
+      color: colors.gray,
+      fontSize: getFontSize(10),
+      fontWeight: '400',
     },
     MainTextContainer: {
         justifyContent: 'center',
