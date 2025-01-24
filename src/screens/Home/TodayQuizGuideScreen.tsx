@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import colors from "../../utils/colors";
 import { getFontSize } from '../../utils/fontUtils';
@@ -23,6 +23,10 @@ const { height } = Dimensions.get('window');
 
 function TodayQuizGuideScreen(): React.JSX.Element {
     const navigation = useNavigation();
+    const apiUrl = process.env.REACT_APP_API_URL;
+    const accessToken = process.env.ACCESS_TOKEN;
+
+    const [todayYN, setTodayYN] = useState(null);
 
     const currentDate = new Date();
 
@@ -31,6 +35,41 @@ function TodayQuizGuideScreen(): React.JSX.Element {
         month: 'long',
         day: 'numeric',
     });
+
+    useEffect(() => {
+        const fetchQuizData = async () => {
+            try {
+                const response = await fetch(`${apiUrl}/quiz?timestamp=${new Date().getTime()}`, {
+                    method: 'GET',
+                    headers: {
+                        "Cache-Control":'no-store',
+                        "Content-Type":"application/json",
+                        access: `${accessToken}`,
+                    },
+                });
+
+                // 응답 상태
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                if (result.success) {
+                    setTodayYN(result.data);
+                } else {
+                    console.error(result.message);
+                }
+            } catch (error) {
+                console.error('Error fetching today quiz data:', error);
+                setTodayYN(result.data);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchQuizData();
+    }, []);
 
     const handleNavigateQuizPress = useCallback(async () => {
         navigation.navigate('TodayQuizScreen');
@@ -66,8 +105,8 @@ function TodayQuizGuideScreen(): React.JSX.Element {
                 <Text style={[styles.BoldSmallText2, {marginLeft: 7}]}>확인해볼 수 있어요.</Text>
             </View>
 
-            <View style={styles.BtnContainer}>
-                <GradientButton height={56} width={328} text="퀴즈 풀기" onPress={handleNavigateQuizPress}/>
+            <View style={styles.BtnContainer}> /* 오늘 안 풀었으면 false -> 풀었으면 true, isDisabled */
+                <GradientButton height={56} width={328} text="퀴즈 풀기" isDisabled={todayYN} onPress={handleNavigateQuizPress}/>
             </View>
         </View>
     );

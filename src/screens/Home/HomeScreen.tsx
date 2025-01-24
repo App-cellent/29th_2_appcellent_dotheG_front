@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import colors from "../../utils/colors";
 import { getFontSize } from '../../utils/fontUtils';
@@ -25,7 +25,8 @@ import {
   ImageBackground,
   Dimensions,
   TouchableOpacity,
-  Alert
+  Alert,
+  Pressable
 } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 
@@ -33,16 +34,100 @@ const { height } = Dimensions.get('window');
 
 function HomeScreen(): React.JSX.Element {
     const navigation = useNavigation();
+    const apiUrl = process.env.REACT_APP_API_URL;
+    const accessToken = process.env.ACCESS_TOKEN;
 
-    const seed = '361';
-    const username = '앱설런트';
-    const thismonthtree = '5';
-    const usertree = '21';
+    const [userName, setUserName] = useState('');
+    const [userReward, setUserReward] = useState(0);
+    const [mainChar, setMainChar] = useState(null);
+    const [monthSavedTree, setMonthSavedTree] = useState(0.0);
+    const [totalSavedTree, setTotalSavedTree] = useState(0.0);
+    const [dailyActivity, setDailyActivity] = useState(4);
+    const [specialActivity, setSpecialActivity] = useState(14);
+
+    const [quizYN, setQuizYN] = useState();
+    const [modalVisible, setModalVisible] = useState(false);
+
+    useEffect(() => {
+        const fetchHomeData = async () => {
+            try {
+                const response = await fetch(`${apiUrl}/mainpage/getInfo?timestamp=${new Date().getTime()}`, {
+                    method: 'GET',
+                    headers: {
+                        "Cache-Control":'no-store',
+                        "Content-Type":"application/json",
+                        access: `${accessToken}`,
+                    },
+                });
+
+                // 응답 상태
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                if (result.success) {
+                    console.log(result.data);
+                    setUserName(result.data.userName);
+                    setUserReward(result.data.userReward);
+                    setMainChar(result.data.mainChar);
+                    setMonthSavedTree(result.data.monthSavedTree);
+                    setTotalSavedTree(result.data.totalSavedTree);
+                    setDailyActivity(result.data.dailyActivity);
+                    setSpecialActivity(result.data.specialActivity);
+                } else {
+                    console.error(result.message);
+                }
+            } catch (error) {
+                console.error('Error fetching Home User data:', error);
+                setTodayStep(result.data);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+    const fetchQuizYNData = async () => {
+        try {
+            const response = await fetch(`${apiUrl}/quiz?timestamp=${new Date().getTime()}`, {
+                method: 'GET',
+                headers: {
+                    "Cache-Control":'no-store',
+                    "Content-Type":"application/json",
+                    access: `${accessToken}`,
+                },
+            });
+
+            // 응답 상태
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+
+            if (result.success) {
+                console.log(result.data);
+                setQuizYN(result.data);
+            } else {
+                console.error(result.message);
+            }
+        } catch (error) {
+            console.error('Error fetching quizYN:', error);
+            setTodayStep(result.data);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+        fetchHomeData();
+        fetchQuizYNData();
+    }, []);
 
     const [selectedImage, setSelectedImage] = useState(null);
 
     const handleNavigateTodayQuiz = useCallback(async () => {
-        navigation.navigate('TodayQuizGuideScreen');
+        if(!quizYN) navigation.navigate('TodayQuizGuideScreen');
+        else setModalVisible(true);
     }, []);
 
     const handleNavigateCamera = useCallback(() => {
@@ -96,12 +181,12 @@ function HomeScreen(): React.JSX.Element {
                 <View style={styles.HomeMainContainer}>
                     <View style={styles.SeedsContainer}>
                         <SeedIcon width={15} height={20} />
-                        <Text style={styles.SeedsText}>{seed}</Text>
+                        <Text style={styles.SeedsText}>{userReward}</Text>
                     </View>
                     <View style={styles.HomeTextContainer}>
                         <View style={styles.MainTextContainer}>
                             <Text style={styles.TitleText1}>반가워요, </Text>
-                            <Text style={styles.YellowText}>{username}</Text>
+                            <Text style={styles.YellowText}>{userName}</Text>
                             <Text style={styles.TitleText1}> 님!</Text>
                         </View>
                         <Text style={styles.TitleText2}>오늘도 우리 함께 달려보아요:)</Text>
@@ -123,14 +208,14 @@ function HomeScreen(): React.JSX.Element {
                     <View style={styles.TreeBox}>
                         <CircleThisMonthTreeIcon width={36} height={36} />
                         <View style={styles.TreeDetailBox}>
-                            <Text style={styles.BoldSmallText}>{thismonthtree}그루</Text>
+                            <Text style={styles.BoldSmallText}>{monthSavedTree}그루</Text>
                             <Text style={styles.GrayText}>이번 달 지킨 나무</Text>
                         </View>
                     </View>
                     <View style={styles.TreeBox}>
                         <CircleUserTreeIcon width={36} height={36} />
                         <View style={styles.TreeDetailBox}>
-                            <Text style={styles.BoldSmallText}>{usertree}그루</Text>
+                            <Text style={styles.BoldSmallText}>{totalSavedTree}그루</Text>
                             <Text style={styles.GrayText}>지금까지 지킨 나무</Text>
                         </View>
                     </View>
@@ -183,6 +268,19 @@ function HomeScreen(): React.JSX.Element {
                     <FloatingButton width={71} height={71}/>
                 </TouchableOpacity>
             </View>
+
+            {modalVisible &&
+              <Pressable style={styles.modalContainer} onPress={() => setModalVisible(false)}>
+                <Pressable style={styles.modalView} onPress={e => e.stopPropagation()}>
+                    <View style={styles.rowContainer}>
+                      <Text style={styles.modalLargeText}>이미 </Text>
+                      <Text style={[styles.modalLargeText, {color: colors.green}]}>오늘의 퀴즈를 </Text>
+                      <Text style={styles.modalLargeText}> 풀었어요!</Text>
+                    </View>
+                    <Text style={styles.modalSmallText}>내일 한 번 더 도전해보세요:)</Text>
+                </Pressable>
+              </Pressable>
+            }
 
             {openQuest &&
             <View style={styles.openQuestOption}>
@@ -382,6 +480,51 @@ const styles = StyleSheet.create({
     CameraIcon: {
         width: 23,
         height: 17,
+    },
+    rowContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+     modalContainer: {
+        position: 'absolute',
+        top: 0,
+        bottom: 0,
+        left: 0,
+        right: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.2)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 10,
+    },
+    modalView: {
+        backgroundColor: colors.white,
+        borderRadius: 15,
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 0,
+            blur: 10,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 2,
+        elevation: 5,
+        width: 285,
+        height: 162,
+    },
+    modalLargeText: {
+        textAlign: 'center',
+        fontSize: getFontSize(20),
+        fontWeight: '800',
+        color: colors.black,
+    },
+    modalSmallText: {
+        textAlign: 'center',
+        fontSize: getFontSize(15),
+        fontWeight: '400',
+        color: colors.lightblack,
+        marginTop: 10,
     },
 });
 
