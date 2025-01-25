@@ -1,12 +1,7 @@
 import React, { useCallback } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useNavigation } from '@react-navigation/native';
-import {
-    View,
-    Text,
-    TouchableOpacity,
-    StyleSheet,
-} from 'react-native';
+import { StyleSheet } from 'react-native';
 
 import BottomTabNavigator from './BottomTabNavigator';
 
@@ -46,7 +41,7 @@ const StackNavigator = () => {
     }, [navigation]);
 
     return (
-        <Stack.Navigator>
+        <Stack.Navigator initialRouteName="LoginScreen">
             <Stack.Screen
                 name="Main"
                 component={BottomTabNavigator}

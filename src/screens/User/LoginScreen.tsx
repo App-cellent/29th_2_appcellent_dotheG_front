@@ -14,6 +14,8 @@ import {
 
 import GradientButton from '../../components/GradientButton';
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 function LoginScreen(): React.JSX.Element {
     const navigation = useNavigation();
     const [isChecked, setIsChecked] = useState(false);
@@ -24,6 +26,12 @@ function LoginScreen(): React.JSX.Element {
 
     // 로그인 버튼 클릭시
     const handleLogin = async () => {
+        if (!apiUrl) {
+            console.error('API URL is not defined in environment variables.');
+            Alert.alert('오류', '서버 URL이 설정되지 않았습니다. 관리자에게 문의하세요.');
+            return;
+        }
+
         try {
             const response = await fetch(`${apiUrl}/login`, {
                 method: 'POST',
@@ -35,21 +43,47 @@ function LoginScreen(): React.JSX.Element {
                     username,
                     password,
                 }),
-            });
+            });       
 
-            // response status
-            if (response.status === 200) {
-                console.log('Success');
+            // 서버 응답 확인
+            if (!response.ok) {
+                const errorText = await response.text(); // 서버 응답 본문 읽기
+                throw new Error(`Login failed: ${response.status} - ${response.statusText}\nResponse: ${errorText}`);
+            }
+        
+            // 헤더에서 토큰 추출
+            const token = response.headers.get('access'); // 'access' 키로 토큰 가져오기
+            if (token) {
+                await AsyncStorage.setItem('token', token); // AsyncStorage에 토큰 저장
+                console.log('Saved Token:', token);
+                console.log('Login Success');
                 Alert.alert('로그인 성공', '홈 화면으로 이동합니다.');
-                navigation.navigate('HomeScreen');
+                navigation.navigate('Main');
             } else {
-                console.log('Login Failure');
+                console.error('Token not found in headers');
                 Alert.alert('로그인 실패', '아이디나 비밀번호를 다시 확인해주세요.');
             }
-        } catch (error) {
-            Alert.alert('오류 발생', '서버와의 통신 중 오류가 발생했습니다.');
-            console.error(error);
-        }
+            } catch (error) {
+            console.error('Login Error:', error);
+            }
+
+        //     // response status
+        //     if (response.status === 200) {
+        //         console.log('Login Success');
+        //         Alert.alert('로그인 성공', '홈 화면으로 이동합니다.');
+        //         navigation.navigate('HomeScreen');
+
+        //         const data = await response.json();
+        //         localStorage.setItem('authToken', data.token);
+        //         console.log('Token saved: ', data.token);
+        //     } else {
+        //         console.log('Login Failure');
+        //         Alert.alert('로그인 실패', '아이디나 비밀번호를 다시 확인해주세요.');
+        //     }
+        // } catch (error) {
+        //     Alert.alert('오류 발생', '서버와의 통신 중 오류가 발생했습니다.');
+        //     console.error(error);
+        // }
     };
 
     // 간편하게 시작하기 애니메이션
