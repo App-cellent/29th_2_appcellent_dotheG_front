@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import LinearGradient from 'react-native-linear-gradient';
 import { 
     StyleSheet, 
@@ -9,15 +9,18 @@ import {
     View, 
     Image,
     TouchableOpacity,
+    Alert
 } from 'react-native';
 
 import GradientButton from '../../components/GradientButton';
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type RootStackParamList = {
     DrawLoadingScreen: { characterData: any };
 };
 
-type NavigationProp = StackNavigationProp<RootStackParamList, 'DrawLoadingScreen'>;
+type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'DrawLoadingScreen'>;
 
 function AnimalDrawScreen(): React.JSX.Element {
     const navigation = useNavigation<NavigationProp>();
@@ -31,23 +34,44 @@ function AnimalDrawScreen(): React.JSX.Element {
 
     const [selectedOption, setSelectedOption] = useState<number | null>(null);
 
+    const apiUrl = process.env.REACT_APP_API_URL;
+
     const handleNext = async () => {
         if (selectedOption !== null) {
             const selectedAnimal = animals.find(animal => animal.id === selectedOption);
             if (selectedAnimal) {
-                const response = await fetch('/characters/draw', {
-                    method: 'POST',
-                    body: JSON.stringify({ drawType: 'ANIMAL', animalName: selectedAnimal.label }),
-                    headers: { 'Content-Type': 'application/json' },
-                });
+                try {
+                    const accessToken = await AsyncStorage.getItem('token');
 
-                const result = await response.json();
-                if (result.success) {
-                    navigation.navigate('DrawLoadingScreen', { characterData: result.data });
-                } else {
-                    alert(result.message);
+                    const response = await fetch(`${apiUrl}/characters/draw`, {
+                        method: 'POST',
+                        headers: { 
+                            "Cache-Control":'no-store',
+                            "Content-Type":"application/json",
+                            access: `${accessToken}`,
+                        },
+                        body: JSON.stringify({ 
+                            drawType: 'ANIMAL', animalName: selectedAnimal.label 
+                        }),
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`API 요청 실패: ${response.status}`)
+                    }
+
+                    const result = await response.json();
+                    if (result.success) {
+                        navigation.navigate('DrawLoadingScreen', { characterData: result.data });
+                    } else {
+                        Alert.alert(result.message || '알 수 없는 오류가 발생했습니다.');
+                    }
+                } catch (error: unknown) {
+                    console.error('API 호출 에러:', error);
+                    Alert.alert('데이터를 불러오는 중 문제가 발생했습니다. 다시 시도해주세요.');
                 }
             }
+        } else {
+            Alert.alert('동물을 선택해주세요.');
         }
     };
 
@@ -191,7 +215,3 @@ const styles = StyleSheet.create({
 })
 
 export default AnimalDrawScreen;
-
-function alert(message: any) {
-    throw new Error('Function not implemented.');
-}

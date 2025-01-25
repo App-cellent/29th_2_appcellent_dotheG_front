@@ -6,13 +6,15 @@
  */
 
 import React, { Component } from 'react';
-import HomeScreen from '../screens/Home/HomeScreen';
-import CharacterScreen from '../screens/Character/CharacterScreen';
-import MyScreen from '../screens/My/MyScreen';
-import PedometerScreen from '../screens/Pedometer/PedometerScreen';
-import ReportScreen from '../screens/Report/ReportScreen';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { SvgXml } from 'react-native-svg';
+
+import HomeScreen from '../screens/Home/HomeScreen';
+import PedometerScreen from '../screens/Pedometer/PedometerScreen';
+import CharacterScreen from '../screens/Character/CharacterScreen';
+import ReportScreen from '../screens/Report/ReportScreen';
+import MyScreen from '../screens/My/MyScreen';
+
 import HomeIcon from '../img/Navigator/HomeIcon.svg';
 import PedometerIcon from '../img/Navigator/PedometerIcon.svg';
 import CharacterIcon from '../img/Navigator/CharacterIcon.svg';

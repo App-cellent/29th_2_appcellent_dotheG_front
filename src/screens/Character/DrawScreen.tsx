@@ -15,14 +15,14 @@ import {
 
 import GradientButton from "../../components/GradientButton";
 
-import { ACCESS_TOKEN } from '@env';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type RootStackParamList = {
     DrawLoadingScreen: { characterData: any };
     AnimalDrawScreen: undefined;
 };
 
-type NavigationProp = StackNavigationProp<RootStackParamList, 'DrawLoadingScreen'>;
+type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'DrawLoadingScreen'>;
 
 function DrawScreen(): React.JSX.Element {
     const navigation = useNavigation<NavigationProp>();
@@ -46,6 +46,8 @@ function DrawScreen(): React.JSX.Element {
             Alert.alert('선택 오류', '옵션을 선택해주세요.');
         }
     };
+
+    const apiUrl = process.env.REACT_APP_API_URL;
 
     const handleConfirm = async () => {
         setModalVisible(false);
@@ -71,11 +73,14 @@ function DrawScreen(): React.JSX.Element {
             }
             
             try {
-                const response = await fetch('/characters/draw', {
+                const accessToken = await AsyncStorage.getItem('token');
+                
+                const response = await fetch(`${apiUrl}/characters/draw`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        access: ACCESS_TOKEN,
+                        "Cache-Control":'no-store',
+                        "Content-Type":"application/json",
+                        access: `${accessToken}`,
                     },
                     body: JSON.stringify({ drawType, animalName }),
                 });

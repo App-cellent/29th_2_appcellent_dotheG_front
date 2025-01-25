@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
 import Svg, { Text as SvgText, Defs, LinearGradient as SvgLinearGradient, Stop, Line } from 'react-native-svg';
@@ -15,6 +15,8 @@ import {
 
 import CharacterRarity from '../../components/CharacterRarity';
 import GradientButton from '../../components/GradientButton';
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // 임시 더미 데이터
 const characters = [
@@ -32,7 +34,14 @@ const characters = [
 ];
 
 // 대표 캐릭터 지정 팝업창
-const SecondModal = ({ visible, onConfirm, onCancel, characterName }) => (
+interface SecondModalProps {
+    visible: boolean;
+    onConfirm: () => void;
+    onCancel: () => void;
+    characterName: string;
+}
+
+const SecondModal: React.FC<SecondModalProps> = ({ visible, onConfirm, onCancel, characterName }) => (
     <Modal
         animationType='fade'
         transparent={true}
@@ -64,23 +73,134 @@ const SecondModal = ({ visible, onConfirm, onCancel, characterName }) => (
     </Modal>
 )
 
+interface Character {
+    id: number;
+    name: string;
+    rarity: string;
+    image: string;
+}
+
 function ListScreen(): React.JSX.Element {
     const navigation = useNavigation();
 
-    const [selectedTab, setSelectedTab] = useState('전체보기');
+    const [selectedTab, setSelectedTab] = useState<keyof typeof tabMapping>('전체보기');
+    const [characters, setCharacters] = useState<Character[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
     const [selectedCharacter, setSelectedCharacter] = useState<number | null>(null);
     const [modalVisible, setModalVisible] = useState(false);
     const [secondModalVisible, setSecondModalVisible] = useState(false);
+    //const [userId, setUserId] = useState<string | null>(null);
 
-    const sortedCharacters = 
-        selectedTab === '전체보기'
-        ? characters
-        : characters.filter(character => character.rarity === selectedTab);
+    // 탭 매핑
+    const tabMapping = {
+        '전체보기': 'ALL',
+        '흔함': 'COMMON',
+        '보통': 'NORMAL',
+        '희귀': 'RARE',
+        '매우희귀': 'LEGENDARY',
+    };
 
-    const groupedCharacters = [];
-    for (let i = 0; i < sortedCharacters.length; i += 3) {
-        groupedCharacters.push(sortedCharacters.slice(i, i + 3));
-    }
+    // 희귀도 매핑
+    const mapRarity = (rarityLevel: number): string => {
+        switch (rarityLevel) {
+            case 1:
+                return '흔함';
+            case 2:
+                return '보통';
+            case 3:
+                return '희귀';
+            case 4:
+                return '매우희귀';
+            default:
+                return '';
+        }
+    };
+
+    const apiUrl = process.env.REACT_APP_API_URL;
+
+    // 사용자 ID API 호출
+    // const fetchUserId = async () => {
+    //     try {
+    //         const accessToken = await AsyncStorage.getItem('token');
+    //         console.log('Access Token:', accessToken);
+
+    //         //${apiUrl}/characters/main?timestamp=${new Date().getTime()}
+
+    //         const response = await fetch(`${apiUrl}/characters/collection`, {
+    //             method: 'GET',
+    //             headers: {
+    //                 "Cache-Control": 'no-store',
+    //                 "Content-Type": "application/json",
+    //                 access: `${accessToken}`,
+    //             },
+    //         });
+    //         const result = await response.json();
+    //         if (response.ok) {
+    //             setUserId(result.userId);
+    //         } else {
+    //             console.error(result.message);
+    //         }
+    //     } catch (error) {
+    //         console.error('Error fetching userId:', error);
+    //     }
+    // };
+
+    // useEffect(() => {
+    //     fetchUserId();
+    // }, []);
+    
+    const fetchCharacterData = async (viewType: string) => {
+        //if (!userId) return;
+        
+        setIsLoading(true);
+        try {
+            const accessToken = await AsyncStorage.getItem('token');
+            const response = await fetch(`${apiUrl}/characters/collection?viewType=${viewType}`, 
+                {
+                    method: 'GET',
+                    headers: {
+                        "Cache-Control": 'no-store',
+                        "Content-Type": "application/json",
+                        access: `${accessToken}`,
+                    },
+                }
+            );
+
+            const result = await response.json();
+            console.log('API response:', result);
+
+            if (response.ok && result.success) {
+                const mappedData = result.data.map((char: any) => ({
+                    id: char.charId,
+                    name: char.charName,
+                    rarity: char.charRarity,
+                    image: { uri: char.charImageUrl },
+                }));
+                setCharacters(mappedData);
+            } else {
+                console.error(result.message);
+            }
+        } catch (error) {
+            console.error('Error fetching characters:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchCharacterData(tabMapping[selectedTab]);
+    }, [selectedTab]);
+
+
+    // const sortedCharacters = 
+    //     selectedTab === '전체보기'
+    //     ? characters
+    //     : characters.filter(character => character.rarity === selectedTab);
+
+    // const groupedCharacters = [];
+    // for (let i = 0; i < sortedCharacters.length; i += 3) {
+    //     groupedCharacters.push(sortedCharacters.slice(i, i + 3));
+    // }
 
     const handleCharacterModal = (id: number) => {
         setSelectedCharacter(id);
@@ -113,7 +233,7 @@ function ListScreen(): React.JSX.Element {
                 return 2;
             case '희귀':
                 return 3;
-            case '매우희귀':
+            case '매우 희귀':
                 return 4;
             default:
                 return 0;
@@ -146,11 +266,11 @@ function ListScreen(): React.JSX.Element {
 
                 <View style={styles.bodyContainer}>
                     <View style={styles.tabContainer}>
-                        {[ '전체보기', '흔함', '보통', '희귀', '매우희귀'].map(tab => (
+                        {Object.keys(tabMapping).map(tab => (
                             <TouchableOpacity
                                 key={tab}
                                 style={styles.tab}
-                                onPress={() => setSelectedTab(tab)}
+                                onPress={() => setSelectedTab(tab as keyof typeof tabMapping)}
                             >
                                 <View style={styles.tabInner}>
                                     {selectedTab === tab ? (
@@ -191,46 +311,48 @@ function ListScreen(): React.JSX.Element {
                         ))}
                     </View>
 
+                    {isLoading ? (
+                        <Text>Loading...</Text>
+                    ) : (
                     <FlatList
-                        data={groupedCharacters}
-                        keyExtractor={(_, index) => index.toString()}
+                        data={characters}
+                        keyExtractor={(item) => item.id.toString()}
                         renderItem={({ item }) => (
                             <View style={styles.row}>
-                                {item.map(character => (
-                                    <TouchableOpacity 
-                                        key={character.id} 
-                                        style={styles.characterBox}
-                                        onPress={() => handleCharacterModal(character.id)}
-                                    >
-                                        {selectedCharacter === character.id ? (
-                                            <View style={styles.gradientContainer}>
-                                                <LinearGradient
-                                                    colors={['#69E6A2', '#9BC9FE']}
-                                                    style={styles.selectedGradient}
-                                                >
-                                                    <View style={styles.imageContainer}>
-                                                        <Image
-                                                            source={character.image}
-                                                            style={styles.image}
-                                                        />
-                                                    </View>
-                                                </LinearGradient>
-                                            </View>
-                                        ) : (
-                                            <Image
-                                                source={character.image}
-                                                style={styles.image}
-                                            />
-                                        )}
-                                    </TouchableOpacity>
-                                ))}
-                                {/* empty CharacterBox */}
-                                {Array(3 - item.length).fill(null).map((_, index) => (
+                                <TouchableOpacity 
+                                    key={item.id} 
+                                    style={styles.characterBox}
+                                    onPress={() => handleCharacterModal(item.id)}
+                                >
+                                    {selectedCharacter === item.id ? (
+                                        <View style={styles.gradientContainer}>
+                                            <LinearGradient
+                                                colors={['#69E6A2', '#9BC9FE']}
+                                                style={styles.selectedGradient}
+                                            >
+                                                <View style={styles.imageContainer}>
+                                                    <Image
+                                                        source={item.image}
+                                                        style={styles.image}
+                                                    />
+                                                </View>
+                                            </LinearGradient>
+                                        </View>
+                                    ) : (
+                                        <Image
+                                            source={item.image}
+                                            style={styles.image}
+                                        />
+                                    )}
+                                </TouchableOpacity>
+                                {/* 빈 CharacterBox 추가 */}
+                                {Array(3 - 1).fill(null).map((_, index) => (
                                     <View key={index} style={styles.emptyBox} />
                                 ))}
                             </View>
                         )}
                     />
+                    )}
                 </View>
 
                 {/* 캐릭터 도감 팝업창 */}

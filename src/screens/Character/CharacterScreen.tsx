@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigation } from '@react-navigation/native';
+import React, { useState } from 'react';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import colors from "../../utils/colors";
 import LinearGradient from 'react-native-linear-gradient';
 import {
@@ -14,52 +14,71 @@ import {
 import CharacterRarity from '../../components/CharacterRarity';
 import GradientButton from "../../components/GradientButton";
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 function CharacterScreen(): React.JSX.Element {
     const navigation = useNavigation();
     const [character, setCharacter] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
     const apiUrl = process.env.REACT_APP_API_URL;
-    const accessToken = process.env.ACCESS_TOKEN;
+    //const accessToken = process.env.ACCESS_TOKEN;
 
-    useEffect(() => {
-        const fetchCharacterData = async () => {
-            try {
-                console.log('Access Token:', accessToken);
+    const fetchCharacterData = async () => {
+        setLoading(true);
+        try {
+            const accessToken = await AsyncStorage.getItem('token');
+            console.log('Access Token:', accessToken);
                 
-                const response = await fetch(`${apiUrl}/characters/main?timestamp=${new Date().getTime()}`, {
-                    method: 'GET',
-                    headers: {
-                        "Cache-Control":'no-store',
-                        "Content-Type":"application/json",
-                        access: `${accessToken}`,
-                    },
-                });
+            const response = await fetch(`${apiUrl}/characters/main?timestamp=${new Date().getTime()}`, {
+                method: 'GET',
+                headers: {
+                    "Cache-Control":'no-store',
+                    "Content-Type":"application/json",
+                    access: `${accessToken}`,
+                },
+            });
 
-                // response status
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const result = await response.json();
-
-                if (result.success) {
-                    setCharacter(result.data);
-                    console.log('Success');
+            // 토큰 갱신
+            if (response.status === 401) {
+                console.warn('Token expired, refreshing token...');
+                const newToken = await refreshToken();
+                if (newToken) {
+                    accessToken = newToken;
+                    await AsyncStorage.setItem('token', newToken);
+                    return fetchCharacterData();
                 } else {
-                    console.error(result.message);
-                    setCharacter(null);
+                    throw new Error('Failed to refresh token');
                 }
-            } catch (error) {
-                console.error('Error fetching character data:', error);
-                setCharacter(null);
-            } finally {
-                setLoading(false);
             }
-        };
 
-        fetchCharacterData();
-    }, [apiUrl, accessToken]);
+            // response status
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+
+            if (result.success) {
+                setCharacter(result.data);
+                console.log('Success');
+            } else {
+                console.error(result.message);
+                setCharacter(null);
+            }
+        } catch (error) {
+            console.error('Error fetching character data:', error);
+            setCharacter(null);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useFocusEffect(
+        React.useCallback(() => {
+            fetchCharacterData();
+        }, [apiUrl])
+    );
 
     if (loading) {
         return (
@@ -120,18 +139,6 @@ function CharacterScreen(): React.JSX.Element {
                         />
                     </View>
                 </View>
-
-                {/* for test.. */}
-                <TouchableOpacity onPress={() => navigation.navigate('LoginScreen')}>
-                    <Text style={{ textAlign: 'center' }}>LoginScreen</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => navigation.navigate('SignupScreen')}>
-                    <Text style={{ textAlign: 'center' }}>SignupScreen</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => navigation.navigate('WelcomeScreen')}>
-                    <Text style={{ textAlign: 'center' }}>WelcomeScreen</Text>
-                </TouchableOpacity>
-                {/* for test.. */}
             </LinearGradient>
         </View>
     );
