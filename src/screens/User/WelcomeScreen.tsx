@@ -8,7 +8,7 @@ function WelcomeScreen(): React.JSX.Element {
     
     useEffect(() => {
         const loading = setTimeout(() => {
-            navigation.navigate('HomeScreen');
+            navigation.navigate('Main');
         }, 1000);
     
         return () => clearTimeout(loading);
