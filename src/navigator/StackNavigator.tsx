@@ -18,8 +18,8 @@ import CameraScreen from '../screens/Quest/CameraScreen';
 import QuestConfirmationScreen from '../screens/Quest/QuestConfirmationScreen';
 
 // Character
-import CharacterScreen from '../screens/Character/CharacterScreen';
-import ListScreen from '../screens/Character/ListScreen';
+// import CharacterScreen from '../screens/Character/CharacterScreen';
+// import ListScreen from '../screens/Character/ListScreen';
 import DrawScreen from '../screens/Character/DrawScreen';
 import AnimalDrawScreen from '../screens/Character/AnimalDrawScreen';
 import DrawLoadingScreen from '../screens/Character/DrawLoadingScreen';
@@ -108,7 +108,7 @@ const StackNavigator = () => {
             />
 
             {/* Character */}
-            <Stack.Screen
+            {/* <Stack.Screen
                 name="CharacterScreen"
                 component={CharacterScreen}
                 options={{ headerShown: false }}
@@ -117,7 +117,7 @@ const StackNavigator = () => {
                 name="ListScreen"
                 component={ListScreen}
                 options={{ headerShown: false }}
-            />
+            /> */}
             <Stack.Screen
                 name="DrawScreen"
                 component={DrawScreen}
