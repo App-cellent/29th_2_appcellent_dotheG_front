@@ -95,8 +95,8 @@ function SignupScreen(): React.JSX.Element {
     const fetchSignupData = async () => {
         const formData = new FormData();
 
-        formData.append('userName', nickname); // 두더지
-        formData.append('userLogin', id); // user1
+        formData.append('userName', nickname); // 두더지, 수달, 참매, 꿀벌
+        formData.append('userLogin', id); // user1, user2, user3, user4
         formData.append('userPassword', password); // test123@
 
         try {
@@ -113,8 +113,8 @@ function SignupScreen(): React.JSX.Element {
 
             if (response.ok) {
                 console.log('API response:', result);
-                Alert.alert(result.message);
-                navigation.navigate('WelcomeScreen');
+                //Alert.alert(result.message);
+                navigation.navigate('WelcomeScreen', { nickname });
             } else {
                 Alert.alert(result.message || '회원가입 실패');
             }
