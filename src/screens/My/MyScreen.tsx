@@ -1,7 +1,7 @@
 import React, { useState,useEffect } from 'react';
 import MainHeader from '../../components/MainHeader';
 import PushNotification from 'react-native-push-notification';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   StyleSheet,
   Text,
@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 
 function MyScreen({ navigation }): React.JSX.Element {
-  const [alarmEnabled, setAlarmEnabled] = useState(false);
+  const [alarmEnabled, setAlarmEnabled] = useState(true);
   const [userName, setUserName] = useState("앱설런트");
   const [userId, setUserId] = useState("Appcellent123");
   const [nicknameModalVisible, setNicknameModalVisible] = useState(false);
@@ -24,6 +24,63 @@ function MyScreen({ navigation }): React.JSX.Element {
   const DAILY_GOAL = 7000;
   const WEEKLY_GOAL = 50000;
 
+  const apiUrl = process.env.REACT_APP_API_URL;
+
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const accessToken = await AsyncStorage.getItem('token');
+        console.log('Access Token:', accessToken);
+
+        const response = await fetch(`${apiUrl}/mypage/info?timestamp=${new Date().getTime()}`, {
+          method: 'GET',
+          headers: {
+            "Cache-Control": 'no-store',
+            "Content-Type": "application/json",
+            access: `${accessToken}`,
+          },
+        });
+
+        if (response.status === 401) {
+          console.warn('Token expired, refreshing token...');
+          const newToken = await refreshToken();
+          if (newToken) {
+            await AsyncStorage.setItem('token', newToken);
+            return fetchUserInfo();
+          } else {
+            throw new Error('Failed to refresh token');
+          }
+        }
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+
+        if (result.success) {
+          console.log("받은 사용자 데이터:", result.data);
+          setUserName(result.data.userName);
+          setUserId(result.data.userLogin);
+          setAlarmEnabled(result.data.noti);
+        } else {
+          console.error(result.message);
+          setUserName(null);
+          setUserId(null);
+          setAlarmEnabled(false);
+        }
+      } catch (error) {
+        console.error("사용자 정보 가져오기 중 오류 발생:", error);
+        setUserName(null);
+        setUserId(null);
+        setAlarmEnabled(false);
+      }
+    };
+
+    fetchUserInfo();
+  }, []);
+
+
   const openNicknameModal = () => {
     setNicknameModalVisible(true);
   };
@@ -32,15 +89,59 @@ function MyScreen({ navigation }): React.JSX.Element {
     setNicknameModalVisible(false);
   };
 
-  const handleChangeNickname = () => {
+  const handleChangeNickname = async () => {
     if (newNickname.trim()) {
-      setUserName(newNickname);
-      setNewNickname("");
-      setNicknameModalVisible(false);
+      try {
+        const accessToken = await AsyncStorage.getItem('token');
+        console.log('Access Token:', accessToken);
+
+        const response = await fetch(
+          `${apiUrl}/mypage/changeName?newName=${newNickname}&timestamp=${new Date().getTime()}`,
+          {
+            method: 'PATCH',
+            headers: {
+              "Cache-Control": 'no-store',
+              "Content-Type": "application/json",
+              access: `${accessToken}`,
+            },
+          }
+        );
+
+        if (response.status === 401) {
+          console.warn('Token expired, refreshing token...');
+          const newToken = await refreshToken();
+          if (newToken) {
+            await AsyncStorage.setItem('token', newToken);
+            return handleChangeNickname(); // 갱신된 토큰으로 재요청
+          } else {
+            throw new Error('Failed to refresh token');
+          }
+        }
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("받은 응답:", data);
+
+        if (data.success) {
+          setUserName(newNickname);
+          setNewNickname("");
+          setNicknameModalVisible(false);
+          alert("닉네임이 변경되었습니다.");
+        } else {
+          alert("닉네임 변경에 실패했습니다.");
+        }
+      } catch (error) {
+        console.error("닉네임 변경 중 오류가 발생했습니다.", error);
+        alert("서버 오류로 닉네임 변경에 실패했습니다.");
+      }
     } else {
       alert("닉네임을 입력해주세요.");
     }
   };
+
 
   const openLogoutModal = () => {
     setLogoutModalVisible(true);
@@ -50,9 +151,27 @@ function MyScreen({ navigation }): React.JSX.Element {
     setLogoutModalVisible(false);
   };
 
-  const handleLogout = () => {
-    alert("로그아웃 되었습니다.");
-    setLogoutModalVisible(false);
+  const handleLogout = async () => {
+    try {
+      // 저장된 토큰 제거
+      await AsyncStorage.removeItem('token');
+
+      // 상태 초기화
+      setUserName(null);
+      setUserId(null);
+      setAlarmEnabled(false);
+
+      // 로그인 화면으로 이동
+      navigation.reset({
+          index: 0,
+          routes: [{ name: 'LoginScreen' }],
+      });
+    } catch (error) {
+      console.error('로그아웃 중 오류 발생:', error);
+      alert('로그아웃 처리 중 오류가 발생했습니다. 다시 시도해주세요.');
+    } finally {
+      setLogoutModalVisible(false);
+    }
   };
 
   const goToWithdrawalScreen = () => {
@@ -67,8 +186,48 @@ function MyScreen({ navigation }): React.JSX.Element {
     navigation.navigate('PasswordChangeScreen');
   };
 
-  const toggleAlarm = () => {
-    setAlarmEnabled(!alarmEnabled);
+  const toggleAlarm = async () => {
+    try {
+      const accessToken = await AsyncStorage.getItem('token');
+      console.log('Access Token:', accessToken);
+
+      const response = await fetch(`${apiUrl}/mypage/toggleNoti?timestamp=${new Date().getTime()}`, {
+        method: 'PATCH',
+        headers: {
+          "Cache-Control": 'no-store',
+          "Content-Type": "application/json",
+          access: `${accessToken}`,
+        },
+      });
+
+      if (response.status === 401) {
+        console.warn('Token expired, refreshing token...');
+        const newToken = await refreshToken();
+        if (newToken) {
+          await AsyncStorage.setItem('token', newToken);
+          return toggleAlarm(); // 갱신된 토큰으로 재요청
+        } else {
+          throw new Error('Failed to refresh token');
+        }
+      }
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('알림 설정 변경 응답:', data);
+
+      if (data.success) {
+        setAlarmEnabled(!alarmEnabled);
+        console.log("알림 설정이 성공적으로 변경되었습니다.");
+      } else {
+        alert("알림 설정 변경에 실패했습니다.");
+      }
+    } catch (error) {
+      console.error("알림 설정 변경 중 오류가 발생했습니다.", error);
+      alert("서버 오류로 알림 설정 변경에 실패했습니다.");
+    }
   };
 
   useEffect(() => {

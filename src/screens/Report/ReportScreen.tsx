@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import MainHeader from '../../components/MainHeader';
 import BarGraph from '../../components/BarGraph';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   StyleSheet,
   Text,
@@ -40,6 +41,57 @@ function ReportScreen(): React.JSX.Element {
     { content: '텀블러 사용', count: 2 },
     { content: '만보기 목표 달성', count: 4 },
   ];
+
+  const apiUrl = process.env.REACT_APP_API_URL;
+  const [weeklyReport, setWeeklyReport] = useState(null);
+
+  const fetchWeeklyReportData = async () => {
+      try {
+        const accessToken = await AsyncStorage.getItem('token');
+        console.log('Access Token:', accessToken);
+
+        const response = await fetch(`${apiUrl}/reports/weekly?timestamp=${new Date().getTime()}`, {
+          method: 'GET',
+          headers: {
+            "Cache-Control": 'no-store',
+            "Content-Type": "application/json",
+            access: `${accessToken}`,
+          },
+        });
+
+        if (response.status === 401) {
+          console.warn('Token expired, refreshing token...');
+          const newToken = await refreshToken();
+          if (newToken) {
+            await AsyncStorage.setItem('token', newToken);
+            return fetchWeeklyReportData();
+          } else {
+            throw new Error('Failed to refresh token');
+          }
+        }
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+
+        if (result.success) {
+          setWeeklyReport(result.data);
+          console.log('Weekly report fetched successfully:', result.data);
+        } else {
+          console.error(result.message);
+          setWeeklyReport(null);
+        }
+      } catch (error) {
+        console.error('Error fetching weekly report data:', error);
+        setWeeklyReport(null);
+      }
+    };
+
+    useEffect(() => {
+      fetchWeeklyReportData();
+    }, []);
 
   const handleTabSwitch = (tab: string) => {
     setSelectedTab(tab);
@@ -82,9 +134,9 @@ function ReportScreen(): React.JSX.Element {
         </View>
       </View>
 
-      {selectedTab === '주간' && (
+      {selectedTab === '주간' && weeklyReport && (
         <View style={styles.content}>
-          <Text style={styles.dateText}>{year.toString()}년 {month.toString()}월 {week}</Text>
+          <Text style={styles.dateText}>{weeklyReport.yearMonthWeek}</Text>
           <View style={styles.usernameContainer}>
             <View style={styles.userTextContainer}>
               <Svg
@@ -104,7 +156,7 @@ function ReportScreen(): React.JSX.Element {
                   x="0"
                   y={usernameFontSize}
                 >
-                  {username}
+                  {weeklyReport.userName}
                 </SvgText>
               </Svg>
 
@@ -112,7 +164,7 @@ function ReportScreen(): React.JSX.Element {
                 style={[styles.hiddenText, { fontSize: usernameFontSize }]}
                 onLayout={handleTextLayout}
               >
-                {username}
+                {weeklyReport.userName}
               </Text>
               <Text style={styles.usernameText}>님의 지난 주</Text>
             </View>
@@ -127,7 +179,7 @@ function ReportScreen(): React.JSX.Element {
                   <Text style={styles.boxTitle}>지난 주 하루 평균 걸음수</Text>
                 </View>
                 <View style={styles.countContainer}>
-                  <Text style={styles.countNum}>{averageSteps.toLocaleString()}</Text>
+                  <Text style={styles.countNum}>{weeklyReport.weeklyAvgSteps.toLocaleString()}</Text>
                   <Text style={styles.countText}>걸음</Text>
                 </View>
               </View>
@@ -142,7 +194,7 @@ function ReportScreen(): React.JSX.Element {
                   <Text style={styles.historyTitle}>지난 주 인증 히스토리 (횟수)</Text>
                 </View>
                 <View style={styles.historyCountContainer}>
-                  <Text style={styles.historyCount}>{historyCount.toLocaleString()}</Text>
+                  <Text style={styles.historyCount}>{weeklyReport.totalCertifications.toLocaleString()}</Text>
                   <Text style={styles.historyText}>회</Text>
                 </View>
               </View>
@@ -163,10 +215,10 @@ function ReportScreen(): React.JSX.Element {
 
               {isHistoryOpen && (
                 <View style={styles.historyDetailsContainer}>
-                  {historyDetails.map((detail, index) => (
+                  {Object.entries(weeklyReport.activityCounts).map(([key, value], index) => (
                     <View key={index} style={styles.historyDetail}>
-                      <Text style={styles.historyDetailContent}>{detail.content}</Text>
-                      <Text style={styles.historyDetailCount}>{detail.count}회</Text>
+                      <Text style={styles.historyDetailContent}>{key}</Text>
+                      <Text style={styles.historyDetailCount}>{value}회</Text>
                     </View>
                   ))}
                 </View>

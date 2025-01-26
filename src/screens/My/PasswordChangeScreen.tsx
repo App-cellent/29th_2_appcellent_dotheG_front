@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import axios from "axios";
+import { REACT_APP_API_URL, ACCESS_TOKEN } from '@env';
 import {
   StyleSheet,
   Text,
@@ -36,6 +38,46 @@ function PasswordChangeScreen({ navigation }) {
     }
   };
 
+  /*
+  const handlePasswordCheck = async () => {
+    if (password.trim()) {
+      const token = ACCESS_TOKEN; // 사용할 토큰
+
+      try {
+        // 비밀번호 확인을 위한 fetch 요청
+        const response = await fetch(
+          `${REACT_APP_API_URL}/mypage/changePassword`,
+          {
+            method: 'PATCH',
+            headers: {
+              access: token
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json(); // 서버 응답 데이터 처리
+        console.log("받은 응답:", data);
+        if (data.success) {
+          setIsPasswordValid(true); // 비밀번호 확인 성공
+          alert('비밀번호 확인 완료');
+        } else {
+          setIsPasswordValid(false); // 비밀번호 확인 실패
+          alert('비밀번호가 일치하지 않습니다.');
+        }
+      } catch (error) {
+        console.error("비밀번호 확인 중 오류가 발생했습니다.", error);
+        alert("서버 오류로 비밀번호 확인에 실패했습니다.");
+      }
+    } else {
+      alert("현재 비밀번호를 입력해주세요.");
+    }
+  };
+  */
+
   const handleNewPasswordCheck = () => {
     const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,20}$/;
     if (regex.test(newPassword)) {
@@ -58,13 +100,65 @@ function PasswordChangeScreen({ navigation }) {
   };
 
   const handleChangePassword = () => {
-    setIsPasswordChanged(true);
+      setIsPasswordChanged(true);
 
-    // 2초 후 홈 화면으로 이동
-    setTimeout(() => {
-      navigation.navigate('Main');
-    }, 2000);
+      // 2초 후 홈 화면으로 이동
+      setTimeout(() => {
+        navigation.navigate('Main');
+      }, 2000);
+    };
+
+  /*
+  const handleChangePassword = async () => {
+    // 비밀번호가 모두 유효한지 확인
+    if (!isPasswordValid || !isNewPasswordValid || !isPasswordsMatch) {
+      alert("비밀번호 변경 조건을 만족하지 않습니다.");
+      return;
+    }
+
+    const token = ACCESS_TOKEN; // 사용할 토큰
+
+    // 요청 본문 데이터 설정
+    const requestBody = {
+      currentPassword: password,
+      newPassword: newPassword,
+      confirmedPassword: confirmPassword,
+    };
+
+    try {
+      // 비밀번호 변경을 위한 API 요청
+      const response = await fetch(`${REACT_APP_API_URL}/mypage/changePassword`, {
+        method: 'PATCH',
+        headers: {
+          access: token,
+        },
+        body: JSON.stringify(requestBody), // 요청 본문
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const data = await response.json(); // 서버 응답 데이터 처리
+      console.log("받은 응답:", data);
+
+      if (data.success) {
+        setIsPasswordChanged(true); // 비밀번호 변경 성공 처리
+        alert("비밀번호가 변경되었습니다.");
+
+        // 2초 후 홈 화면으로 이동
+        setTimeout(() => {
+          navigation.navigate('Main');
+        }, 2000);
+      } else {
+        alert("비밀번호 변경에 실패했습니다.");
+      }
+    } catch (error) {
+      console.error("비밀번호 변경 중 오류가 발생했습니다.", error);
+      alert("서버 오류로 비밀번호 변경에 실패했습니다.");
+    }
   };
+  */
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
