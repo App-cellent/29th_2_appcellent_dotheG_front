@@ -7,7 +7,8 @@ import {
     View, 
     Image, 
     TouchableOpacity,
-    TextInput
+    TextInput,
+    Alert
 } from 'react-native';
 
 import GradientButton from '../../components/GradientButton';
@@ -79,13 +80,49 @@ function SignupScreen(): React.JSX.Element {
         }
     };
 
-    // 모든 입력 조건 충족 시 가입하기 버튼 활성화화
+    // 모든 입력 조건 충족 시 가입하기 버튼 활성화
     const isFormValid =
         isIdValid &&
         isPasswordValid &&
         isPasswordMatch &&
         isNicknameValid &&
         isAgreeChecked;
+
+    
+    // 회원가입 API (GradientButton onPress)
+    const apiUrl = process.env.REACT_APP_API_URL;
+
+    const fetchSignupData = async () => {
+        const formData = new FormData();
+
+        formData.append('userName', nickname); // 두더지, 수달, 참매, 꿀벌
+        formData.append('userLogin', id); // user1, user2, user3, user4
+        formData.append('userPassword', password); // test123@
+
+        try {
+            const response = await fetch(`${apiUrl}/users/signup`, {
+                method: 'POST',
+                headers: {
+                    "Cache-Control":'no-store',
+                    "Accept":"application/json",
+                },
+                body: formData,
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                console.log('API response:', result);
+                //Alert.alert(result.message);
+                navigation.navigate('WelcomeScreen', { nickname });
+            } else {
+                Alert.alert(result.message || '회원가입 실패');
+            }
+        } catch (error) {
+            console.error('회원가입 에러:', error);
+            Alert.alert('회원가입 에러 발생');
+        }
+    };
 
     return(
         <View style={styles.container}>
@@ -278,7 +315,7 @@ function SignupScreen(): React.JSX.Element {
                     <View style={styles.gradientButtonContainer}>
                         <GradientButton
                             height={52} width={362} text="가입하기"
-                            onPress={() => navigation.navigate('WelcomeScreen')}
+                            onPress={fetchSignupData}
                         />
                     </View>
                 ) : (

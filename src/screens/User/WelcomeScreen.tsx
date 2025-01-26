@@ -1,15 +1,17 @@
 import * as React from 'react'
 import { useEffect } from 'react';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { StyleSheet, Text, View, ImageBackground } from 'react-native';
 
 function WelcomeScreen(): React.JSX.Element {
     const navigation = useNavigation();
+    const route = useRoute();
+    const { nickname } = route.params || {};
     
     useEffect(() => {
         const loading = setTimeout(() => {
-            navigation.navigate('HomeScreen');
-        }, 1000);
+            navigation.navigate('LoginScreen');
+        }, 2000);
     
         return () => clearTimeout(loading);
     }, [navigation]);
@@ -21,7 +23,7 @@ function WelcomeScreen(): React.JSX.Element {
                 style={styles.background}
             >
                 <Text style={styles.text}>
-                    <Text style={styles.userName}>앱설런트</Text>
+                    <Text style={styles.userName}>{nickname || '사용자'}</Text>
                     {' 님, 환영해요 :)'}
                 </Text>
             </ImageBackground>
