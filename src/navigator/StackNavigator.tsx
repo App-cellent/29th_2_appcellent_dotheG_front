@@ -7,7 +7,9 @@ import BottomTabNavigator from './BottomTabNavigator';
 
 import HomeScreen from '../screens/Home/HomeScreen';
 import TodayQuizGuideScreen from '../screens/Home/TodayQuizGuideScreen';
-import TodayQuizScreen from '../screens/Home/TodayQuizScreen';
+import TodayQuiz1Screen from '../screens/Home/TodayQuiz1Screen';
+import TodayQuiz2Screen from '../screens/Home/TodayQuiz2Screen';
+import TodayQuiz3Screen from '../screens/Home/TodayQuiz3Screen';
 import TodayQuizCorrectScreen from '../screens/Home/TodayQuizCorrectScreen';
 import TodayQuizWrongScreen from '../screens/Home/TodayQuizWrongScreen';
 
@@ -61,8 +63,20 @@ const StackNavigator = () => {
             />
 
             <Stack.Screen
-                name="TodayQuizScreen"
-                component={TodayQuizScreen}
+                name="TodayQuiz1Screen"
+                component={TodayQuiz1Screen}
+                options={{ headerShown: false }}
+            />
+
+            <Stack.Screen
+                name="TodayQuiz2Screen"
+                component={TodayQuiz2Screen}
+                options={{ headerShown: false }}
+            />
+
+            <Stack.Screen
+                name="TodayQuiz3Screen"
+                component={TodayQuiz3Screen}
                 options={{ headerShown: false }}
             />
 

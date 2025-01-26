@@ -133,7 +133,7 @@ function PedometerScreen(): React.JSX.Element {
             try {
                 const accessToken = await AsyncStorage.getItem('token');
                 const stepsInt = parseInt(steps, 10);
-                const response = await fetch(`${apiUrl}/steps/update?steps=60000`, {
+                const response = await fetch(`${apiUrl}/steps/update?steps=${stepsInt}`, {
                     method: 'PATCH',
                     headers: {
                         "Cache-Control": 'no-store',

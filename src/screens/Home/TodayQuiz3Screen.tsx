@@ -4,9 +4,10 @@ import colors from "../../utils/colors";
 import { getFontSize } from '../../utils/fontUtils';
 
 import GradientButton from "../../components/GradientButton";
-
 import GradientBackground from "../../img/Home/GradientBackground.png";
 import GradientEarth from "../../img/Home/GradientEarth.png";
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {
   ScrollView,
@@ -21,10 +22,14 @@ import {
 
 const { height } = Dimensions.get('window');
 
-function TodayQuizScreen(): React.JSX.Element {
+function TodayQuiz3Screen(): React.JSX.Element {
     const navigation = useNavigation();
     const apiUrl = process.env.REACT_APP_API_URL;
-    const accessToken = process.env.ACCESS_TOKEN;
+
+    const [quizTitle, setQuizTitle] = useState("");
+    const [quizText, setQuizText] = useState([]);
+    const [selectedAnswer, setSelectedAnswer] = useState(null);
+    const [responseMessage, setResponseMessage] = useState(""); // 서버에서 받은 메시지 상태 추가
 
     const currentDate = new Date();
 
@@ -34,23 +39,61 @@ function TodayQuizScreen(): React.JSX.Element {
         day: 'numeric',
     });
 
-    const handleNavigateQuizPress = useCallback(async () => {
-        navigation.navigate('TodayQuizWrongScreen');
-    }, [navigation]);
-
     useEffect(() => {
-        const fetchQuizData = async () => {
+            const fetchQuizData = async () => {
+                try {
+                    const accessToken = await AsyncStorage.getItem('token');
+                    const response = await fetch(`${apiUrl}/quiz/getQuiz?timestamp=${new Date().getTime()}`, {
+                        method: 'GET',
+                        headers: {
+                            "Cache-Control": 'no-store',
+                            "Content-Type": "application/json",
+                            access: `${accessToken}`,
+                        },
+                    });
+
+                    // 응답 상태
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        console.log(result.data);
+                        setQuizTitle(result.data.quizTitle);
+                        setQuizText(result.data.quizText);
+                    } else {
+                        console.error(result.message);
+                    }
+                } catch (error) {
+                    console.error('Error fetching today quiz data:', error);
+                }
+            };
+
+            fetchQuizData();
+        }, []);
+
+        const handleSelectAnswer = (answer) => {
+            setSelectedAnswer(answer);
+            console.log(answer);
+        };
+
+        const handleNavigateQuizPress = async () => {
             try {
-                const response = await fetch(`${apiUrl}/quiz/getQuiz?timestamp=${new Date().getTime()}`, {
-                    method: 'GET',
+                const accessToken = await AsyncStorage.getItem('token');
+                const response = await fetch(`${apiUrl}/quiz/answer?myAnswer=${selectedAnswer}`, {
+                    method: 'POST',
                     headers: {
-                        "Cache-Control":'no-store',
-                        "Content-Type":"application/json",
+                        "Cache-Control": 'no-store',
+                        "Content-Type": "application/json",
                         access: `${accessToken}`,
                     },
+                    body: JSON.stringify({
+                        selectedAnswer,
+                    }),
                 });
 
-                // 응답 상태
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
@@ -58,32 +101,25 @@ function TodayQuizScreen(): React.JSX.Element {
                 const result = await response.json();
 
                 if (result.success) {
-                    console.log(result.data);
+                    if (result.data === "정답입니다.") {
+                        navigation.navigate("TodayQuizCorrectScreen");
+                    } else {
+                        setResponseMessage(result.data);
+                        navigation.navigate("TodayQuizWrongScreen", {
+                            hintText: result.data,
+                            imageUrl: result.data.imageUrl || null,
+                        }); // Wrong screen
+                    }
                 } else {
                     console.error(result.message);
+                    setResponseMessage(result.message);  // Handle failure messages
                 }
             } catch (error) {
-                console.error('Error fetching today quiz data:', error);
-                setTodayYN(result.data);
-            } finally {
-                setLoading(false);
+                console.error('Error submitting quiz answer:', error);
+                setResponseMessage('퀴즈 제출에 실패했습니다.');
             }
         };
 
-        fetchQuizData();
-    }, []);
-
-    const [selectedAnswer, setSelectedAnswer] = useState(null);
-
-    const handleSelectAnswer = (answer) => {
-        setSelectedAnswer(answer);
-    };
-
-    useEffect(() => {
-        if (selectedAnswer !== null) {
-            console.log("선택된 답:", selectedAnswer);
-        }
-    }, [selectedAnswer]);
 
     return (
         <View style={styles.container}>
@@ -102,44 +138,26 @@ function TodayQuizScreen(): React.JSX.Element {
                     <Text style={[styles.GreenText, { color: colors.lightblack }]}> 오늘의 퀴즈</Text>
                 </View>
                 <View style={styles.rowContainer}>
-                    <Text style={styles.BoldLargeText}>Q. 다음 중 친환경 인증 마크에 해당하는 것은?</Text>
+                    <Text style={styles.BoldLargeText}>Q. {quizTitle}</Text>
                 </View>
             </View>
 
             <View style={styles.TwoAnswerContainer}>
               <TouchableOpacity
-                onPress={() => handleSelectAnswer('quiz1')}
+                onPress={() => handleSelectAnswer('O')}
               >
-                  <View style={[styles.Answer, selectedAnswer === 'quiz1' && styles.selected]}>
-                    <Image source={require('../../img/Home/Quiz/quiz1.png')} />
+                  <View style={[styles.Answer, selectedAnswer === 'O' && styles.selected]}>
+                    <Text style={styles.Selected}>O</Text>
                   </View>
               </TouchableOpacity>
               <TouchableOpacity
-                  onPress={() => handleSelectAnswer('quiz2')}
+                  onPress={() => handleSelectAnswer('X')}
                 >
-                <View style={[styles.Answer, selectedAnswer === 'quiz2' && styles.selected]}>
-                <Image source={require('../../img/Home/Quiz/quiz2.png')} />
+                <View style={[styles.Answer, selectedAnswer === 'X' && styles.selected]}>
+                    <Text style={styles.Selected}>X</Text>
                 </View>
                 </TouchableOpacity>
             </View>
-
-            <View style={styles.TwoAnswerContainer}>
-            <TouchableOpacity
-                onPress={() => handleSelectAnswer('quiz3')}
-              >
-              <View style={[styles.Answer, selectedAnswer === 'quiz3' && styles.selected]}>
-                <Image source={require('../../img/Home/Quiz/quiz3.png')} />
-              </View>
-              </TouchableOpacity>
-              <TouchableOpacity
-                  onPress={() => handleSelectAnswer('quiz4')}
-                >
-              <View style={[styles.Answer, selectedAnswer === 'quiz4' && styles.selected]}>
-                <Image source={require('../../img/Home/Quiz/quiz4.png')} />
-              </View>
-              </TouchableOpacity>
-            </View>
-
             <View style={styles.BtnContainer}>
                 <GradientButton height={56} width={328} text="제출하기" onPress={handleNavigateQuizPress} isDisabled={selectedAnswer === null}/>
             </View>
@@ -203,7 +221,12 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginTop: 191,
     },
+    Selected:{
+        color: colors.lightblack,
+        fontSize: getFontSize(100),
+        fontWeight: '700',
+    }
 });
 
-export default TodayQuizScreen;
+export default TodayQuiz3Screen;
 
