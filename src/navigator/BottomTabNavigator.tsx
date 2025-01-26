@@ -6,13 +6,17 @@
  */
 
 import React, { Component } from 'react';
-import HomeScreen from '../screens/Home/HomeScreen';
-import CharacterScreen from '../screens/Character/CharacterScreen';
-import MyScreen from '../screens/My/MyScreen';
-import PedometerScreen from '../screens/Pedometer/PedometerScreen';
-import ReportScreen from '../screens/Report/ReportScreen';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SvgXml } from 'react-native-svg';
+
+import HomeScreen from '../screens/Home/HomeScreen';
+import PedometerScreen from '../screens/Pedometer/PedometerScreen';
+import CharacterScreen from '../screens/Character/CharacterScreen';
+import ListScreen from '../screens/Character/ListScreen';
+import ReportScreen from '../screens/Report/ReportScreen';
+import MyScreen from '../screens/My/MyScreen';
+
 import HomeIcon from '../img/Navigator/HomeIcon.svg';
 import PedometerIcon from '../img/Navigator/PedometerIcon.svg';
 import CharacterIcon from '../img/Navigator/CharacterIcon.svg';
@@ -34,8 +38,19 @@ import MyActiveIcon from '../img/Navigator/MyActiveIcon.svg';
 //   View,
 // } from 'react-native';
 
+const Tab = createBottomTabNavigator();
+const Stack = createNativeStackNavigator();
+
+function CharacterStackNavigator() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="CharacterScreen" component={CharacterScreen} />
+      <Stack.Screen name="ListScreen" component={ListScreen} />
+    </Stack.Navigator>
+  );
+}
+
 function BottomTabNavigator(): React.JSX.Element {
-  const Tab = createBottomTabNavigator();
   return (
     <Tab.Navigator
       screenOptions={{
@@ -85,7 +100,7 @@ function BottomTabNavigator(): React.JSX.Element {
       />
       <Tab.Screen
           name="Character"
-          component={CharacterScreen}
+          component={CharacterStackNavigator}
           options={{
             title: '캐릭터',
             tabBarIcon: ({focused}) => (

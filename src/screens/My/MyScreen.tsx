@@ -1,6 +1,7 @@
 import React, { useState,useEffect } from 'react';
 import MainHeader from '../../components/MainHeader';
 import PushNotification from 'react-native-push-notification';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   StyleSheet,
   Text,
@@ -28,7 +29,6 @@ function MyScreen({ navigation }): React.JSX.Element {
   const WEEKLY_GOAL = 50000;
 
   const apiUrl = process.env.REACT_APP_API_URL;
-  const accessToken = process.env.ACCESS_TOKEN;
 
   useEffect(() => {
           FirebaseModule.getDeviceToken((token) => {
@@ -44,25 +44,51 @@ function MyScreen({ navigation }): React.JSX.Element {
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
+        const accessToken = await AsyncStorage.getItem('token');
+        console.log('Access Token:', accessToken);
+
         const response = await fetch(`${apiUrl}/mypage/info?timestamp=${new Date().getTime()}`, {
           method: 'GET',
           headers: {
-            "Cache-Control":'no-store',
+            "Cache-Control": 'no-store',
+            "Content-Type": "application/json",
             access: `${accessToken}`,
           },
         });
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
+        if (response.status === 401) {
+          console.warn('Token expired, refreshing token...');
+          const newToken = await refreshToken();
+          if (newToken) {
+            await AsyncStorage.setItem('token', newToken);
+            return fetchUserInfo();
+          } else {
+            throw new Error('Failed to refresh token');
+          }
         }
 
-        const data = await response.json();
-        console.log("받은 사용자 데이터:", data);
-        setUserName(data.data.userName);
-        setUserId(data.data.userLogin);
-        setAlarmEnabled(data.data.noti);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+
+        if (result.success) {
+          console.log("받은 사용자 데이터:", result.data);
+          setUserName(result.data.userName);
+          setUserId(result.data.userLogin);
+          setAlarmEnabled(result.data.noti);
+        } else {
+          console.error(result.message);
+          setUserName(null);
+          setUserId(null);
+          setAlarmEnabled(false);
+        }
       } catch (error) {
-        console.error("사용자 정보 가져오기 중 오류 발생", error);
+        console.error("사용자 정보 가져오기 중 오류 발생:", error);
+        setUserName(null);
+        setUserId(null);
+        setAlarmEnabled(false);
       }
     };
 
@@ -81,16 +107,31 @@ function MyScreen({ navigation }): React.JSX.Element {
   const handleChangeNickname = async () => {
     if (newNickname.trim()) {
       try {
+        const accessToken = await AsyncStorage.getItem('token');
+        console.log('Access Token:', accessToken);
+
         const response = await fetch(
           `${apiUrl}/mypage/changeName?newName=${newNickname}&timestamp=${new Date().getTime()}`,
           {
             method: 'PATCH',
             headers: {
-              "Cache-Control":'no-store',
+              "Cache-Control": 'no-store',
+              "Content-Type": "application/json",
               access: `${accessToken}`,
             },
           }
         );
+
+        if (response.status === 401) {
+          console.warn('Token expired, refreshing token...');
+          const newToken = await refreshToken();
+          if (newToken) {
+            await AsyncStorage.setItem('token', newToken);
+            return handleChangeNickname(); // 갱신된 토큰으로 재요청
+          } else {
+            throw new Error('Failed to refresh token');
+          }
+        }
 
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
@@ -98,6 +139,7 @@ function MyScreen({ navigation }): React.JSX.Element {
 
         const data = await response.json();
         console.log("받은 응답:", data);
+
         if (data.success) {
           setUserName(newNickname);
           setNewNickname("");
@@ -115,6 +157,7 @@ function MyScreen({ navigation }): React.JSX.Element {
     }
   };
 
+
   const openLogoutModal = () => {
     setLogoutModalVisible(true);
   };
@@ -123,9 +166,27 @@ function MyScreen({ navigation }): React.JSX.Element {
     setLogoutModalVisible(false);
   };
 
-  const handleLogout = () => {
-    alert("로그아웃 되었습니다.");
-    setLogoutModalVisible(false);
+  const handleLogout = async () => {
+    try {
+      // 저장된 토큰 제거
+      await AsyncStorage.removeItem('token');
+
+      // 상태 초기화
+      setUserName(null);
+      setUserId(null);
+      setAlarmEnabled(false);
+
+      // 로그인 화면으로 이동
+      navigation.reset({
+          index: 0,
+          routes: [{ name: 'LoginScreen' }],
+      });
+    } catch (error) {
+      console.error('로그아웃 중 오류 발생:', error);
+      alert('로그아웃 처리 중 오류가 발생했습니다. 다시 시도해주세요.');
+    } finally {
+      setLogoutModalVisible(false);
+    }
   };
 
   const goToWithdrawalScreen = () => {
@@ -142,13 +203,28 @@ function MyScreen({ navigation }): React.JSX.Element {
 
   const toggleAlarm = async () => {
     try {
+      const accessToken = await AsyncStorage.getItem('token');
+      console.log('Access Token:', accessToken);
+
       const response = await fetch(`${apiUrl}/mypage/toggleNoti?timestamp=${new Date().getTime()}`, {
         method: 'PATCH',
         headers: {
-          "Cache-Control":'no-store',
+          "Cache-Control": 'no-store',
+          "Content-Type": "application/json",
           access: `${accessToken}`,
         },
       });
+
+      if (response.status === 401) {
+        console.warn('Token expired, refreshing token...');
+        const newToken = await refreshToken();
+        if (newToken) {
+          await AsyncStorage.setItem('token', newToken);
+          return toggleAlarm(); // 갱신된 토큰으로 재요청
+        } else {
+          throw new Error('Failed to refresh token');
+        }
+      }
 
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
@@ -156,6 +232,7 @@ function MyScreen({ navigation }): React.JSX.Element {
 
       const data = await response.json();
       console.log('알림 설정 변경 응답:', data);
+
       if (data.success) {
         setAlarmEnabled(!alarmEnabled);
         console.log("알림 설정이 성공적으로 변경되었습니다.");
