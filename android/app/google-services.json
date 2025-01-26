@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "901710714249",
+    "project_id": "dotheg-43475",
+    "storage_bucket": "dotheg-43475.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:901710714249:android:ce1c5874f69210d8627d58",
+        "android_client_info": {
+          "package_name": "com.dothegnav"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDivR-LYhNSBp4X5hORTX30NoNOFzd391o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

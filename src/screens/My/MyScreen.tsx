@@ -9,7 +9,11 @@ import {
   TouchableOpacity,
   TextInput,
   Modal,
+  NativeModules,
+  Alert,
 } from 'react-native';
+
+const { FirebaseModule } = NativeModules;
 
 function MyScreen({ navigation }): React.JSX.Element {
   const [alarmEnabled, setAlarmEnabled] = useState(true);
@@ -25,6 +29,17 @@ function MyScreen({ navigation }): React.JSX.Element {
 
   const apiUrl = process.env.REACT_APP_API_URL;
   const accessToken = process.env.ACCESS_TOKEN;
+
+  useEffect(() => {
+          FirebaseModule.getDeviceToken((token) => {
+              if (token) {
+                  console.log('FCM Device Token:', token);
+                  // 토큰을 백엔드로 전송하거나 로컬 상태에 저장
+              } else {
+                  console.error('FCM 토큰을 가져올 수 없습니다.');
+              }
+          });
+      }, []);
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -67,7 +82,7 @@ function MyScreen({ navigation }): React.JSX.Element {
     if (newNickname.trim()) {
       try {
         const response = await fetch(
-          `${apiUrl}/mypage/changeName?newName=${newNickname}?timestamp=${new Date().getTime()}`,
+          `${apiUrl}/mypage/changeName?newName=${newNickname}&timestamp=${new Date().getTime()}`,
           {
             method: 'PATCH',
             headers: {
