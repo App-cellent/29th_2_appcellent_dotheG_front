@@ -1,5 +1,5 @@
-import React, { useCallback, useState, useEffect } from 'react';
-import { useNavigation } from '@react-navigation/native';
+import React, { useCallback } from 'react';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import colors from "../../utils/colors";
 import { getFontSize } from '../../utils/fontUtils';
 
@@ -11,7 +11,6 @@ import {
   Text,
   View,
   Image,
-  ImageBackground,
   Dimensions,
   TouchableOpacity
 } from 'react-native';
@@ -19,28 +18,24 @@ import {
 const { height } = Dimensions.get('window');
 
 function TodayQuizWrongScreen(): React.JSX.Element {
-    const titleText = '오답이에요. 친환경 인증 마크, 다시 확인해보세요!';
-    const contentText = '친환경 인증 마크’는 친환경 제품에 대한 자발적 기업 생산 및 소비 활성화를 위한 환경표지인증 제도에요. 1992년부터 현재까지 진행되고 있는 사업이에요. 사무용 기기·가구 및 사무용품, 주택·건설용 자재·재료 및 설비, 개인용품 및 가정용품, 가정용 기기·가구 등 우리의 생활 곳곳에서 만나볼 수 있는 친근한 마크 중 하나입니다!'
-
     const navigation = useNavigation();
+    const route = useRoute();
 
-    const currentDate = new Date();
+    // Extract data passed from TodayQuiz1Screen
+    const { hintText, imageUrl } = route.params;
 
-    const formattedDate = currentDate.toLocaleDateString('ko-KR', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-    });
+    const titleText = '오답이에요. 다시 확인해보세요!';
+    const contentText = hintText || '해설을 불러오는데 실패했습니다.';  // Fallback if no hintText is provided
 
     const handleNavigateQuizPress = useCallback(async () => {
-        navigation.popToTop();
+        navigation.navigate("HomeScreen");
     }, [navigation]);
 
     return (
         <View style={styles.container}>
             <View style={styles.TopTextContainer}>
-                <View style={[styles.rowContainer, {marginBottom: 10}]}>
-                    <Text style={styles.GreenText}>{formattedDate}</Text>
+                <View style={[styles.rowContainer, { marginBottom: 10 }]}>
+                    <Text style={styles.GreenText}>{new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}</Text>
                     <Text style={[styles.GreenText, { color: colors.lightblack }]}> 오늘의 퀴즈</Text>
                 </View>
                 <View style={styles.rowContainer}>
@@ -48,9 +43,11 @@ function TodayQuizWrongScreen(): React.JSX.Element {
                 </View>
             </View>
 
-            <View style={styles.imageContainer}>
-                <Image source={require('../../img/Home/Quiz/quiz1.png')} style={styles.answerImage} />
-            </View>
+            {imageUrl ? (
+                <View style={styles.imageContainer}>
+                    <Image source={{ uri: imageUrl }} style={styles.answerImage} />
+                </View>
+            ) : null}
 
             <View style={styles.textContainer}>
                 <Text style={styles.ContentText}>{contentText}</Text>
@@ -69,18 +66,10 @@ const styles = StyleSheet.create({
         backgroundColor: '#FFFFFF',
         alignItems: 'center',
     },
-    header: {
-        alignItems: 'flex-start',
-        justifyContent: 'center',
-        paddingHorizontal: 18,
-    },
-    closeIcon: {
-        width: 7.13,
-        height: 14,
-    },
     TopTextContainer: {
         paddingHorizontal: 22,
         marginTop: 85,
+        alignSelf: 'flex-start',
     },
     imageContainer: {
         width: 266,
@@ -93,13 +82,14 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     textContainer: {
-        marginHorizontal: 47,
+        marginHorizontal: 22,
+        alignSelf: 'flex-start',
     },
-    answerImage:{
+    answerImage: {
         width: 170,
         height: 170,
     },
-    rowContainer:{
+    rowContainer: {
         flexDirection: 'row',
     },
     GreenText: {
@@ -123,7 +113,7 @@ const styles = StyleSheet.create({
     BtnContainer: {
         marginHorizontal: 16,
         alignItems: 'center',
-        marginTop: 70,
+        marginTop: 491,
     },
 });
 

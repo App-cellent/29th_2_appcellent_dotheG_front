@@ -4,9 +4,10 @@ import colors from "../../utils/colors";
 import { getFontSize } from '../../utils/fontUtils';
 
 import GradientButton from "../../components/GradientButton";
-
 import GradientBackground from "../../img/Home/GradientBackground.png";
 import GradientEarth from "../../img/Home/GradientEarth.png";
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {
   ScrollView,
@@ -23,10 +24,11 @@ const { height } = Dimensions.get('window');
 
 function TodayQuizGuideScreen(): React.JSX.Element {
     const navigation = useNavigation();
+    const [quizType, setQuizType] = useState(null);
     const apiUrl = process.env.REACT_APP_API_URL;
-    const accessToken = process.env.ACCESS_TOKEN;
 
-    const [todayYN, setTodayYN] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [quizAvailable, setQuizAvailable] = useState(true);
 
     const currentDate = new Date();
 
@@ -39,7 +41,8 @@ function TodayQuizGuideScreen(): React.JSX.Element {
     useEffect(() => {
         const fetchQuizData = async () => {
             try {
-                const response = await fetch(`${apiUrl}/quiz?timestamp=${new Date().getTime()}`, {
+                const accessToken = await AsyncStorage.getItem('token');
+                const response = await fetch(`${apiUrl}/quiz/getQuiz?timestamp=${new Date().getTime()}`, {
                     method: 'GET',
                     headers: {
                         "Cache-Control":'no-store',
@@ -47,6 +50,11 @@ function TodayQuizGuideScreen(): React.JSX.Element {
                         access: `${accessToken}`,
                     },
                 });
+
+                if (response.status === 404) {
+                  setQuizAvailable(false);
+                  console.log("404");
+                }
 
                 // 응답 상태
                 if (!response.ok) {
@@ -56,13 +64,17 @@ function TodayQuizGuideScreen(): React.JSX.Element {
                 const result = await response.json();
 
                 if (result.success) {
-                    setTodayYN(result.data);
-                } else {
+                    console.log(result.data);
+                    setQuizType(result.data.quizType);
+                    setQuizAvailable(true);
+                }
+                else {
                     console.error(result.message);
+                    setQuizAvailable(false);
                 }
             } catch (error) {
                 console.error('Error fetching today quiz data:', error);
-                setTodayYN(result.data);
+                setQuizAvailable(false);
             } finally {
                 setLoading(false);
             }
@@ -74,6 +86,16 @@ function TodayQuizGuideScreen(): React.JSX.Element {
     const handleNavigateQuizPress = useCallback(async () => {
         navigation.navigate('TodayQuizScreen');
     }, [navigation]);
+
+    const navigateToQuiz = () => {
+        if (quizType === 1) {
+            navigation.navigate('TodayQuiz1Screen');
+        } else if (quizType === 2) {
+            navigation.navigate('TodayQuiz2Screen');
+        } else if (quizType === 3) {
+            navigation.navigate('TodayQuiz3Screen');
+        }
+    };
 
     return (
         <View style={styles.container}>
@@ -106,7 +128,7 @@ function TodayQuizGuideScreen(): React.JSX.Element {
             </View>
 
             <View style={styles.BtnContainer}> /* 오늘 안 풀었으면 false -> 풀었으면 true, isDisabled */
-                <GradientButton height={56} width={328} text="퀴즈 풀기" isDisabled={todayYN} onPress={handleNavigateQuizPress}/>
+                <GradientButton height={56} width={328} text="퀴즈 풀기" isDisabled={!quizAvailable} onPress={navigateToQuiz}/>
             </View>
         </View>
     );
