@@ -8,6 +8,8 @@ import MainHeader from '../../components/MainHeader';
 import LinearGradientBackground from 'react-native-linear-gradient';
 import SeedIcon from '../../img/Home/SeedIcon.svg';
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import Svg, { Text as SvgText, Defs, LinearGradient, Stop } from 'react-native-svg';
 import {
   SafeAreaView,
@@ -27,7 +29,6 @@ import {
 function PedometerScreen(): React.JSX.Element {
     const currentDate = new Date();
     const apiUrl = process.env.REACT_APP_API_URL;
-    const accessToken = process.env.ACCESS_TOKEN;
 
     const formattedDate = currentDate.toLocaleDateString('ko-KR', {
         year: 'numeric',
@@ -64,6 +65,7 @@ function PedometerScreen(): React.JSX.Element {
 
         const fetchStepData = async () => {
             try {
+                const accessToken = await AsyncStorage.getItem('token');
                 const response = await fetch(`${apiUrl}/steps/summary?timestamp=${new Date().getTime()}`, {
                     method: 'GET',
                     headers: {
@@ -129,6 +131,7 @@ function PedometerScreen(): React.JSX.Element {
     useEffect(() => {
         const fetchUpdateSteps = async (steps) => {
             try {
+                const accessToken = await AsyncStorage.getItem('token');
                 const stepsInt = parseInt(steps, 10);
                 const response = await fetch(`${apiUrl}/steps/update?steps=60000`, {
                     method: 'PATCH',
@@ -182,6 +185,7 @@ function PedometerScreen(): React.JSX.Element {
     useEffect(() => {
         const fetchRewardState = async () => {
             try {
+                const accessToken = await AsyncStorage.getItem('token');
                 const response = await fetch(`${apiUrl}/steps/reward/state`, {
                     method: 'GET',
                     headers: {
@@ -214,6 +218,7 @@ function PedometerScreen(): React.JSX.Element {
 
     const fetchTodayReward = async () => {
         try {
+            const accessToken = await AsyncStorage.getItem('token');
             const response = await fetch(`${apiUrl}/steps/reward/today`, {
                 method: 'PATCH',
                 headers: {
@@ -244,6 +249,7 @@ function PedometerScreen(): React.JSX.Element {
 
     const fetchWeekReward = async () => {
         try {
+            const accessToken = await AsyncStorage.getItem('token');
             const response = await fetch(`${apiUrl}/steps/reward/weekly`, {
                 method: 'PATCH',
                 headers: {

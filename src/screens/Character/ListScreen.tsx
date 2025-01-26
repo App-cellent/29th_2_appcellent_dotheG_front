@@ -20,17 +20,17 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // 임시 더미 데이터
 const characters = [
-    { id: 1, name: '땅에서 갓 튀어나온 두더지', rarity: '흔함', image: require('../../img/Character/mole/[1]mole1.png') },
-    { id: 2, name: '비행하는 꿀벌', rarity: '흔함', image: require('../../img/Character/honeybee/[13]honeybee1.png') },
-    { id: 3, name: '흙이 부족해 화난 두더지', rarity: '보통', image: require('../../img/Character/mole/[2]mole2.png') },
-    { id: 4, name: '꽃에 물주는 꿀벌', rarity: '보통', image: require('../../img/Character/honeybee/[14]honeybee2.png') },
-    { id: 5, name: '수줍은 두더지', rarity: '희귀', image: require('../../img/Character/mole/[3]mole3.png') },
-    { id: 6, name: '꽃을 떼다 만 꿀벌', rarity: '희귀', image: require('../../img/Character/honeybee/[15]honeybee3.png') },
-    { id: 7, name: '삽을 든 두더지', rarity: '매우희귀', image: require('../../img/Character/mole/[4]mole4.png') },
-    { id: 8, name: '행복한 꿀벌', rarity: '매우희귀', image: require('../../img/Character/honeybee/[16]honeybee4.png') },
-    { id: 9, name: '파란 지구', rarity: '매우희귀', image: require('../../img/Character/bonus/[17]earth.png') },
-    { id: 10, name: '네잎클로버', rarity: '매우희귀', image: require('../../img/Character/bonus/[18]clover.png') },
-    { id: 11, name: '구름에 가려진 햇빛', rarity: '매우희귀', image: require('../../img/Character/bonus/[19]sun.png') },
+    { id: 1, name: '땅에서 갓 튀어나온 두더지', rarity: '흔함', image: require('../../img/Character/Image/1.png') },
+    { id: 2, name: '비행하는 꿀벌', rarity: '흔함', image: require('../../img/Character/Image/13.png') },
+    { id: 3, name: '흙이 부족해 화난 두더지', rarity: '보통', image: require('../../img/Character/Image/2.png') },
+    { id: 4, name: '꽃에 물주는 꿀벌', rarity: '보통', image: require('../../img/Character/Image/14.png') },
+    { id: 5, name: '수줍은 두더지', rarity: '희귀', image: require('../../img/Character/Image/3.png') },
+    { id: 6, name: '꽃을 떼다 만 꿀벌', rarity: '희귀', image: require('../../img/Character/Image/15.png') },
+    { id: 7, name: '삽을 든 두더지', rarity: '매우희귀', image: require('../../img/Character/Image/4.png') },
+    { id: 8, name: '행복한 꿀벌', rarity: '매우희귀', image: require('../../img/Character/Image/16.png') },
+    { id: 9, name: '파란 지구', rarity: '매우희귀', image: require('../../img/Character/Image/17.png') },
+    { id: 10, name: '네잎클로버', rarity: '매우희귀', image: require('../../img/Character/Image/18.png') },
+    { id: 11, name: '구름에 가려진 햇빛', rarity: '매우희귀', image: require('../../img/Character/Image/19.png') },
 ];
 
 // 대표 캐릭터 지정 팝업창
