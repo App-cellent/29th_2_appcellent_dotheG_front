@@ -40,100 +40,65 @@ function PedometerScreen(): React.JSX.Element {
     const [weekGoalYN, setWeekGoalYN] = useState(false);
     const [todayModalVisible, setTodayModalVisible] = useState(false);
     const [weekModalVisible, setWeekModalVisible] = useState(false);
+
     const [todayStep, setTodayStep] = useState(0);
-    const [lastStepCount, setLastStepCount] = useState(todayStep);
     const [weekStep, setWeekStep] = useState(0);
     const [totalStep, setTotalStep] = useState(0);
     const [carbonReduction, setCarbonReduction] = useState(0.0);
+    const [lastStepCount, setLastStepCount] = useState(0);  // 초기값을 0으로 설정
+    const todayTargetStep = 7000;
+    const monthTargetStep = 50000;
+
     const [todayReward, setTodayReward] = useState(false);
     const [weekReward, setWeekReward] = useState(false);
     const [todayRewardState, setTodayRewardState] = useState(false);
     const [weekRewardState, setWeekRewardState] = useState(false);
-    const todayTargetStep = 7000;
-    const monthTargetStep = 50000;
 
     const confirmTargetStep = () => {
-        setTodayGoalYN(todayStep >= todayTargetStep);
-        setWeekGoalYN(weekStep >= monthTargetStep);
-    };
+        if (todayStep >= todayTargetStep) setTodayGoalYN(true);
+        else setTodayGoalYN(false);
+        if (weekStep >= monthTargetStep) setWeekGoalYN(true);
+        else setWeekGoalYN(false);
+    }
 
     useEffect(() => {
         const fetchStepData = async () => {
             try {
                 const accessToken = await AsyncStorage.getItem('token');
-                const response = await fetch(`${apiUrl}/steps/summary?timestamp=${Date.now()}`, {
+                const response = await fetch(`${apiUrl}/steps/summary?timestamp=${new Date().getTime()}`, {
                     method: 'GET',
                     headers: {
                         "Cache-Control": 'no-store',
                         "Content-Type": "application/json",
-                        access: accessToken,
+                        access: `${accessToken}`,
                     },
                 });
 
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
                 const result = await response.json();
 
                 if (result.success) {
-                    const { today, week, total, carbonReduction } = result.data;
-                    setTodayStep(today);
-                    setLastStepCount(today);
-                    setWeekStep(week);
-                    setTotalStep(total);
-                    setCarbonReduction(carbonReduction);
+                    console.log(result.data);
+                    setTodayStep(result.data.today);
+                    setLastStepCount(result.data.today);  // API에서 받아온 today 값으로 lastStepCount 초기화
+                    setWeekStep(result.data.week);
+                    setTotalStep(result.data.total);
+                    setCarbonReduction(result.data.carbonReduction);
+                } else {
+                    console.error(result.message);
                 }
             } catch (error) {
                 console.error('Error fetching step data:', error);
+            } finally {
+                setLoading(false);
             }
         };
 
         fetchStepData();
     }, []);
-
-    useEffect(() => {
-        if (todayStep > 0) {
-            fetchUpdateSteps(todayStep);
-        }
-    }, [todayStep]);
-
-    const fetchUpdateSteps = async (steps) => {
-        try {
-            const accessToken = await AsyncStorage.getItem('token');
-            const response = await fetch(`${apiUrl}/steps/update?steps=${steps}`, {
-                method: 'PATCH',
-                headers: {
-                    "Cache-Control": 'no-store',
-                    "Content-Type": "application/json",
-                    access: accessToken,
-                },
-            });
-
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            const result = await response.json();
-
-            if (result.success) {
-                const summaryResponse = await fetch(`${apiUrl}/steps/summary?timestamp=${Date.now()}`, {
-                    method: 'GET',
-                    headers: {
-                        "Cache-Control": 'no-store',
-                        "Content-Type": "application/json",
-                        access: accessToken,
-                    },
-                });
-
-                const summaryResult = await summaryResponse.json();
-                if (summaryResult.success) {
-                    const { today, week, total, carbonReduction } = summaryResult.data;
-                    setTodayStep(today);
-                    setWeekStep(week);
-                    setTotalStep(total);
-                    setCarbonReduction(carbonReduction);
-                    confirmTargetStep();
-                }
-            }
-        } catch (error) {
-            console.error('Error updating steps:', error);
-        }
-    };
 
     const stepRef = useRef(todayStep);
 
@@ -143,13 +108,15 @@ function PedometerScreen(): React.JSX.Element {
             default_delay: 150000000,
             cheatInterval: 3000,
             onStepCountChange: (stepCount) => {
-                if (stepCount > lastStepCount) {
-                    if (stepCount !== todayStep) {
-                        setTodayStep(stepCount);
-                        setLastStepCount(stepCount);
-                    }
+                // API에서 받아온 이전 걸음 수에 새로운 걸음 수를 더함
+                const newStepCount = lastStepCount + (stepCount - (stepRef.current || 0));
+                if (newStepCount > lastStepCount) {
+                    setTodayStep(newStepCount);
+                    setLastStepCount(newStepCount);
+                    stepRef.current = stepCount;
                 }
-                if (stepCount >= todayTargetStep) {
+
+                if (newStepCount >= todayTargetStep) {
                     setWeekGoalYN(true);
                 }
             },
@@ -159,8 +126,64 @@ function PedometerScreen(): React.JSX.Element {
         };
 
         startCounter(config);
+
         return () => { stopCounter(); };
     }, [lastStepCount]);
+
+    useEffect(() => {
+        const fetchUpdateSteps = async (steps) => {
+            try {
+                const accessToken = await AsyncStorage.getItem('token');
+                const stepsInt = parseInt(steps, 10);
+                const response = await fetch(`${apiUrl}/steps/update?steps=${stepsInt}`, {
+                    method: 'PATCH',
+                    headers: {
+                        "Cache-Control": 'no-store',
+                        "Content-Type": "application/json",
+                        access: `${accessToken}`,
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                if (result.success) {
+                    const summaryResponse = await fetch(`${apiUrl}/steps/summary?timestamp=${new Date().getTime()}`, {
+                        method: 'GET',
+                        headers: {
+                            "Cache-Control": 'no-store',
+                            "Content-Type": "application/json",
+                            access: `${accessToken}`,
+                        },
+                    });
+
+                    const summaryResult = await summaryResponse.json();
+
+                    if (summaryResult.success) {
+                        setTodayStep(summaryResult.data.today);
+                        setLastStepCount(summaryResult.data.today);  // API 업데이트 후에도 lastStepCount 업데이트
+                        setWeekStep(summaryResult.data.week);
+                        setTotalStep(summaryResult.data.total);
+                        setCarbonReduction(summaryResult.data.carbonReduction);
+                        confirmTargetStep();
+                    }
+                } else {
+                    console.error(result.message);
+                }
+            } catch (error) {
+                console.error('Error updating and fetching steps:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (todayStep > 0) {
+            fetchUpdateSteps(todayStep);
+        }
+    }, [todayStep]);
 
     useEffect(() => {
         const fetchRewardState = async () => {
@@ -171,17 +194,22 @@ function PedometerScreen(): React.JSX.Element {
                     headers: {
                         "Cache-Control": 'no-store',
                         "Content-Type": "application/json",
-                        access: accessToken,
+                        access: `${accessToken}`,
                     },
                 });
 
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
                 const result = await response.json();
 
                 if (result.success) {
                     const { today, weekly } = result.data;
-                    setTodayReward(today);
+                    setTodayReward(today);  // 리워드 상태 업데이트
                     setWeekReward(weekly);
+                } else {
+                    console.error(result.message);
                 }
             } catch (error) {
                 console.error('Error fetching reward state:', error);
@@ -199,18 +227,26 @@ function PedometerScreen(): React.JSX.Element {
                 headers: {
                     "Cache-Control": 'no-store',
                     "Content-Type": "application/json",
-                    access: accessToken,
+                    access: `${accessToken}`,
                 },
             });
 
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
             const result = await response.json();
 
             if (result.success) {
-                setTodayReward(true);
+                console.log(result.message);
+                setTodayReward(true);  // 리워드 지급 후 상태 변경
+            } else {
+                console.error(result.message);
             }
         } catch (error) {
             console.error('Error fetching today reward:', error);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -222,18 +258,26 @@ function PedometerScreen(): React.JSX.Element {
                 headers: {
                     "Cache-Control": 'no-store',
                     "Content-Type": "application/json",
-                    access: accessToken,
+                    access: `${accessToken}`,
                 },
             });
 
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
             const result = await response.json();
 
             if (result.success) {
-                setWeekReward(true);
+                console.log(result.message);
+                setWeekReward(true);  // 리워드 지급 후 상태 변경
+            } else {
+                console.error(result.message);
             }
         } catch (error) {
             console.error('Error fetching week reward:', error);
+        } finally {
+            setLoading(false);
         }
     };
 
