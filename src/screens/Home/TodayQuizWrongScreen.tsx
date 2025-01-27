@@ -28,7 +28,10 @@ function TodayQuizWrongScreen(): React.JSX.Element {
     const contentText = hintText || '해설을 불러오는데 실패했습니다.';  // Fallback if no hintText is provided
 
     const handleNavigateQuizPress = useCallback(async () => {
-        navigation.navigate("HomeScreen");
+        navigation.reset({
+            index: 0,
+            routes: [{ name: 'HomeScreen' }],
+        });
     }, [navigation]);
 
     return (
@@ -36,7 +39,7 @@ function TodayQuizWrongScreen(): React.JSX.Element {
             <View style={styles.TopTextContainer}>
                 <View style={[styles.rowContainer, { marginBottom: 10 }]}>
                     <Text style={styles.GreenText}>{new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}</Text>
-                    <Text style={[styles.GreenText, { color: colors.lightblack }]}> 오늘의 퀴즈</Text>
+                    <Text style={[styles.GreenText, { color:  colors.lightblack }]}> 오늘의 퀴즈</Text>
                 </View>
                 <View style={styles.rowContainer}>
                     <Text style={styles.BoldLargeText}>{titleText}</Text>
@@ -54,7 +57,7 @@ function TodayQuizWrongScreen(): React.JSX.Element {
             </View>
 
             <View style={styles.BtnContainer}>
-                <GradientButton height={56} width={328} text="홈으로 돌아가기" onPress={handleNavigateQuizPress} />
+                <GradientButton height={56} width={350} text="홈으로 돌아가기" onPress={handleNavigateQuizPress} />
             </View>
         </View>
     );
@@ -113,7 +116,9 @@ const styles = StyleSheet.create({
     BtnContainer: {
         marginHorizontal: 16,
         alignItems: 'center',
-        marginTop: 491,
+        position: 'absolute',
+        bottom: 50,
+        alignSelf: 'center',
     },
 });
 

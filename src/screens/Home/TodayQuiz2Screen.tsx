@@ -4,6 +4,8 @@ import colors from "../../utils/colors";
 import { getFontSize } from '../../utils/fontUtils';
 
 import GradientButton from "../../components/GradientButton";
+
+import LeftArrow from '../../img/Home/Quiz/LeftArrow.svg';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {
@@ -38,7 +40,7 @@ function TodayQuiz2Screen(): React.JSX.Element {
             try {
                 const accessToken = await AsyncStorage.getItem('token');
                 const selectedAnswerInt = parseInt(selectedAnswer, 10);
-                                const response = await fetch(`${apiUrl}/quiz/answer?myAnswer=${selectedAnswerInt}`, {
+                const response = await fetch(`${apiUrl}/quiz/getQuiz?timestamp=${new Date().getTime()}`, {
                     method: 'GET',
                     headers: {
                         "Cache-Control": 'no-store',
@@ -94,13 +96,20 @@ function TodayQuiz2Screen(): React.JSX.Element {
             }
 
             const result = await response.json();
-
+            console.log(result);
             if (result.success) {
-                console.log(result.message);
-                setResponseMessage(result.data);  // 서버에서 받은 메시지 처리
+                if (result.data === "정답입니다.") {
+                    navigation.navigate("TodayQuizCorrectScreen");
+                } else {
+                    setResponseMessage(result.data);
+                    navigation.navigate("TodayQuizWrongScreen", {
+                        hintText: result.data,
+                        imageUrl: result.data.imageUrl || null,
+                    }); // Wrong screen
+                }
             } else {
                 console.error(result.message);
-                setResponseMessage(result.message);  // 실패 메시지도 처리
+                setResponseMessage(result.message);  // Handle failure messages
             }
         } catch (error) {
             console.error('Error submitting quiz answer:', error);
@@ -116,8 +125,7 @@ function TodayQuiz2Screen(): React.JSX.Element {
         <View style={styles.container}>
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => navigation.pop()}>
-                    <Image
-                        source={require('../../img/My/arrowleft.png')}
+                    <LeftArrow
                         style={styles.closeIcon}
                     />
                 </TouchableOpacity>
@@ -139,8 +147,10 @@ function TodayQuiz2Screen(): React.JSX.Element {
                         key={index}
                         onPress={() => handleSelectAnswer(`${index + 1}`)}
                     >
-                        <View style={[styles.Answer, selectedAnswer === `quiz${index + 1}` && styles.selected]}>
-                            {/* 만약 quizText 항목이 URL인 경우 이미지로 렌더링 */}
+                        <View style={[
+                              styles.Answer,
+                              selectedAnswer === `${index + 1}` && styles.selected, // 비교 조건 수정
+                        ]}>
                             {isImageUrl(answer) ? (
                                 <Image source={{ uri: answer }} style={styles.answerImage} />
                             ) : (
@@ -154,7 +164,7 @@ function TodayQuiz2Screen(): React.JSX.Element {
             <View style={styles.BtnContainer}>
                 <GradientButton
                     height={56}
-                    width={328}
+                    width={350}
                     text="제출하기"
                     onPress={handleNavigateQuizPress}
                     isDisabled={selectedAnswer === null}
@@ -226,7 +236,9 @@ const styles = StyleSheet.create({
     BtnContainer: {
         marginHorizontal: 16,
         alignItems: 'center',
-        marginTop: 151,
+        position: 'absolute',
+        bottom: 50,
+        alignSelf: 'center',
     },
     responseContainer: {
         marginTop: 20,

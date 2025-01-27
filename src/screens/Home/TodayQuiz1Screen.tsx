@@ -4,6 +4,7 @@ import colors from "../../utils/colors";
 import { getFontSize } from '../../utils/fontUtils';
 
 import GradientButton from "../../components/GradientButton";
+import LeftArrow from '../../img/Home/Quiz/LeftArrow.svg';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {
@@ -118,7 +119,7 @@ function TodayQuiz1Screen(): React.JSX.Element {
     return (
         <View style={styles.container}>
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()}>
+                <TouchableOpacity onPress={() => navigation.pop()}>
                     <Image
                         source={require('../../img/My/arrowleft.png')}
                         style={styles.closeIcon}
@@ -236,9 +237,11 @@ const styles = StyleSheet.create({
         color: colors.black,
     },
     BtnContainer: {
+        position: 'absolute',
+        bottom: 50,
+        alignSelf: 'center',
         marginHorizontal: 16,
         alignItems: 'center',
-        marginTop: 191,
     },
 });
 

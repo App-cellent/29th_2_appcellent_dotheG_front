@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import colors from "../../utils/colors";
 import { getFontSize } from '../../utils/fontUtils';
 import LinearGradient from 'react-native-linear-gradient';
@@ -38,7 +38,9 @@ function HomeScreen(): React.JSX.Element {
     const apiUrl = process.env.REACT_APP_API_URL;
 
     const [showTreeInfo, setShowTreeInfo] = useState(true);
+    const [loading, setLoading] = useState(false);
 
+    // User state
     const [userName, setUserName] = useState('');
     const [userReward, setUserReward] = useState(0);
     const [mainChar, setMainChar] = useState(null);
@@ -47,13 +49,11 @@ function HomeScreen(): React.JSX.Element {
     const [dailyActivity, setDailyActivity] = useState(1);
     const [specialActivity, setSpecialActivity] = useState(11);
 
+    // Quiz state
     const [quizYN, setQuizYN] = useState();
     const [modalVisible, setModalVisible] = useState(false);
 
-    const TreeInfo = () => {
-        setShowTreeInfo(!showTreeInfo);
-    }
-
+    // Quest state
     const [dailyQuest, setDailyQuest] = useState(null);
     const [specialQuest, setSpecialQuest] = useState(null);
 
@@ -73,88 +73,58 @@ function HomeScreen(): React.JSX.Element {
         '반려 식물 키우기'
     ];
 
-    const getDailyQuest = (activity: number) => {
+    const charImages = {
+        1: require('../../img/Character/Image/1.png'),
+        2: require('../../img/Character/Image/2.png'),
+        3: require('../../img/Character/Image/3.png'),
+        4: require('../../img/Character/Image/4.png'),
+        5: require('../../img/Character/Image/5.png'),
+        6: require('../../img/Character/Image/6.png'),
+        7: require('../../img/Character/Image/7.png'),
+        8: require('../../img/Character/Image/8.png'),
+        9: require('../../img/Character/Image/9.png'),
+        10: require('../../img/Character/Image/10.png'),
+        11: require('../../img/Character/Image/11.png'),
+        12: require('../../img/Character/Image/12.png'),
+        13: require('../../img/Character/Image/13.png'),
+        14: require('../../img/Character/Image/14.png'),
+        15: require('../../img/Character/Image/15.png'),
+        16: require('../../img/Character/Image/16.png'),
+        17: require('../../img/Character/Image/17.png'),
+        18: require('../../img/Character/Image/18.png'),
+        19: require('../../img/Character/Image/19.png'),
+    };
+
+    const getDailyQuest = useCallback((activity: number) => {
         return dailyQuests[activity - 1];
-    };
+    }, []);
 
-    const getSpecialQuest = (activity: number) => {
+    const getSpecialQuest = useCallback((activity: number) => {
         return specialQuests[activity - 11];
-    };
+    }, []);
 
-  const charImages = {
-    1: require('../../img/Character/Image/1.png'),
-    2: require('../../img/Character/Image/2.png'),
-    3: require('../../img/Character/Image/3.png'),
-    4: require('../../img/Character/Image/4.png'),
-    5: require('../../img/Character/Image/5.png'),
-    6: require('../../img/Character/Image/6.png'),
-    7: require('../../img/Character/Image/7.png'),
-    8: require('../../img/Character/Image/8.png'),
-    9: require('../../img/Character/Image/9.png'),
-    10: require('../../img/Character/Image/10.png'),
-    11: require('../../img/Character/Image/11.png'),
-    12: require('../../img/Character/Image/12.png'),
-    13: require('../../img/Character/Image/13.png'),
-    14: require('../../img/Character/Image/14.png'),
-    15: require('../../img/Character/Image/15.png'),
-    16: require('../../img/Character/Image/16.png'),
-    17: require('../../img/Character/Image/17.png'),
-    18: require('../../img/Character/Image/18.png'),
-    19: require('../../img/Character/Image/19.png'),
-  };
+    const getMainCharImage = useCallback(() => {
+        const charId = mainChar !== null ? mainChar : 1;
+        return charImages[charId] || charImages[1];
+    }, [mainChar]);
 
-    useEffect(() => {
-        const fetchHomeData = async () => {
-            try {
-                const accessToken = await AsyncStorage.getItem('token');
-                const response = await fetch(`${apiUrl}/mainpage/getInfo?timestamp=${new Date().getTime()}`, {
-                    method: 'GET',
-                    headers: {
-                        "Cache-Control":'no-store',
-                        "Content-Type":"application/json",
-                        access: `${accessToken}`,
-                    },
-                });
+    const TreeInfo = useCallback(() => {
+        setShowTreeInfo(prev => !prev);
+    }, []);
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const result = await response.json();
-
-                if (result.success) {
-                    console.log(result.data);
-                    setUserName(result.data.userName);
-                    setUserReward(result.data.userReward);
-                    setMainChar(result.data.mainChar);
-                    setMonthSavedTree(result.data.monthSavedTree);
-                    setTotalSavedTree(result.data.totalSavedTree);
-                    setDailyQuest(getDailyQuest(result.data.dailyActivity));
-                    setSpecialQuest(getSpecialQuest(result.data.specialActivity));
-                } else {
-                    console.error(result.message);
-                }
-            } catch (error) {
-                console.error('Error fetching Home User data:', error);
-                setTodayStep(result.data);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-    const fetchQuizYNData = async () => {
+    const fetchHomeData = useCallback(async () => {
         try {
+            setLoading(true);
             const accessToken = await AsyncStorage.getItem('token');
-            const response = await fetch(`${apiUrl}/quiz?timestamp=${new Date().getTime()}`, {
+            const response = await fetch(`${apiUrl}/mainpage/getInfo?timestamp=${new Date().getTime()}`, {
                 method: 'GET',
                 headers: {
-                    "Cache-Control":'no-store',
-                    "Content-Type":"application/json",
+                    "Cache-Control": 'no-store',
+                    "Content-Type": "application/json",
                     access: `${accessToken}`,
                 },
             });
 
-            // 응답 상태
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -162,35 +132,79 @@ function HomeScreen(): React.JSX.Element {
             const result = await response.json();
 
             if (result.success) {
-                console.log(result.data);
+                const {
+                    userName,
+                    userReward,
+                    mainChar,
+                    monthSavedTree,
+                    totalSavedTree,
+                    dailyActivity,
+                    specialActivity
+                } = result.data;
+
+                setUserName(userName);
+                setUserReward(userReward);
+                setMainChar(mainChar);
+                setMonthSavedTree(monthSavedTree);
+                setTotalSavedTree(totalSavedTree);
+                setDailyQuest(getDailyQuest(dailyActivity));
+                setSpecialQuest(getSpecialQuest(specialActivity));
+            } else {
+                console.error(result.message);
+            }
+        } catch (error) {
+            console.error('Error fetching Home User data:', error);
+        } finally {
+            setLoading(false);
+        }
+    }, [getDailyQuest, getSpecialQuest]);
+
+    const fetchQuizYNData = useCallback(async () => {
+        try {
+            const accessToken = await AsyncStorage.getItem('token');
+            const response = await fetch(`${apiUrl}/quiz?timestamp=${new Date().getTime()}`, {
+                method: 'GET',
+                headers: {
+                    "Cache-Control": 'no-store',
+                    "Content-Type": "application/json",
+                    access: `${accessToken}`,
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+
+            if (result.success) {
                 setQuizYN(result.data);
             } else {
                 console.error(result.message);
             }
         } catch (error) {
             console.error('Error fetching quizYN:', error);
-            setTodayStep(result.data);
-        } finally {
-            setLoading(false);
         }
-    };
+    }, []);
 
-        fetchHomeData();
-        fetchQuizYNData();
-    }, [userName, userReward, mainChar, monthSavedTree, totalSavedTree, dailyActivity, specialActivity]);
-
-    const getMainCharImage = () => {
-        // If mainChar is null, use image 1, otherwise use the image for the corresponding mainChar
-        const charId = mainChar !== null ? mainChar : 1;
-        return charImages[charId] || charImages[1];  // Fallback to image 1 if charId is invalid
-      };
+    useFocusEffect(
+        useCallback(() => {
+            fetchHomeData();
+            fetchQuizYNData();
+        }, [fetchHomeData, fetchQuizYNData])
+    );
 
     const [selectedImage, setSelectedImage] = useState(null);
 
-    const handleNavigateTodayQuiz = useCallback(async () => {
-        if(!quizYN) navigation.navigate('TodayQuizGuideScreen');
-        else setModalVisible(true);
-    }, []);
+    const handleNavigateTodayQuiz = useCallback(() => {
+        if(!quizYN) {
+            navigation.navigate('TodayQuizGuideScreen', {
+                screen: 'TodayQuizGuideScreen'
+            });
+        } else {
+            setModalVisible(true);
+        }
+    }, [quizYN]);
 
     const handleNavigateCamera = useCallback(() => {
         navigation.navigate('CameraScreen');
