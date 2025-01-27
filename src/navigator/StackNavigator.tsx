@@ -4,8 +4,6 @@ import { useNavigation } from '@react-navigation/native';
 import { StyleSheet } from 'react-native';
 
 import BottomTabNavigator from './BottomTabNavigator';
-
-import HomeScreen from '../screens/Home/HomeScreen';
 import TodayQuizGuideScreen from '../screens/Home/TodayQuizGuideScreen';
 import TodayQuiz1Screen from '../screens/Home/TodayQuiz1Screen';
 import TodayQuiz2Screen from '../screens/Home/TodayQuiz2Screen';
@@ -47,48 +45,6 @@ const StackNavigator = () => {
             <Stack.Screen
                 name="Main"
                 component={BottomTabNavigator}
-                options={{ headerShown: false }}
-            />
-
-            <Stack.Screen
-                name="HomeScreen"
-                component={HomeScreen}
-                options={{ headerShown: false }}
-            />
-
-            <Stack.Screen
-                name="TodayQuizGuideScreen"
-                component={TodayQuizGuideScreen}
-                options={{ headerShown: false }}
-            />
-
-            <Stack.Screen
-                name="TodayQuiz1Screen"
-                component={TodayQuiz1Screen}
-                options={{ headerShown: false }}
-            />
-
-            <Stack.Screen
-                name="TodayQuiz2Screen"
-                component={TodayQuiz2Screen}
-                options={{ headerShown: false }}
-            />
-
-            <Stack.Screen
-                name="TodayQuiz3Screen"
-                component={TodayQuiz3Screen}
-                options={{ headerShown: false }}
-            />
-
-            <Stack.Screen
-                name="TodayQuizCorrectScreen"
-                component={TodayQuizCorrectScreen}
-                options={{ headerShown: false }}
-            />
-
-            <Stack.Screen
-                name="TodayQuizWrongScreen"
-                component={TodayQuizWrongScreen}
                 options={{ headerShown: false }}
             />
 
