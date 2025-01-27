@@ -20,10 +20,7 @@ function TodayQuizCorrectScreen(): React.JSX.Element {
     const navigation = useNavigation();
 
     const navigateHome = async () => {
-        navigation.reset({
-            index: 0,
-            routes: [{ name: 'HomeScreen' }],
-        });
+        navigation.navigate('Main', { screen: 'Home' });
     };
 
     return (
