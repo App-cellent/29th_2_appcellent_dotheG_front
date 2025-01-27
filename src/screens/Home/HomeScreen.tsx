@@ -104,8 +104,7 @@ function HomeScreen(): React.JSX.Element {
     }, []);
 
     const getMainCharImage = useCallback(() => {
-        const charId = mainChar !== null ? mainChar : 1;
-        return charImages[charId] || charImages[1];
+        return charImages[mainChar];
     }, [mainChar]);
 
     const TreeInfo = useCallback(() => {
@@ -268,10 +267,18 @@ function HomeScreen(): React.JSX.Element {
                         <Text style={styles.TitleText2}>오늘도 우리 함께 달려보아요:)</Text>
                     </View>
                     <View style={{justifyContent: 'center', alignItems: 'center', marginTop: 5, marginBottom: 10}}>
-                        <View style={styles.MainBackgroundWrapper}>
-                            <Image source={require('../../img/Home/HomeCharBackground.png')} style={styles.MainBackground} />
-                            <Image source={getMainCharImage()} style={styles.MainChar} />
-                        </View>
+                            {mainChar === null && (
+                                <View style={styles.NullBackgroundWrapper}>
+                                <Text style={styles.NullText}>하단 캐릭터 버튼을 눌러</Text>
+                                <Text style={styles.NullText}>캐릭터 뽑기를 진행해보세요!</Text>
+                                </View>
+                            )}
+                            {mainChar !== null && (
+                                <View style={styles.MainBackgroundWrapper}>
+                                    <Image source={require('../../img/Home/HomeCharBackground.png')} style={styles.MainBackground} />
+                                    <Image source={getMainCharImage()} style={styles.MainChar} />
+                                </View>
+                            )}
                     </View>
 
                     <TouchableOpacity onPress={handleNavigateTodayQuiz}>
@@ -338,9 +345,11 @@ function HomeScreen(): React.JSX.Element {
                         </View>
                     </View>
 
-                    <View style={[styles.MenuBox, {paddingLeft: 30}]}>
-                        <Text style={styles.BoldLargeText}>오늘의 인증</Text>
-                        <Text style={styles.GrayText}>나의 친환경 활동을 인증해보세요!</Text>
+                    <View style={[styles.MenuBox, {paddingLeft: 30}]} >
+                        <TouchableOpacity onPress={() => navigation.navigate("QuestViewScreen")}>
+                            <Text style={styles.BoldLargeText}>오늘의 인증</Text>
+                            <Text style={styles.GrayText}>나의 친환경 활동을 인증해보세요!</Text>
+                        </TouchableOpacity>
                     </View>
 
                     <View style={[styles.MenuBox, {paddingLeft: 30}]}>
@@ -405,6 +414,19 @@ const styles = StyleSheet.create({
         width: '95%',
         height: 200,
     },
+    NullBackgroundWrapper: {
+        width: '100%',
+        height: 200,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    NullText: {
+        color: '#C1F6E6',
+        fontSize: getFontSize(16),
+        fontWeight: '800',
+        lineHeight: 25,
+        textAlign: 'center',
+    },
     MainBackground: {
         width: '100%',
         height: '100%',
@@ -415,7 +437,7 @@ const styles = StyleSheet.create({
         bottom: '50%',
         left: '50%',
         transform: [{ translateX: -114 }, { translateY: +98 }],
-        width: 228,
+        width: 268,
         height: 196,
     },
     scrollContainer: {
