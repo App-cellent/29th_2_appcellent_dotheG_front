@@ -40,68 +40,102 @@ function PedometerScreen(): React.JSX.Element {
     const [weekGoalYN, setWeekGoalYN] = useState(false);
     const [todayModalVisible, setTodayModalVisible] = useState(false);
     const [weekModalVisible, setWeekModalVisible] = useState(false);
-
     const [todayStep, setTodayStep] = useState(0);
+    const [lastStepCount, setLastStepCount] = useState(todayStep);
     const [weekStep, setWeekStep] = useState(0);
     const [totalStep, setTotalStep] = useState(0);
     const [carbonReduction, setCarbonReduction] = useState(0.0);
-    const todayTargetStep = 7000;
-    const monthTargetStep = 50000;
-
     const [todayReward, setTodayReward] = useState(false);
     const [weekReward, setWeekReward] = useState(false);
     const [todayRewardState, setTodayRewardState] = useState(false);
     const [weekRewardState, setWeekRewardState] = useState(false);
+    const todayTargetStep = 7000;
+    const monthTargetStep = 50000;
 
     const confirmTargetStep = () => {
-        if (todayStep >= todayTargetStep) setTodayGoalYN(true);
-        else setTodayGoalYN(false);
-        if (weekStep >= monthTargetStep) setWeekGoalYN(true);
-        else setWeekGoalYN(false);
-    }
+        setTodayGoalYN(todayStep >= todayTargetStep);
+        setWeekGoalYN(weekStep >= monthTargetStep);
+    };
 
     useEffect(() => {
-        confirmTargetStep();
-
         const fetchStepData = async () => {
             try {
                 const accessToken = await AsyncStorage.getItem('token');
-                const response = await fetch(`${apiUrl}/steps/summary?timestamp=${new Date().getTime()}`, {
+                const response = await fetch(`${apiUrl}/steps/summary?timestamp=${Date.now()}`, {
                     method: 'GET',
                     headers: {
                         "Cache-Control": 'no-store',
                         "Content-Type": "application/json",
-                        access: `${accessToken}`,
+                        access: accessToken,
                     },
                 });
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const result = await response.json();
 
                 if (result.success) {
-                    console.log(result.data);
-                    setTodayStep(result.data.today);  // 오늘 걸음수
-                    setWeekStep(result.data.week);     // 주간 걸음수
-                    setTotalStep(result.data.total);   // 총 걸음수
-                    setCarbonReduction(result.data.carbonReduction);  // 탄소 감소량
-                } else {
-                    console.error(result.message);
+                    const { today, week, total, carbonReduction } = result.data;
+                    setTodayStep(today);
+                    setLastStepCount(today);
+                    setWeekStep(week);
+                    setTotalStep(total);
+                    setCarbonReduction(carbonReduction);
                 }
             } catch (error) {
                 console.error('Error fetching step data:', error);
-            } finally {
-                setLoading(false);
             }
         };
 
         fetchStepData();
     }, []);
 
+    useEffect(() => {
+        if (todayStep > 0) {
+            fetchUpdateSteps(todayStep);
+        }
+    }, [todayStep]);
+
+    const fetchUpdateSteps = async (steps) => {
+        try {
+            const accessToken = await AsyncStorage.getItem('token');
+            const response = await fetch(`${apiUrl}/steps/update?steps=${steps}`, {
+                method: 'PATCH',
+                headers: {
+                    "Cache-Control": 'no-store',
+                    "Content-Type": "application/json",
+                    access: accessToken,
+                },
+            });
+
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const result = await response.json();
+
+            if (result.success) {
+                const summaryResponse = await fetch(`${apiUrl}/steps/summary?timestamp=${Date.now()}`, {
+                    method: 'GET',
+                    headers: {
+                        "Cache-Control": 'no-store',
+                        "Content-Type": "application/json",
+                        access: accessToken,
+                    },
+                });
+
+                const summaryResult = await summaryResponse.json();
+                if (summaryResult.success) {
+                    const { today, week, total, carbonReduction } = summaryResult.data;
+                    setTodayStep(today);
+                    setWeekStep(week);
+                    setTotalStep(total);
+                    setCarbonReduction(carbonReduction);
+                    confirmTargetStep();
+                }
+            }
+        } catch (error) {
+            console.error('Error updating steps:', error);
+        }
+    };
+
     const stepRef = useRef(todayStep);
-    const [lastStepCount, setLastStepCount] = useState(0);
 
     useEffect(() => {
         const config = {
@@ -110,10 +144,11 @@ function PedometerScreen(): React.JSX.Element {
             cheatInterval: 3000,
             onStepCountChange: (stepCount) => {
                 if (stepCount > lastStepCount) {
-                    setTodayStep(stepCount);
-                    setLastStepCount(stepCount);
+                    if (stepCount !== todayStep) {
+                        setTodayStep(stepCount);
+                        setLastStepCount(stepCount);
+                    }
                 }
-
                 if (stepCount >= todayTargetStep) {
                     setWeekGoalYN(true);
                 }
@@ -124,63 +159,8 @@ function PedometerScreen(): React.JSX.Element {
         };
 
         startCounter(config);
-
         return () => { stopCounter(); };
     }, [lastStepCount]);
-
-    useEffect(() => {
-        const fetchUpdateSteps = async (steps) => {
-            try {
-                const accessToken = await AsyncStorage.getItem('token');
-                const stepsInt = parseInt(steps, 10);
-                const response = await fetch(`${apiUrl}/steps/update?steps=${stepsInt}`, {
-                    method: 'PATCH',
-                    headers: {
-                        "Cache-Control": 'no-store',
-                        "Content-Type": "application/json",
-                        access: `${accessToken}`,
-                    },
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const result = await response.json();
-
-                if (result.success) {
-                    const summaryResponse = await fetch(`${apiUrl}/steps/summary?timestamp=${new Date().getTime()}`, {
-                        method: 'GET',
-                        headers: {
-                            "Cache-Control": 'no-store',
-                            "Content-Type": "application/json",
-                            access: `${accessToken}`,
-                        },
-                    });
-
-                    const summaryResult = await summaryResponse.json();
-
-                    if (summaryResult.success) {
-                        setTodayStep(summaryResult.data.today);
-                        setWeekStep(summaryResult.data.week);
-                        setTotalStep(summaryResult.data.total);
-                        setCarbonReduction(summaryResult.data.carbonReduction);
-                        confirmTargetStep();
-                    }
-                } else {
-                    console.error(result.message);
-                }
-            } catch (error) {
-                console.error('Error updating and fetching steps:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        if (todayStep > 0) {
-            fetchUpdateSteps(todayStep);
-        }
-    }, [todayStep]);
 
     useEffect(() => {
         const fetchRewardState = async () => {
@@ -191,22 +171,17 @@ function PedometerScreen(): React.JSX.Element {
                     headers: {
                         "Cache-Control": 'no-store',
                         "Content-Type": "application/json",
-                        access: `${accessToken}`,
+                        access: accessToken,
                     },
                 });
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const result = await response.json();
 
                 if (result.success) {
                     const { today, weekly } = result.data;
-                    setTodayReward(today);  // 리워드 상태 업데이트
+                    setTodayReward(today);
                     setWeekReward(weekly);
-                } else {
-                    console.error(result.message);
                 }
             } catch (error) {
                 console.error('Error fetching reward state:', error);
@@ -224,26 +199,18 @@ function PedometerScreen(): React.JSX.Element {
                 headers: {
                     "Cache-Control": 'no-store',
                     "Content-Type": "application/json",
-                    access: `${accessToken}`,
+                    access: accessToken,
                 },
             });
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const result = await response.json();
 
             if (result.success) {
-                console.log(result.message);
-                setTodayReward(true);  // 리워드 지급 후 상태 변경
-            } else {
-                console.error(result.message);
+                setTodayReward(true);
             }
         } catch (error) {
             console.error('Error fetching today reward:', error);
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -255,26 +222,18 @@ function PedometerScreen(): React.JSX.Element {
                 headers: {
                     "Cache-Control": 'no-store',
                     "Content-Type": "application/json",
-                    access: `${accessToken}`,
+                    access: accessToken,
                 },
             });
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const result = await response.json();
 
             if (result.success) {
-                console.log(result.message);
-                setWeekReward(true);  // 리워드 지급 후 상태 변경
-            } else {
-                console.error(result.message);
+                setWeekReward(true);
             }
         } catch (error) {
             console.error('Error fetching week reward:', error);
-        } finally {
-            setLoading(false);
         }
     };
 
