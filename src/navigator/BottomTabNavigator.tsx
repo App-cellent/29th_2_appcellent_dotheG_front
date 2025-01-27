@@ -11,12 +11,6 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SvgXml } from 'react-native-svg';
 
 import HomeScreen from '../screens/Home/HomeScreen';
-import TodayQuizGuideScreen from '../screens/Home/Quiz/TodayQuizGuideScreen';
-import TodayQuiz1Screen from '../screens/Home/Quiz/TodayQuiz1Screen';
-import TodayQuiz2Screen from '../screens/Home/Quiz/TodayQuiz2Screen';
-import TodayQuiz3Screen from '../screens/Home/Quiz/TodayQuiz3Screen';
-import TodayQuizCorrectScreen from '../screens/Home/Quiz/TodayQuizCorrectScreen';
-import TodayQuizWrongScreen from '../screens/Home/Quiz/TodayQuizWrongScreen';
 import PedometerScreen from '../screens/Pedometer/PedometerScreen';
 import CharacterScreen from '../screens/Character/CharacterScreen';
 import ListScreen from '../screens/Character/ListScreen';
@@ -56,20 +50,6 @@ function CharacterStackNavigator() {
   );
 }
 
-function HomeStackNavigator() {
-  return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="HomeScreen" component={HomeScreen} />
-      <Stack.Screen name="TodayQuizGuideScreen" component={TodayQuizGuideScreen} />
-      <Stack.Screen name="TodayQuiz1Screen" component={TodayQuiz1Screen} />
-      <Stack.Screen name="TodayQuiz2Screen" component={TodayQuiz2Screen} />
-      <Stack.Screen name="TodayQuiz3Screen" component={TodayQuiz3Screen} />
-      <Stack.Screen name="TodayQuizCorrectScreen" component={TodayQuizCorrectScreen} />
-      <Stack.Screen name="TodayQuizWrongScreen" component={TodayQuizWrongScreen} />
-    </Stack.Navigator>
-  );
-}
-
 function BottomTabNavigator(): React.JSX.Element {
   return (
       <Tab.Navigator
@@ -100,7 +80,7 @@ function BottomTabNavigator(): React.JSX.Element {
 
       <Tab.Screen
         name="Home"
-        component={HomeStackNavigator}
+        component={HomeScreen}
         options={{
           title: '홈',
           tabBarIcon: ({ focused }) => (

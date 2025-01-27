@@ -28,10 +28,7 @@ function TodayQuizWrongScreen(): React.JSX.Element {
     const contentText = hintText || '해설을 불러오는데 실패했습니다.';  // Fallback if no hintText is provided
 
     const handleNavigateQuizPress = useCallback(async () => {
-        navigation.reset({
-            index: 0,
-            routes: [{ name: 'HomeScreen' }],
-        });
+        navigation.navigate('Main', { screen: 'Home' });
     }, [navigation]);
 
     return (
