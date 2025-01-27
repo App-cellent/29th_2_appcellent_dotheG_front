@@ -111,6 +111,7 @@ const styles = StyleSheet.create({
         color: colors.lightblack,
         fontSize: getFontSize(14),
         fontWeight: '400',
+        marginVertical: 26,
         lineHeight: 25,
     },
     BtnContainer: {
