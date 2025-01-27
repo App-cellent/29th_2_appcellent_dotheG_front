@@ -4,14 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { StyleSheet } from 'react-native';
 
 import BottomTabNavigator from './BottomTabNavigator';
-
-import HomeScreen from '../screens/Home/HomeScreen';
-import TodayQuizGuideScreen from '../screens/Home/TodayQuizGuideScreen';
-import TodayQuiz1Screen from '../screens/Home/TodayQuiz1Screen';
-import TodayQuiz2Screen from '../screens/Home/TodayQuiz2Screen';
-import TodayQuiz3Screen from '../screens/Home/TodayQuiz3Screen';
-import TodayQuizCorrectScreen from '../screens/Home/TodayQuizCorrectScreen';
-import TodayQuizWrongScreen from '../screens/Home/TodayQuizWrongScreen';
+import QuestViewScreen from '../screens/Home/QuestViewScreen';
 
 import WithdrawalScreen from '../screens/My/WithdrawalScreen';
 import AlarmScreen from '../screens/My/AlarmScreen';
@@ -51,50 +44,14 @@ const StackNavigator = () => {
             />
 
             <Stack.Screen
-                name="HomeScreen"
-                component={HomeScreen}
-                options={{ headerShown: false }}
-            />
-
-            <Stack.Screen
-                name="TodayQuizGuideScreen"
-                component={TodayQuizGuideScreen}
-                options={{ headerShown: false }}
-            />
-
-            <Stack.Screen
-                name="TodayQuiz1Screen"
-                component={TodayQuiz1Screen}
-                options={{ headerShown: false }}
-            />
-
-            <Stack.Screen
-                name="TodayQuiz2Screen"
-                component={TodayQuiz2Screen}
-                options={{ headerShown: false }}
-            />
-
-            <Stack.Screen
-                name="TodayQuiz3Screen"
-                component={TodayQuiz3Screen}
-                options={{ headerShown: false }}
-            />
-
-            <Stack.Screen
-                name="TodayQuizCorrectScreen"
-                component={TodayQuizCorrectScreen}
-                options={{ headerShown: false }}
-            />
-
-            <Stack.Screen
-                name="TodayQuizWrongScreen"
-                component={TodayQuizWrongScreen}
-                options={{ headerShown: false }}
-            />
-
-            <Stack.Screen
                 name="WithdrawalScreen"
                 component={WithdrawalScreen}
+                options={{ headerShown: false }}
+            />
+
+            <Stack.Screen
+                name="QuestViewScreen"
+                component={QuestViewScreen}
                 options={{ headerShown: false }}
             />
 

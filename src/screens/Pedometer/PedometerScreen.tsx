@@ -45,6 +45,7 @@ function PedometerScreen(): React.JSX.Element {
     const [weekStep, setWeekStep] = useState(0);
     const [totalStep, setTotalStep] = useState(0);
     const [carbonReduction, setCarbonReduction] = useState(0.0);
+    const [lastStepCount, setLastStepCount] = useState(0);  // 초기값을 0으로 설정
     const todayTargetStep = 7000;
     const monthTargetStep = 50000;
 
@@ -61,8 +62,6 @@ function PedometerScreen(): React.JSX.Element {
     }
 
     useEffect(() => {
-        confirmTargetStep();
-
         const fetchStepData = async () => {
             try {
                 const accessToken = await AsyncStorage.getItem('token');
@@ -83,10 +82,11 @@ function PedometerScreen(): React.JSX.Element {
 
                 if (result.success) {
                     console.log(result.data);
-                    setTodayStep(result.data.today);  // 오늘 걸음수
-                    setWeekStep(result.data.week);     // 주간 걸음수
-                    setTotalStep(result.data.total);   // 총 걸음수
-                    setCarbonReduction(result.data.carbonReduction);  // 탄소 감소량
+                    setTodayStep(result.data.today);
+                    setLastStepCount(result.data.today);  // API에서 받아온 today 값으로 lastStepCount 초기화
+                    setWeekStep(result.data.week);
+                    setTotalStep(result.data.total);
+                    setCarbonReduction(result.data.carbonReduction);
                 } else {
                     console.error(result.message);
                 }
@@ -101,7 +101,6 @@ function PedometerScreen(): React.JSX.Element {
     }, []);
 
     const stepRef = useRef(todayStep);
-    const [lastStepCount, setLastStepCount] = useState(0);
 
     useEffect(() => {
         const config = {
@@ -109,12 +108,15 @@ function PedometerScreen(): React.JSX.Element {
             default_delay: 150000000,
             cheatInterval: 3000,
             onStepCountChange: (stepCount) => {
-                if (stepCount > lastStepCount) {
-                    setTodayStep(stepCount);
-                    setLastStepCount(stepCount);
+                // API에서 받아온 이전 걸음 수에 새로운 걸음 수를 더함
+                const newStepCount = lastStepCount + (stepCount - (stepRef.current || 0));
+                if (newStepCount > lastStepCount) {
+                    setTodayStep(newStepCount);
+                    setLastStepCount(newStepCount);
+                    stepRef.current = stepCount;
                 }
 
-                if (stepCount >= todayTargetStep) {
+                if (newStepCount >= todayTargetStep) {
                     setWeekGoalYN(true);
                 }
             },
@@ -162,6 +164,7 @@ function PedometerScreen(): React.JSX.Element {
 
                     if (summaryResult.success) {
                         setTodayStep(summaryResult.data.today);
+                        setLastStepCount(summaryResult.data.today);  // API 업데이트 후에도 lastStepCount 업데이트
                         setWeekStep(summaryResult.data.week);
                         setTotalStep(summaryResult.data.total);
                         setCarbonReduction(summaryResult.data.carbonReduction);

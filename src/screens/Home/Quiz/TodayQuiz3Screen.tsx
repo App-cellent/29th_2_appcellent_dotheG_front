@@ -1,13 +1,13 @@
 import React, { useCallback, useState, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import colors from "../../utils/colors";
-import { getFontSize } from '../../utils/fontUtils';
+import colors from "../../../utils/colors";
+import { getFontSize } from '../../../utils/fontUtils';
 
-import GradientButton from "../../components/GradientButton";
-import GradientBackground from "../../img/Home/GradientBackground.png";
-import GradientEarth from "../../img/Home/GradientEarth.png";
+import GradientButton from "../../../components/GradientButton";
+import GradientBackground from "../../../img/Home/GradientBackground.png";
+import GradientEarth from "../../../img/Home/GradientEarth.png";
 
-import LeftArrow from '../../img/Home/Quiz/LeftArrow.svg';
+import LeftArrow from '../../../img/Home/Quiz/LeftArrow.svg';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {
@@ -138,7 +138,8 @@ function TodayQuiz3Screen(): React.JSX.Element {
                     <Text style={[styles.GreenText, { color: colors.lightblack }]}> 오늘의 퀴즈</Text>
                 </View>
                 <View style={styles.rowContainer}>
-                    <Text style={styles.BoldLargeText}>Q. {quizTitle}</Text>
+                    <Text style={styles.questionMark}>Q. </Text>
+                    <Text style={styles.BoldLargeText}>{quizTitle}</Text>
                 </View>
             </View>
 
@@ -147,17 +148,20 @@ function TodayQuiz3Screen(): React.JSX.Element {
                 onPress={() => handleSelectAnswer('O')}
               >
                   <View style={[styles.Answer, selectedAnswer === 'O' && styles.selected]}>
-                    <Text style={styles.Selected}>O</Text>
+                    <Image source={require('../../../img/Home/Quiz/O.png')} style={[styles.Selected, {width: 63, height: 62}]} />
+                    <Text style={styles.OText}>그렇다</Text>
                   </View>
               </TouchableOpacity>
               <TouchableOpacity
                   onPress={() => handleSelectAnswer('X')}
                 >
                 <View style={[styles.Answer, selectedAnswer === 'X' && styles.selected]}>
-                    <Text style={styles.Selected}>X</Text>
+                    <Image source={require('../../../img/Home/Quiz/X.png')} style={[styles.Selected, {width: 55, height: 62} ]} />
+                    <Text style={styles.XText}>아니다</Text>
                 </View>
                 </TouchableOpacity>
             </View>
+
             <View style={styles.BtnContainer}>
                 <GradientButton height={56} width={350} text="제출하기" onPress={handleNavigateQuizPress} isDisabled={selectedAnswer === null}/>
             </View>
@@ -201,8 +205,23 @@ const styles = StyleSheet.create({
         borderColor: colors.green,
         borderWidth: 4,
     },
+    OText: {
+        color: "#2088FF",
+        fontSize: getFontSize(14),
+        fontWeight: '800',
+        marginTop: 8,
+    },
+    XText: {
+        color: "#FF5F5F",
+        marginTop: 8,
+        fontSize: getFontSize(14),
+        fontWeight: '800',
+    },
     rowContainer:{
         flexDirection: 'row',
+        flexWrap: 'wrap',
+        marginBottom: 20,
+        alignItems: 'flex-start',
     },
     GreenText: {
         color: colors.green,
@@ -214,7 +233,14 @@ const styles = StyleSheet.create({
         fontSize: getFontSize(25),
         fontWeight: '800',
         lineHeight: 34,
-        marginBottom: 8,
+        flex: 1,
+        flexShrink: 1,
+    },
+    questionMark: {
+        fontSize: getFontSize(25),
+        fontWeight: '800',
+        color: colors.green,
+        lineHeight: 34,
     },
     BtnContainer: {
         position: 'absolute',

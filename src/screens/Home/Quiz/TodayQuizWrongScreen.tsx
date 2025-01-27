@@ -1,9 +1,9 @@
 import React, { useCallback } from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import colors from "../../utils/colors";
-import { getFontSize } from '../../utils/fontUtils';
+import colors from "../../../utils/colors";
+import { getFontSize } from '../../../utils/fontUtils';
 
-import GradientButton from "../../components/GradientButton";
+import GradientButton from "../../../components/GradientButton";
 
 import {
   ScrollView,
@@ -111,6 +111,7 @@ const styles = StyleSheet.create({
         color: colors.lightblack,
         fontSize: getFontSize(14),
         fontWeight: '400',
+        marginVertical: 26,
         lineHeight: 25,
     },
     BtnContainer: {

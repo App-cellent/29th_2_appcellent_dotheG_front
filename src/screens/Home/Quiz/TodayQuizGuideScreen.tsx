@@ -1,13 +1,13 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import colors from "../../utils/colors";
-import { getFontSize } from '../../utils/fontUtils';
+import colors from "../../../utils/colors";
+import { getFontSize } from '../../../utils/fontUtils';
 
-import GradientButton from "../../components/GradientButton";
-import GradientBackground from "../../img/Home/GradientBackground.png";
-import GradientEarth from "../../img/Home/GradientEarth.png";
+import GradientButton from "../../../components/GradientButton";
+import GradientBackground from "../../../img/Home/GradientBackground.png";
+import GradientEarth from "../../../img/Home/GradientEarth.png";
 
-import LeftArrow from '../../img/Home/Quiz/LeftArrow.svg';
+import LeftArrow from '../../../img/Home/Quiz/LeftArrow.svg';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -117,8 +117,8 @@ function TodayQuizGuideScreen(): React.JSX.Element {
                 <Text style={styles.BoldSmallText1}>오늘만 받을 수 있는 리워드를 받아가세요.</Text>
             </View>
 
-            <ImageBackground source={require('../../img/Home/GradientBackground.png')} style={styles.gradient}>
-              <Image source={require('../../img/Home/GradientEarth.png')} style={styles.earthImage} />
+            <ImageBackground source={require('../../../img/Home/GradientBackground.png')} style={styles.gradient}>
+              <Image source={require('../../../img/Home/GradientEarth.png')} style={styles.earthImage} />
             </ImageBackground>
 
             <View style={styles.BottomTextContainer}>

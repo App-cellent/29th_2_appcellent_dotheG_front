@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import colors from "../../utils/colors";
-import { getFontSize } from '../../utils/fontUtils';
+import colors from "../../../utils/colors";
+import { getFontSize } from '../../../utils/fontUtils';
 
-import GradientButton from "../../components/GradientButton";
-import LeftArrow from '../../img/Home/Quiz/LeftArrow.svg';
+import GradientButton from "../../../components/GradientButton";
+
+import LeftArrow from '../../../img/Home/Quiz/LeftArrow.svg';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {
   StyleSheet,
   Text,
-  TextInput,
   View,
   Image,
   TouchableOpacity,
@@ -19,17 +19,16 @@ import {
 
 const { height } = Dimensions.get('window');
 
-function TodayQuiz1Screen(): React.JSX.Element {
+function TodayQuiz2Screen(): React.JSX.Element {
     const navigation = useNavigation();
     const apiUrl = process.env.REACT_APP_API_URL;
 
     const [quizTitle, setQuizTitle] = useState("");
-    const [quizText, setQuizText] = useState("");
-    const [userAnswer, setUserAnswer] = useState("");
-    const [responseMessage, setResponseMessage] = useState(""); // 서버에서 받은 메시지 상태
+    const [quizText, setQuizText] = useState([]);
+    const [selectedAnswer, setSelectedAnswer] = useState(null);
+    const [responseMessage, setResponseMessage] = useState(""); // 서버에서 받은 메시지 상태 추가
 
     const currentDate = new Date();
-
     const formattedDate = currentDate.toLocaleDateString('ko-KR', {
         year: 'numeric',
         month: 'long',
@@ -40,11 +39,12 @@ function TodayQuiz1Screen(): React.JSX.Element {
         const fetchQuizData = async () => {
             try {
                 const accessToken = await AsyncStorage.getItem('token');
+                const selectedAnswerInt = parseInt(selectedAnswer, 10);
                 const response = await fetch(`${apiUrl}/quiz/getQuiz?timestamp=${new Date().getTime()}`, {
                     method: 'GET',
                     headers: {
-                        "Cache-Control":'no-store',
-                        "Content-Type":"application/json",
+                        "Cache-Control": 'no-store',
+                        "Content-Type": "application/json",
                         access: `${accessToken}`,
                     },
                 });
@@ -57,6 +57,7 @@ function TodayQuiz1Screen(): React.JSX.Element {
                 const result = await response.json();
 
                 if (result.success) {
+                    console.log(result.data);
                     setQuizTitle(result.data.quizTitle);
                     setQuizText(result.data.quizText);
                 } else {
@@ -70,14 +71,15 @@ function TodayQuiz1Screen(): React.JSX.Element {
         fetchQuizData();
     }, []);
 
-    const handleUserAnswer = (answer: string) => {
-        setUserAnswer(answer);
+    const handleSelectAnswer = (answer) => {
+        setSelectedAnswer(answer);
+        console.log(answer);
     };
 
     const handleNavigateQuizPress = async () => {
         try {
             const accessToken = await AsyncStorage.getItem('token');
-            const response = await fetch(`${apiUrl}/quiz/answer?myAnswer=${userAnswer}`, {
+            const response = await fetch(`${apiUrl}/quiz/answer?myAnswer=${selectedAnswer}`, {
                 method: 'POST',
                 headers: {
                     "Cache-Control": 'no-store',
@@ -85,7 +87,7 @@ function TodayQuiz1Screen(): React.JSX.Element {
                     access: `${accessToken}`,
                 },
                 body: JSON.stringify({
-                    selectedAnswer: userAnswer,
+                    selectedAnswer,
                 }),
             });
 
@@ -94,21 +96,20 @@ function TodayQuiz1Screen(): React.JSX.Element {
             }
 
             const result = await response.json();
-
+            console.log(result);
             if (result.success) {
-                if (result.data === "정답입니다") {
-                    setResponseMessage("정답입니다!");
+                if (result.data === "정답입니다.") {
                     navigation.navigate("TodayQuizCorrectScreen");
                 } else {
                     setResponseMessage(result.data);
                     navigation.navigate("TodayQuizWrongScreen", {
                         hintText: result.data,
                         imageUrl: result.data.imageUrl || null,
-                    });
+                    }); // Wrong screen
                 }
             } else {
                 console.error(result.message);
-                setResponseMessage(result.message);  // 실패 메시지도 처리
+                setResponseMessage(result.message);  // Handle failure messages
             }
         } catch (error) {
             console.error('Error submitting quiz answer:', error);
@@ -116,12 +117,15 @@ function TodayQuiz1Screen(): React.JSX.Element {
         }
     };
 
+    const isImageUrl = (url: string) => {
+        return url.startsWith('https://') && (url.includes('.jpg') || url.includes('.png') || url.includes('.jpeg'));
+    };
+
     return (
         <View style={styles.container}>
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => navigation.pop()}>
-                    <Image
-                        source={require('../../img/My/arrowleft.png')}
+                    <LeftArrow
                         style={styles.closeIcon}
                     />
                 </TouchableOpacity>
@@ -137,36 +141,33 @@ function TodayQuiz1Screen(): React.JSX.Element {
                 </View>
             </View>
 
-            {/* 주관식 입력 필드 (한 줄) */}
-            <View style={styles.inputContainer}>
-                <TextInput
-                    style={styles.textInput}
-                    placeholder="여기에 답을 입력하세요"
-                    value={userAnswer}
-                    onChangeText={handleUserAnswer}
-                    multiline={false} // 한 줄로 설정
-                />
+            <View style={styles.TwoAnswerContainer}>
+                {quizText.length > 0 && quizText.map((answer, index) => (
+                    <TouchableOpacity
+                        key={index}
+                        onPress={() => handleSelectAnswer(`${index + 1}`)}
+                    >
+                        <View style={[
+                              styles.Answer,
+                              selectedAnswer === `${index + 1}` && styles.selected, // 비교 조건 수정
+                        ]}>
+                            {isImageUrl(answer) ? (
+                                <Image source={{ uri: answer }} style={styles.answerImage} />
+                            ) : (
+                                <Text>{answer}</Text>
+                            )}
+                        </View>
+                    </TouchableOpacity>
+                ))}
             </View>
-
-            {quizText && (
-                <View style={styles.hintContainer}>
-                    <Text style={styles.hintText}>{quizText}</Text>
-                </View>
-            )}
-
-            {responseMessage && (
-                <View style={styles.resultContainer}>
-                    <Text style={styles.resultText}>{responseMessage}</Text>
-                </View>
-            )}
 
             <View style={styles.BtnContainer}>
                 <GradientButton
                     height={56}
-                    width={328}
+                    width={350}
                     text="제출하기"
                     onPress={handleNavigateQuizPress}
-                    isDisabled={userAnswer === ""}
+                    isDisabled={selectedAnswer === null}
                 />
             </View>
         </View>
@@ -192,6 +193,31 @@ const styles = StyleSheet.create({
         paddingHorizontal: 22,
         marginTop: 29,
     },
+    TwoAnswerContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        flexWrap: 'wrap',
+        marginTop: 30,
+    },
+    Answer: {
+        width: 168,
+        height: 158,
+        margin: 10,
+        padding: 4,
+        backgroundColor: '#EFF0F2',
+        borderRadius: 15,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    selected: {
+        borderColor: colors.green,
+        borderWidth: 4,
+    },
+    answerImage: {
+        width: 100,  // 이미지 크기 설정
+        height: 100, // 이미지 크기 설정
+        resizeMode: 'contain',  // 이미지 비율을 유지하며 크기 조절
+    },
     rowContainer: {
         flexDirection: 'row',
     },
@@ -207,42 +233,22 @@ const styles = StyleSheet.create({
         lineHeight: 34,
         marginBottom: 8,
     },
-    inputContainer: {
-        marginTop: 20,
-        marginHorizontal: 20,
-    },
-    textInput: {
-        height: 50,  // 한 줄 크기
-        borderColor: '#EFF0F2',
-        borderWidth: 1,
-        borderRadius: 10,
-        paddingHorizontal: 10,
-        fontSize: getFontSize(16),
-    },
-    hintContainer: {
-        marginTop: 20,
-        marginHorizontal: 20,
-    },
-    hintText: {
-        fontSize: getFontSize(14),
-        color: colors.lightblack,
-    },
-    resultContainer: {
-        marginTop: 20,
-        marginHorizontal: 20,
-    },
-    resultText: {
-        fontSize: getFontSize(16),
-        fontWeight: '500',
-        color: colors.black,
-    },
     BtnContainer: {
+        marginHorizontal: 16,
+        alignItems: 'center',
         position: 'absolute',
         bottom: 50,
         alignSelf: 'center',
-        marginHorizontal: 16,
+    },
+    responseContainer: {
+        marginTop: 20,
         alignItems: 'center',
+    },
+    responseText: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: colors.black,
     },
 });
 
-export default TodayQuiz1Screen;
+export default TodayQuiz2Screen;
