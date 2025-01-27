@@ -13,8 +13,9 @@ import CircleStarIcon from '../../img/Home/CircleStarIcon.svg';
 import CircleQuestionIcon from '../../img/Home/CircleQuestionIcon.svg';
 import QuestIcon from '../../img/Home/QuestIcon.svg';
 import PedometerIcon from '../../img/Home/PedometerIcon.svg';
-
 import FloatingButton from '../../img/Home/FloatingButton.svg';
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {
   ScrollView,
@@ -35,7 +36,6 @@ const { height } = Dimensions.get('window');
 function HomeScreen(): React.JSX.Element {
     const navigation = useNavigation();
     const apiUrl = process.env.REACT_APP_API_URL;
-    const accessToken = process.env.ACCESS_TOKEN;
 
     const [showTreeInfo, setShowTreeInfo] = useState(true);
 
@@ -44,8 +44,8 @@ function HomeScreen(): React.JSX.Element {
     const [mainChar, setMainChar] = useState(null);
     const [monthSavedTree, setMonthSavedTree] = useState(0.0);
     const [totalSavedTree, setTotalSavedTree] = useState(0.0);
-    const [dailyActivity, setDailyActivity] = useState(4);
-    const [specialActivity, setSpecialActivity] = useState(14);
+    const [dailyActivity, setDailyActivity] = useState(1);
+    const [specialActivity, setSpecialActivity] = useState(11);
 
     const [quizYN, setQuizYN] = useState();
     const [modalVisible, setModalVisible] = useState(false);
@@ -73,36 +73,40 @@ function HomeScreen(): React.JSX.Element {
         '반려 식물 키우기'
     ];
 
-    const getRandomQuest = (quests) => {
-        const randomIndex = Math.floor(Math.random() * quests.length);
-        return quests[randomIndex];
+    const getDailyQuest = (activity: number) => {
+        return dailyQuests[activity - 1];
     };
 
-    const refreshQuests = () => {
-        setDailyQuest(getRandomQuest(dailyQuests));
-        setSpecialQuest(getRandomQuest(specialQuests));
+    const getSpecialQuest = (activity: number) => {
+        return specialQuests[activity - 11];
     };
 
-    useEffect(() => {
-        // 화면이 로드될 때 퀘스트 초기화
-        refreshQuests();
-
-        const now = new Date();
-        const midnight = new Date(now);
-        midnight.setHours(24, 0, 0, 0);
-
-        const timeUntilMidnight = midnight - now;
-
-        const timeoutId = setTimeout(() => {
-            refreshQuests();
-            setInterval(refreshQuests, 24 * 60 * 60 * 1000);
-        }, timeUntilMidnight);
-        return () => clearTimeout(timeoutId);
-    }, []);
+  const charImages = {
+    1: require('../../img/Character/Image/1.png'),
+    2: require('../../img/Character/Image/2.png'),
+    3: require('../../img/Character/Image/3.png'),
+    4: require('../../img/Character/Image/4.png'),
+    5: require('../../img/Character/Image/5.png'),
+    6: require('../../img/Character/Image/6.png'),
+    7: require('../../img/Character/Image/7.png'),
+    8: require('../../img/Character/Image/8.png'),
+    9: require('../../img/Character/Image/9.png'),
+    10: require('../../img/Character/Image/10.png'),
+    11: require('../../img/Character/Image/11.png'),
+    12: require('../../img/Character/Image/12.png'),
+    13: require('../../img/Character/Image/13.png'),
+    14: require('../../img/Character/Image/14.png'),
+    15: require('../../img/Character/Image/15.png'),
+    16: require('../../img/Character/Image/16.png'),
+    17: require('../../img/Character/Image/17.png'),
+    18: require('../../img/Character/Image/18.png'),
+    19: require('../../img/Character/Image/19.png'),
+  };
 
     useEffect(() => {
         const fetchHomeData = async () => {
             try {
+                const accessToken = await AsyncStorage.getItem('token');
                 const response = await fetch(`${apiUrl}/mainpage/getInfo?timestamp=${new Date().getTime()}`, {
                     method: 'GET',
                     headers: {
@@ -112,7 +116,6 @@ function HomeScreen(): React.JSX.Element {
                     },
                 });
 
-                // 응답 상태
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
@@ -126,8 +129,8 @@ function HomeScreen(): React.JSX.Element {
                     setMainChar(result.data.mainChar);
                     setMonthSavedTree(result.data.monthSavedTree);
                     setTotalSavedTree(result.data.totalSavedTree);
-                    setDailyActivity(result.data.dailyActivity);
-                    setSpecialActivity(result.data.specialActivity);
+                    setDailyQuest(getDailyQuest(result.data.dailyActivity));
+                    setSpecialQuest(getSpecialQuest(result.data.specialActivity));
                 } else {
                     console.error(result.message);
                 }
@@ -141,6 +144,7 @@ function HomeScreen(): React.JSX.Element {
 
     const fetchQuizYNData = async () => {
         try {
+            const accessToken = await AsyncStorage.getItem('token');
             const response = await fetch(`${apiUrl}/quiz?timestamp=${new Date().getTime()}`, {
                 method: 'GET',
                 headers: {
@@ -173,7 +177,13 @@ function HomeScreen(): React.JSX.Element {
 
         fetchHomeData();
         fetchQuizYNData();
-    }, []);
+    }, [userName, userReward, mainChar, monthSavedTree, totalSavedTree, dailyActivity, specialActivity]);
+
+    const getMainCharImage = () => {
+        // If mainChar is null, use image 1, otherwise use the image for the corresponding mainChar
+        const charId = mainChar !== null ? mainChar : 1;
+        return charImages[charId] || charImages[1];  // Fallback to image 1 if charId is invalid
+      };
 
     const [selectedImage, setSelectedImage] = useState(null);
 
@@ -246,7 +256,7 @@ function HomeScreen(): React.JSX.Element {
                     <View style={{justifyContent: 'center', alignItems: 'center', marginTop: 5, marginBottom: 10}}>
                         <View style={styles.MainBackgroundWrapper}>
                             <Image source={require('../../img/Home/HomeCharBackground.png')} style={styles.MainBackground} />
-                            <Image source={require('../../img/Character/mole/[1]mole1.png')} style={styles.MainChar} />
+                            <Image source={getMainCharImage()} style={styles.MainChar} />
                         </View>
                     </View>
 
