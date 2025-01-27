@@ -46,7 +46,8 @@ function DrawScreen(): React.JSX.Element {
             Alert.alert('선택 오류', '옵션을 선택해주세요.');
         }
     };
-
+    
+    // 뽑기 API
     const apiUrl = process.env.REACT_APP_API_URL;
 
     const handleConfirm = async () => {

@@ -31,10 +31,12 @@ function SignupScreen(): React.JSX.Element {
 
     const [isAgreeChecked, setIsAgreeChecked] = useState(false);
 
+    // 개인정보 동의
     const handleAgreeCheck = () => {
         setIsAgreeChecked(!isAgreeChecked);
     };
 
+    // 아이디
     const handleIdCheck = (text: string) => {
         setId(text);
         const idRegex = /^[a-z0-9]{4,12}$/;
@@ -42,6 +44,7 @@ function SignupScreen(): React.JSX.Element {
         setIdCheckResult(null); // 중복 확인 결과 초기화
     };
 
+    // 비밀번호
     const handlePasswordCheck = (text: string) => {
         setPassword(text);
         // 대문자 or 소문자, 숫자, 특수문자
@@ -52,11 +55,13 @@ function SignupScreen(): React.JSX.Element {
         setIsPasswordMatch(text === confirmPassword);
     };
 
+    // 비밀번호 확인
     const handleConfirmPasswordCheck = (text: string) => {
         setConfirmPassword(text);
         setIsPasswordMatch(password === text);
     };
 
+    // 닉네임
     const handleNicknameCheck = (text: string) => {
         setNickname(text);
         const nicknameRegex = /^[가-힣]+$/;
@@ -64,6 +69,7 @@ function SignupScreen(): React.JSX.Element {
         setNicknameCheckResult(null); // 중복 확인 결과 초기화
     };
 
+    // 아이디 중복확인
     const checkIdAvailability = () => {
         if (id === 'duplicateId') {
             setIdCheckResult('중복되는 아이디입니다.');
@@ -72,6 +78,7 @@ function SignupScreen(): React.JSX.Element {
         }
     };
 
+    // 닉네임 중복확인
     const checkNicknameAvailability = () => {
         if (nickname === '중복닉네임') {
             setNicknameCheckResult('중복 닉네임입니다.');
@@ -87,7 +94,6 @@ function SignupScreen(): React.JSX.Element {
         isPasswordMatch &&
         isNicknameValid &&
         isAgreeChecked;
-
     
     // 회원가입 API (GradientButton onPress)
     const apiUrl = process.env.REACT_APP_API_URL;

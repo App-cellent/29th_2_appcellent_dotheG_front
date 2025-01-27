@@ -1,15 +1,23 @@
 import * as React from 'react';
+import { useRoute } from '@react-navigation/native';
 import { StyleSheet, Text, View, Image, ImageBackground } from 'react-native';
 
 import CharacterRarity from '../../components/CharacterRarity';
 
-type DrawResultProps = {
-    characterName: string;
-    characterImage: string;
-    rarity: number;
+type DrawResultParams = {
+    characterData: {
+        characterName: string;
+        characterImageUrl: string;
+        characterRarity: number;
+    };
 };
 
-function DrawResultScreen({ characterName, characterImage, rarity }: DrawResultProps): React.JSX.Element {
+function DrawResultScreen(): React.JSX.Element {
+    const route = useRoute();
+    const { characterData } = route.params as DrawResultParams;
+
+    const { characterName, characterImageUrl, characterRarity } = characterData || {};
+
     return(
         <View style={styles.container}>
             <ImageBackground
@@ -20,12 +28,19 @@ function DrawResultScreen({ characterName, characterImage, rarity }: DrawResultP
                     <Text style={styles.characterText}>새로운 캐릭터</Text>
                     {'가 나왔어요!'}
                 </Text>
-                <Image
-                    source={{ uri: characterImage }}
-                    style={styles.characterImg}
-                />
+                {characterImageUrl ? (
+                    <Image
+                        source={{ uri: characterImageUrl }}
+                        style={styles.characterImg}
+                    />
+                ) : (
+                    <Image
+                        source={require('../../img/Character/nullCharacter.png')}
+                        style={styles.characterImg}
+                    />
+                )}
                 <Text style={[styles.text, styles.marginBottom9]}>{characterName}</Text>
-                <CharacterRarity rarity={rarity} />
+                <CharacterRarity rarity={characterRarity} />
             </ImageBackground>
         </View>
     );
