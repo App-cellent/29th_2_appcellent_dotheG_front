@@ -7,6 +7,8 @@ import GradientButton from "../../components/GradientButton";
 import GradientBackground from "../../img/Home/GradientBackground.png";
 import GradientEarth from "../../img/Home/GradientEarth.png";
 
+import LeftArrow from '../../img/Home/Quiz/LeftArrow.svg';
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {
@@ -100,9 +102,8 @@ function TodayQuizGuideScreen(): React.JSX.Element {
     return (
         <View style={styles.container}>
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()}>
-                  <Image
-                    source={require('../../img/My/arrowleft.png')}
+                <TouchableOpacity onPress={() => navigation.pop()}>
+                  <LeftArrow
                     style={styles.closeIcon}
                   />
                 </TouchableOpacity>
@@ -128,7 +129,7 @@ function TodayQuizGuideScreen(): React.JSX.Element {
             </View>
 
             <View style={styles.BtnContainer}> /* 오늘 안 풀었으면 false -> 풀었으면 true, isDisabled */
-                <GradientButton height={56} width={328} text="퀴즈 풀기" isDisabled={!quizAvailable} onPress={navigateToQuiz}/>
+                <GradientButton height={56} width={350} text="퀴즈 풀기" isDisabled={!quizAvailable} onPress={navigateToQuiz}/>
             </View>
         </View>
     );
@@ -146,8 +147,9 @@ const styles = StyleSheet.create({
         height: 56,
     },
     closeIcon: {
-        width: 7.13,
-        height: 14,
+        marginTop: 10,
+        width: 11.13,
+        height: 18,
     },
     TopTextContainer: {
         paddingHorizontal: 22,
@@ -157,15 +159,15 @@ const styles = StyleSheet.create({
         paddingHorizontal: 21,
     },
     gradient: {
-        height: 171,
+        height: 201,
         marginTop: 44,
         marginBottom: 15,
         justifyContent: 'center', // 수직 가운데 정렬
         alignItems: 'center', // 수평 가운데 정렬
     },
     earthImage: {
-        width: 164,
-        height: 112,
+        width: 184,
+        height: 132,
     },
     GreenText: {
         color: colors.green,
@@ -194,8 +196,10 @@ const styles = StyleSheet.create({
     },
     BtnContainer: {
         paddingHorizontal: 16,
+        position: 'absolute',
+        bottom: 50,
+        alignSelf: 'center',
         alignItems: 'center',
-        marginTop: 93,
     },
 });
 

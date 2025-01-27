@@ -7,6 +7,7 @@ import GradientButton from "../../components/GradientButton";
 import GradientBackground from "../../img/Home/GradientBackground.png";
 import GradientEarth from "../../img/Home/GradientEarth.png";
 
+import LeftArrow from '../../img/Home/Quiz/LeftArrow.svg';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {
@@ -124,11 +125,10 @@ function TodayQuiz3Screen(): React.JSX.Element {
     return (
         <View style={styles.container}>
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()}>
-                  <Image
-                    source={require('../../img/My/arrowleft.png')}
-                    style={styles.closeIcon}
-                  />
+                <TouchableOpacity onPress={() => navigation.pop()}>
+                    <LeftArrow
+                        style={styles.closeIcon}
+                    />
                 </TouchableOpacity>
             </View>
 
@@ -159,7 +159,7 @@ function TodayQuiz3Screen(): React.JSX.Element {
                 </TouchableOpacity>
             </View>
             <View style={styles.BtnContainer}>
-                <GradientButton height={56} width={328} text="제출하기" onPress={handleNavigateQuizPress} isDisabled={selectedAnswer === null}/>
+                <GradientButton height={56} width={350} text="제출하기" onPress={handleNavigateQuizPress} isDisabled={selectedAnswer === null}/>
             </View>
         </View>
     );
@@ -217,9 +217,11 @@ const styles = StyleSheet.create({
         marginBottom: 8,
     },
     BtnContainer: {
+        position: 'absolute',
+        bottom: 50,
+        alignSelf: 'center',
         marginHorizontal: 16,
         alignItems: 'center',
-        marginTop: 191,
     },
     Selected:{
         color: colors.lightblack,
