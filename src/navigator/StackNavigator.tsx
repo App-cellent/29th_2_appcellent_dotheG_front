@@ -6,6 +6,12 @@ import { StyleSheet } from 'react-native';
 import { useTabBarVisibility } from '../utils/useTabBarVisibility';
 
 import BottomTabNavigator from './BottomTabNavigator';
+import TodayQuizGuideScreen from '../screens/Home/Quiz/TodayQuizGuideScreen';
+import TodayQuiz1Screen from '../screens/Home/Quiz/TodayQuiz1Screen';
+import TodayQuiz2Screen from '../screens/Home/Quiz/TodayQuiz2Screen';
+import TodayQuiz3Screen from '../screens/Home/Quiz/TodayQuiz3Screen';
+import TodayQuizCorrectScreen from '../screens/Home/Quiz/TodayQuizCorrectScreen';
+import TodayQuizWrongScreen from '../screens/Home/Quiz/TodayQuizWrongScreen';
 import QuestViewScreen from '../screens/Home/QuestViewScreen';
 import TodayQuizGuideScreen from '../screens/Home/Quiz/TodayQuizGuideScreen';
 import TodayQuiz1Screen from '../screens/Home/Quiz/TodayQuiz1Screen';
@@ -57,6 +63,13 @@ const StackNavigator = () => {
                 component={WithdrawalScreen}
                 options={{ headerShown: false }}
             />
+
+            <Stack.Screen name="TodayQuizGuideScreen" component={TodayQuizGuideScreen} options={{ headerShown: false }}/>
+            <Stack.Screen name="TodayQuiz1Screen" component={TodayQuiz1Screen} options={{ headerShown: false }}/>
+            <Stack.Screen name="TodayQuiz2Screen" component={TodayQuiz2Screen} options={{ headerShown: false }}/>
+            <Stack.Screen name="TodayQuiz3Screen" component={TodayQuiz3Screen} options={{ headerShown: false }}/>
+            <Stack.Screen name="TodayQuizCorrectScreen" component={TodayQuizCorrectScreen} options={{ headerShown: false }}/>
+            <Stack.Screen name="TodayQuizWrongScreen" component={TodayQuizWrongScreen} options={{ headerShown: false }}/>
 
             <Stack.Screen
                 name="QuestViewScreen"
