@@ -3,8 +3,6 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useNavigation } from '@react-navigation/native';
 import { StyleSheet } from 'react-native';
 
-import { useTabBarVisibility } from '../utils/useTabBarVisibility';
-
 import BottomTabNavigator from './BottomTabNavigator';
 import TodayQuizGuideScreen from '../screens/Home/Quiz/TodayQuizGuideScreen';
 import TodayQuiz1Screen from '../screens/Home/Quiz/TodayQuiz1Screen';
@@ -13,12 +11,6 @@ import TodayQuiz3Screen from '../screens/Home/Quiz/TodayQuiz3Screen';
 import TodayQuizCorrectScreen from '../screens/Home/Quiz/TodayQuizCorrectScreen';
 import TodayQuizWrongScreen from '../screens/Home/Quiz/TodayQuizWrongScreen';
 import QuestViewScreen from '../screens/Home/QuestViewScreen';
-import TodayQuizGuideScreen from '../screens/Home/Quiz/TodayQuizGuideScreen';
-import TodayQuiz1Screen from '../screens/Home/Quiz/TodayQuiz1Screen';
-import TodayQuiz2Screen from '../screens/Home/Quiz/TodayQuiz2Screen';
-import TodayQuiz3Screen from '../screens/Home/Quiz/TodayQuiz3Screen';
-import TodayQuizCorrectScreen from '../screens/Home/Quiz/TodayQuizCorrectScreen';
-import TodayQuizWrongScreen from '../screens/Home/Quiz/TodayQuizWrongScreen';
 
 import WithdrawalScreen from '../screens/My/WithdrawalScreen';
 import AlarmScreen from '../screens/My/AlarmScreen';
@@ -44,7 +36,6 @@ import ChangePwCompleteScreen from '../screens/User/ChangePwCompleteScreen';
 const StackNavigator = () => {
     const navigation = useNavigation();
     const Stack = createNativeStackNavigator();
-    const { setIsTabBarVisible } = useTabBarVisibility();
 
     const goBack = useCallback(() => {
         navigation.goBack();
@@ -76,60 +67,6 @@ const StackNavigator = () => {
                 component={QuestViewScreen}
                 options={{ headerShown: false }}
             />
-
-            <Stack.Screen
-                name="TodayQuizGuideScreen"
-                component={TodayQuizGuideScreen}
-                options={{
-                  headerShown: false,
-                  listeners: {
-                    focus: () => setIsTabBarVisible(false),
-                    blur: () => setIsTabBarVisible(true),
-                  },
-                }}
-              />
-
-            <Stack.Screen
-                name="TodayQuiz2Screen"
-                component={TodayQuiz2Screen}
-                options={{ headerShown: false }}
-            />
-
-            <Stack.Screen
-                name="TodayQuiz3Screen"
-                component={TodayQuiz3Screen}
-                options={{ headerShown: false }}
-            />
-
-            <Stack.Screen
-                name="TodayQuiz1Screen"
-                component={TodayQuiz1Screen}
-                options={{ headerShown: false }}
-              />
-
-              <Stack.Screen
-                name="TodayQuizCorrectScreen"
-                component={TodayQuizCorrectScreen}
-                options={{
-                  headerShown: false,
-                  listeners: {
-                    focus: () => setIsTabBarVisible(false),
-                    blur: () => setIsTabBarVisible(true),
-                  },
-                }}
-              />
-
-              <Stack.Screen
-                name="TodayQuizWrongScreen"
-                component={TodayQuizWrongScreen}
-                options={{
-                  headerShown: false,
-                  listeners: {
-                    focus: () => setIsTabBarVisible(false),
-                    blur: () => setIsTabBarVisible(true),
-                  },
-                }}
-              />
 
             <Stack.Screen
                 name="AlarmScreen"

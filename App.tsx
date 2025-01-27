@@ -10,7 +10,6 @@ import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import StackNavigator from './src/navigator/StackNavigator';
 import PushNotification from "react-native-push-notification";
 import {enableScreens} from 'react-native-screens';
-import { TabBarProvider } from './src/utils/useTabBarVisibility';
 
 function App(): React.JSX.Element {
     enableScreens();
@@ -30,11 +29,9 @@ function App(): React.JSX.Element {
   });
 
   return (
-  <TabBarProvider>
-        <NavigationContainer theme={customTheme}>
-            <StackNavigator />
-        </NavigationContainer>
-    </TabBarProvider>
+    <NavigationContainer theme={customTheme}>
+        <StackNavigator />
+    </NavigationContainer>
   );
 }
 
