@@ -70,22 +70,40 @@ function SignupScreen(): React.JSX.Element {
     };
 
     // 아이디 중복확인
-    const checkIdAvailability = () => {
-        if (id === 'duplicateId') {
-            setIdCheckResult('중복되는 아이디입니다.');
-        } else {
-            setIdCheckResult('사용 가능한 아이디입니다.');
-        }
-    };
+    // const checkIdAvailability = async () => {
+    //     try {
+    //         const response = await fetch(`${apiUrl}/users/check-userlogin`, {
+    //             method: 'POST',
+    //             headers: {
+    //                 "Cache-Control":'no-store',
+    //                 "Accept":"application/json",
+    //             },
+    //         });
+    //     }
+    //     // if (id === 'duplicateId') {
+    //     //     setIdCheckResult('중복되는 아이디입니다.');
+    //     // } else {
+    //     //     setIdCheckResult('사용 가능한 아이디입니다.');
+    //     // }
+    // };
 
     // 닉네임 중복확인
-    const checkNicknameAvailability = () => {
-        if (nickname === '중복닉네임') {
-            setNicknameCheckResult('중복 닉네임입니다.');
-        } else {
-            setNicknameCheckResult('사용 가능한 닉네임입니다.');
-        }
-    };
+    // const checkNicknameAvailability = async () => {
+    //     try {
+    //         const response = await fetch(`${apiUrl}/users/check-username`, {
+    //             method: 'POST',
+    //             headers: {
+    //                 "Cache-Control":'no-store',
+    //                 "Accept":"application/json",
+    //             },
+    //         });
+    //     }
+    //     // if (nickname === '중복닉네임') {
+    //     //     setNicknameCheckResult('중복 닉네임입니다.');
+    //     // } else {
+    //     //     setNicknameCheckResult('사용 가능한 닉네임입니다.');
+    //     // }
+    // };
 
     // 모든 입력 조건 충족 시 가입하기 버튼 활성화
     const isFormValid =
@@ -101,9 +119,9 @@ function SignupScreen(): React.JSX.Element {
     const fetchSignupData = async () => {
         const formData = new FormData();
 
-        formData.append('userName', nickname); // 두더지, 수달, 참매, 꿀벌
-        formData.append('userLogin', id); // user1, user2, user3, user4
-        formData.append('userPassword', password); // test123@
+        formData.append('userName', nickname);
+        formData.append('userLogin', id);
+        formData.append('userPassword', password);
 
         try {
             const response = await fetch(`${apiUrl}/users/signup`, {

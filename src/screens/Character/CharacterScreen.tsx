@@ -9,6 +9,7 @@ import {
   View,
   TouchableOpacity, 
   ActivityIndicator, 
+  Alert
 } from 'react-native';
 
 import CharacterRarity from '../../components/CharacterRarity';
@@ -24,6 +25,45 @@ function CharacterScreen(): React.JSX.Element {
 
     const apiUrl = process.env.REACT_APP_API_URL;
     //const accessToken = process.env.ACCESS_TOKEN;
+
+    //로그아웃 테스트
+    const handleLogout = async () => {
+        try {
+          const accessToken = await AsyncStorage.getItem('token');
+          const refreshToken = await AsyncStorage.getItem('refreshToken');
+          console.log('Access Token:', accessToken);
+          console.log('Refresh Token:', refreshToken);
+          
+          const response = await fetch(`${apiUrl}/logout`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+              "Cache-Control":"no-store",
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              refresh: refreshToken,
+            }),
+          });
+    
+          if (response.ok) {
+            console.log('Logout Success:', response.status)
+            Alert.alert('Success', '로그아웃 성공');
+
+            await AsyncStorage.removeItem('token');
+            await AsyncStorage.removeItem('refreshToken');
+
+            navigation.navigate('LoginScreen');
+          } else {
+            console.error('Logout Failed')
+            Alert.alert('Error', `로그아웃 실패: ${response.status}`);
+          }
+        } catch (error) {
+          console.error('Logout Error:', error);
+          Alert.alert('Error', '로그아웃 오류 발생');
+        }
+    };
+    //로그아웃 테스트
 
     const fetchCharacterData = async () => {
         setLoading(true);
@@ -117,9 +157,7 @@ function CharacterScreen(): React.JSX.Element {
                 <View style={styles.bodyContainer}>
                     {/* 캐릭터 이미지 */}
                     <Image
-                        source={character && character.characterImageUrl 
-                            ? { uri: character.characterImageUrl } 
-                            : require('../../img/Character/nullCharacter.png')}
+                        source={{ uri: character.characterImageUrl }}
                         style={styles.characterImg}
                     />
                     {/* 캐릭터 이름 */}
@@ -145,6 +183,18 @@ function CharacterScreen(): React.JSX.Element {
                         />
                     </View>
                 </View>
+
+                {/* for test.. */}
+                <TouchableOpacity onPress={() => navigation.navigate('LoginScreen')}>
+                    <Text style={{ textAlign: 'center' }}>LoginScreen</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => navigation.navigate('SignupScreen')}>
+                    <Text style={{ textAlign: 'center' }}>SignupScreen</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={handleLogout}>
+                    <Text style={{ textAlign: 'center' }}>로그아웃</Text>
+                </TouchableOpacity>
+                {/* for test.. */}
             </LinearGradient>
         </View>
     );
