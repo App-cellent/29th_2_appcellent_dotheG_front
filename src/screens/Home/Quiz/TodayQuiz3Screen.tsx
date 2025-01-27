@@ -1,13 +1,13 @@
 import React, { useCallback, useState, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import colors from "../../utils/colors";
-import { getFontSize } from '../../utils/fontUtils';
+import colors from "../../../utils/colors";
+import { getFontSize } from '../../../utils/fontUtils';
 
-import GradientButton from "../../components/GradientButton";
-import GradientBackground from "../../img/Home/GradientBackground.png";
-import GradientEarth from "../../img/Home/GradientEarth.png";
+import GradientButton from "../../../components/GradientButton";
+import GradientBackground from "../../../img/Home/GradientBackground.png";
+import GradientEarth from "../../../img/Home/GradientEarth.png";
 
-import LeftArrow from '../../img/Home/Quiz/LeftArrow.svg';
+import LeftArrow from '../../../img/Home/Quiz/LeftArrow.svg';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {

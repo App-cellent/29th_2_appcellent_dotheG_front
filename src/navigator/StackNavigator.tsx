@@ -4,12 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { StyleSheet } from 'react-native';
 
 import BottomTabNavigator from './BottomTabNavigator';
-import TodayQuizGuideScreen from '../screens/Home/TodayQuizGuideScreen';
-import TodayQuiz1Screen from '../screens/Home/TodayQuiz1Screen';
-import TodayQuiz2Screen from '../screens/Home/TodayQuiz2Screen';
-import TodayQuiz3Screen from '../screens/Home/TodayQuiz3Screen';
-import TodayQuizCorrectScreen from '../screens/Home/TodayQuizCorrectScreen';
-import TodayQuizWrongScreen from '../screens/Home/TodayQuizWrongScreen';
+import QuestViewScreen from '../screens/Home/QuestViewScreen';
 
 import WithdrawalScreen from '../screens/My/WithdrawalScreen';
 import AlarmScreen from '../screens/My/AlarmScreen';
@@ -51,6 +46,12 @@ const StackNavigator = () => {
             <Stack.Screen
                 name="WithdrawalScreen"
                 component={WithdrawalScreen}
+                options={{ headerShown: false }}
+            />
+
+            <Stack.Screen
+                name="QuestViewScreen"
+                component={QuestViewScreen}
                 options={{ headerShown: false }}
             />
 

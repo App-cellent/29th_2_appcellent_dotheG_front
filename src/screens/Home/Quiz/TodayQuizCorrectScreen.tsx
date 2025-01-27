@@ -1,9 +1,9 @@
 import React from 'react';
 import { useNavigation } from '@react-navigation/native';
-import colors from "../../utils/colors";
-import { getFontSize } from '../../utils/fontUtils';
+import colors from "../../../utils/colors";
+import { getFontSize } from '../../../utils/fontUtils';
 
-import SeedIcon from '../../img/Home/SeedIcon.svg';
+import SeedIcon from '../../../img/Home/SeedIcon.svg';
 
 import {
   StyleSheet,
@@ -19,7 +19,7 @@ const { height } = Dimensions.get('window');
 function TodayQuizCorrectScreen(): React.JSX.Element {
     const navigation = useNavigation();
 
-    const navigateHome = () => {
+    const navigateHome = async () => {
         navigation.reset({
             index: 0,
             routes: [{ name: 'HomeScreen' }],
@@ -29,7 +29,7 @@ function TodayQuizCorrectScreen(): React.JSX.Element {
     return (
         <TouchableOpacity style={styles.container} onPress={navigateHome}>
             <ImageBackground
-                source={require('../../img/Home/Quiz/QuizCorrectBackgroundImage.png')}
+                source={require('../../../img/Home/Quiz/QuizCorrectBackgroundImage.png')}
                 style={styles.backgroundImage}
             >
                 <View style={styles.rowItem}>

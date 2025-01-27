@@ -11,12 +11,12 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SvgXml } from 'react-native-svg';
 
 import HomeScreen from '../screens/Home/HomeScreen';
-import TodayQuizGuideScreen from '../screens/Home/TodayQuizGuideScreen';
-import TodayQuiz1Screen from '../screens/Home/TodayQuiz1Screen';
-import TodayQuiz2Screen from '../screens/Home/TodayQuiz2Screen';
-import TodayQuiz3Screen from '../screens/Home/TodayQuiz3Screen';
-import TodayQuizCorrectScreen from '../screens/Home/TodayQuizCorrectScreen';
-import TodayQuizWrongScreen from '../screens/Home/TodayQuizWrongScreen';
+import TodayQuizGuideScreen from '../screens/Home/Quiz/TodayQuizGuideScreen';
+import TodayQuiz1Screen from '../screens/Home/Quiz/TodayQuiz1Screen';
+import TodayQuiz2Screen from '../screens/Home/Quiz/TodayQuiz2Screen';
+import TodayQuiz3Screen from '../screens/Home/Quiz/TodayQuiz3Screen';
+import TodayQuizCorrectScreen from '../screens/Home/Quiz/TodayQuizCorrectScreen';
+import TodayQuizWrongScreen from '../screens/Home/Quiz/TodayQuizWrongScreen';
 import PedometerScreen from '../screens/Pedometer/PedometerScreen';
 import CharacterScreen from '../screens/Character/CharacterScreen';
 import ListScreen from '../screens/Character/ListScreen';

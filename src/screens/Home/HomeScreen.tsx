@@ -361,7 +361,7 @@ function HomeScreen(): React.JSX.Element {
                 <Pressable style={styles.modalView} onPress={e => e.stopPropagation()}>
                     <View style={styles.rowContainer}>
                       <Text style={styles.modalLargeText}>이미 </Text>
-                      <Text style={[styles.modalLargeText, {color: colors.green}]}>오늘의 퀴즈를 </Text>
+                      <Text style={[styles.modalLargeText, {color: colors.green}]}>오늘의 퀴즈를</Text>
                       <Text style={styles.modalLargeText}> 풀었어요!</Text>
                     </View>
                     <Text style={styles.modalSmallText}>내일 한 번 더 도전해보세요:)</Text>
@@ -642,8 +642,8 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 2,
         elevation: 5,
-        width: 285,
-        height: 162,
+        width: 295,
+        height: 172,
     },
     modalLargeText: {
         textAlign: 'center',
