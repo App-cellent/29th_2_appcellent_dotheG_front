@@ -15,17 +15,17 @@ import {
   TouchableOpacity
 } from 'react-native';
 
-const { height } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 function TodayQuizWrongScreen(): React.JSX.Element {
     const navigation = useNavigation();
     const route = useRoute();
 
-    // Extract data passed from TodayQuiz1Screen
-    const { hintText, imageUrl } = route.params;
+    console.log(route.params);
 
-    const titleText = '오답이에요. 다시 확인해보세요!';
-    const contentText = hintText || '해설을 불러오는데 실패했습니다.';  // Fallback if no hintText is provided
+    const { data } = route.params;
+    const imageUrl = data.quizSolImage;
+    const contentText = data.quizSol || '';  // Fallback if no hintText is provided
 
     const handleNavigateQuizPress = useCallback(async () => {
         navigation.navigate('Main', { screen: 'Home' });
@@ -39,7 +39,7 @@ function TodayQuizWrongScreen(): React.JSX.Element {
                     <Text style={[styles.GreenText, { color:  colors.lightblack }]}> 오늘의 퀴즈</Text>
                 </View>
                 <View style={styles.rowContainer}>
-                    <Text style={styles.BoldLargeText}>{titleText}</Text>
+                    <Text style={styles.BoldLargeText}>오답이에요. 다시 확인해보세요!</Text>
                 </View>
             </View>
 
@@ -54,7 +54,7 @@ function TodayQuizWrongScreen(): React.JSX.Element {
             </View>
 
             <View style={styles.BtnContainer}>
-                <GradientButton height={56} width={350} text="홈으로 돌아가기" onPress={handleNavigateQuizPress} />
+                <GradientButton height={56} width={358} text="홈으로 돌아가기" onPress={handleNavigateQuizPress} />
             </View>
         </View>
     );
@@ -65,29 +65,28 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#FFFFFF',
         alignItems: 'center',
+        width: '100%',
+        paddingHorizontal: 22,
     },
     TopTextContainer: {
-        paddingHorizontal: 22,
         marginTop: 85,
         alignSelf: 'flex-start',
     },
     imageContainer: {
-        width: 266,
-        height: 248,
-        marginHorizontal: 47,
-        marginVertical: 26,
+        width: '100%',
+        height: width - 44,
         backgroundColor: '#EFF0F2',
         borderRadius: 15,
         alignItems: 'center',
         justifyContent: 'center',
     },
     textContainer: {
-        marginHorizontal: 22,
+        width: '100%',
         alignSelf: 'flex-start',
     },
     answerImage: {
-        width: 170,
-        height: 170,
+        width: '65%',
+        height: width - 190,
     },
     rowContainer: {
         flexDirection: 'row',
@@ -106,7 +105,7 @@ const styles = StyleSheet.create({
     },
     ContentText: {
         color: colors.lightblack,
-        fontSize: getFontSize(14),
+        fontSize: getFontSize(15),
         fontWeight: '400',
         marginVertical: 26,
         lineHeight: 25,
