@@ -107,9 +107,8 @@ function TodayQuiz3Screen(): React.JSX.Element {
                     } else {
                         setResponseMessage(result.data);
                         navigation.navigate("TodayQuizWrongScreen", {
-                            hintText: result.data,
-                            imageUrl: result.data.imageUrl || null,
-                        }); // Wrong screen
+                            data: result.data,
+                        });
                     }
                 } else {
                     console.error(result.message);

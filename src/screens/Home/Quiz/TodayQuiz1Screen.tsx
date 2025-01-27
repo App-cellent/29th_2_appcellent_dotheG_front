@@ -99,13 +99,11 @@ function TodayQuiz1Screen(): React.JSX.Element {
 
             if (result.success) {
                 if (result.data === "정답입니다.") {
-                    setResponseMessage("정답입니다!");
                     navigation.navigate("TodayQuizCorrectScreen");
                 } else {
                     setResponseMessage(result.data);
                     navigation.navigate("TodayQuizWrongScreen", {
-                        hintText: result.data,
-                        imageUrl: result.data.imageUrl || null,
+                        data: result.data,
                     });
                 }
             } else {
@@ -270,6 +268,7 @@ const styles = StyleSheet.create({
         fontSize: getFontSize(16),
     },
     hintContainer: {
+        width: '80%',
         marginTop: 20,
         alignItems: 'center',
         justifyContent: 'center',
