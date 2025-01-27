@@ -1,25 +1,29 @@
 import * as React from 'react';
 import { useEffect } from 'react';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { StyleSheet, Text, View, ImageBackground } from 'react-native';
 
 type RootStackParamList = {
-    DrawResultScreen: undefined;
+    DrawResultScreen: { characterData: any };
 };
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'DrawResultScreen'>;
+type RoutePropType = RouteProp<RootStackParamList, 'DrawResultScreen'>;
 
 function DrawLoadingScreen(): React.JSX.Element {
     const navigation = useNavigation<NavigationProp>();
+    const route = useRoute<RoutePropType>();
+    
+    const characterData = route.params?.characterData;
 
     useEffect(() => {
         const loading = setTimeout(() => {
-            navigation.navigate('DrawResultScreen');
+            navigation.navigate('DrawResultScreen', { characterData });
         }, 1000);
 
         return () => clearTimeout(loading);
-    }, [navigation]);
+    }, [navigation, characterData]);
 
     return(
         <View style={styles.container}>

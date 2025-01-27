@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useNavigation, useFocusEffect, useRoute } from '@react-navigation/native';
 import colors from "../../utils/colors";
 import LinearGradient from 'react-native-linear-gradient';
 import {
@@ -18,6 +18,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 function CharacterScreen(): React.JSX.Element {
     const navigation = useNavigation();
+    const route = useRoute();
     const [character, setCharacter] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
@@ -76,8 +77,13 @@ function CharacterScreen(): React.JSX.Element {
 
     useFocusEffect(
         React.useCallback(() => {
-            fetchCharacterData();
-        }, [apiUrl])
+            if (route.params?.updatedCharacter) {
+                console.log("Success : receive params data", route.params.updatedCharacter);
+                setCharacter(route.params.updatedCharacter);
+            } else {
+                fetchCharacterData();
+            }
+        }, [apiUrl, route.params])
     );
 
     if (loading) {
