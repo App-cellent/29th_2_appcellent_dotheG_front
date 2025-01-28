@@ -51,9 +51,7 @@ function QuestViewScreen(): React.JSX.Element {
                         source={item}
                         style={styles.imageItem}
                     />
-                    {isSelected && (
-                        <CheckIcon style={styles.checkIcon} width={30} height={30} />
-                    )}
+                    <CheckIcon style={styles.checkIcon} width={30} height={30} />
                 </View>
             </TouchableOpacity>
         );
