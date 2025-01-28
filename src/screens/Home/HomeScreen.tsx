@@ -275,8 +275,12 @@ function HomeScreen(): React.JSX.Element {
                             )}
                             {mainChar !== null && (
                                 <View style={styles.MainBackgroundWrapper}>
+                                    <ImageBackground
+                                        style={styles.MainChar}
+                                        source={getMainCharImage()}
+                                        resizeMode="contain"
+                                    />
                                     <Image source={require('../../img/Home/HomeCharBackground.png')} style={styles.MainBackground} />
-                                    <Image source={getMainCharImage()} style={styles.MainChar} />
                                 </View>
                             )}
                     </View>
@@ -410,9 +414,11 @@ const styles = StyleSheet.create({
     HomeMainContainer: {
     },
     MainBackgroundWrapper: {
-        position: 'relative',
-        width: '95%',
+        width: '100%',
         height: 200,
+        paddingHorizontal: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     NullBackgroundWrapper: {
         width: '100%',
@@ -428,17 +434,15 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     MainBackground: {
+        position: 'absolute',
         width: '100%',
         height: '100%',
         resizeMode: 'cover',
     },
     MainChar: {
-        position: 'absolute',
-        bottom: '50%',
-        left: '50%',
-        transform: [{ translateX: -114 }, { translateY: +98 }],
-        width: 268,
-        height: 196,
+        width: '100%',
+        height: '100%',
+        resizeMode: 'contain'
     },
     scrollContainer: {
         backgroundColor: colors.lightgray,
