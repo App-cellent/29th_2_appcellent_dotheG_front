@@ -32,6 +32,7 @@ import SignupScreen from '../screens/User/SignupScreen';
 import WelcomeScreen from '../screens/User/WelcomeScreen';
 import FindIdPwScreen from '../screens/User/FindIdPwScreen';
 import ChangePwCompleteScreen from '../screens/User/ChangePwCompleteScreen';
+import Tutorial from '../screens/User/Tutorial';
 
 const StackNavigator = () => {
     const navigation = useNavigation();
@@ -44,11 +45,15 @@ const StackNavigator = () => {
     return (
         <Stack.Navigator initialRouteName="LoginScreen">
             <Stack.Screen
-                name="Main"
-                component={BottomTabNavigator}
+                    name="Main"
+                    component={BottomTabNavigator}
+                    options={{ headerShown: false }}
+                />
+            <Stack.Screen
+                name="Tutorial"
+                component={Tutorial}
                 options={{ headerShown: false }}
             />
-
             <Stack.Screen
                 name="WithdrawalScreen"
                 component={WithdrawalScreen}
