@@ -47,7 +47,7 @@ function CharacterScreen(): React.JSX.Element {
           });
     
           if (response.ok) {
-            console.log('Logout Success:', response.status)
+            console.log('Logout Success:', response.status);
             Alert.alert('Success', '로그아웃 성공');
 
             await AsyncStorage.removeItem('token');
@@ -55,7 +55,7 @@ function CharacterScreen(): React.JSX.Element {
 
             navigation.navigate('LoginScreen');
           } else {
-            console.error('Logout Failed')
+            console.error('Logout Failed');
             Alert.alert('Error', `로그아웃 실패: ${response.status}`);
           }
         } catch (error) {
