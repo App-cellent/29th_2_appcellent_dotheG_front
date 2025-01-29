@@ -4,6 +4,7 @@ import colors from "../../../utils/colors";
 import { getFontSize } from '../../../utils/fontUtils';
 
 import GradientButton from "../../../components/GradientButton";
+import { LinearGradient } from 'react-native-linear-gradient';
 import GradientBackground from "../../../img/Home/GradientBackground.png";
 import GradientEarth from "../../../img/Home/GradientEarth.png";
 
@@ -155,15 +156,29 @@ function TodayQuiz3Screen(): React.JSX.Element {
                   onPress={() => handleSelectAnswer('X')}
                 >
                 <View style={[styles.Answer, selectedAnswer === 'X' && styles.selected]}>
-                    <Image source={require('../../../img/Home/Quiz/X.png')} style={[styles.Selected, {width: 55, height: 62} ]} />
+                    <Image source={require('../../../img/Home/Quiz/X.png')} style={[styles.Selected, {width: 56, height: 63} ]} />
                     <Text style={styles.XText}>아니다</Text>
                 </View>
                 </TouchableOpacity>
             </View>
 
-            <View style={styles.BtnContainer}>
-                <GradientButton height={56} width={350} text="제출하기" onPress={handleNavigateQuizPress} isDisabled={selectedAnswer === null}/>
-            </View>
+            <TouchableOpacity
+                style={[
+                    styles.BtnContainer,
+                    { backgroundColor: selectedAnswer === null ? '#D3D3D3' : 'transparent' }
+                ]}
+                disabled={selectedAnswer === ""}
+                onPress={handleNavigateQuizPress}
+            >
+                <LinearGradient
+                    colors={selectedAnswer === null ? ['#D3D3D3', '#D3D3D3'] : ['#9BC9FE', '#69E6A2']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={styles.completeButton}
+                >
+                    <Text style={styles.completeButtonText}>제출하기</Text>
+                </LinearGradient>
+            </TouchableOpacity>
         </View>
     );
 }
@@ -180,8 +195,9 @@ const styles = StyleSheet.create({
         height: 56,
     },
     closeIcon: {
-        width: 7.13,
-        height: 14,
+        marginTop: 10,
+        width: 11.13,
+        height: 18,
     },
     TopTextContainer: {
         paddingHorizontal: 22,
@@ -194,7 +210,7 @@ const styles = StyleSheet.create({
     Answer: {
         width: 168,
         height: 158,
-        margin: 10,
+        marginHorizontal: 10,
         backgroundColor: '#EFF0F2',
         borderRadius: 15,
         alignItems: 'center',
@@ -244,9 +260,24 @@ const styles = StyleSheet.create({
     BtnContainer: {
         position: 'absolute',
         bottom: 50,
-        alignSelf: 'center',
-        marginHorizontal: 16,
+        left: 16,
+        right: 16,
+        height: 56,
+        justifyContent: 'center',
         alignItems: 'center',
+        borderRadius: 15,
+    },
+    completeButton: {
+        width: '100%',
+        height: '100%',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 15,
+    },
+    completeButtonText: {
+        color: '#FFFFFF',
+        fontSize: 16,
+        fontWeight: 'bold',
     },
     Selected:{
         color: colors.lightblack,

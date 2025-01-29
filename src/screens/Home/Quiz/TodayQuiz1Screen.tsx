@@ -3,6 +3,7 @@ import { useNavigation } from '@react-navigation/native';
 import colors from "../../../utils/colors";
 import { getFontSize } from '../../../utils/fontUtils';
 
+import { LinearGradient } from 'react-native-linear-gradient';
 import GradientButton from "../../../components/GradientButton";
 import LeftArrow from '../../../img/Home/Quiz/LeftArrow.svg';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -122,62 +123,68 @@ function TodayQuiz1Screen(): React.JSX.Element {
             style={styles.keyboardAvoidingContainer}
             keyboardVerticalOffset={Platform.OS === "ios" ? 50 : 0}
         >
-            <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-                <View style={styles.scrollContent}>
-                    <View style={styles.header}>
-                        <TouchableOpacity onPress={() => navigation.pop()}>
-                            <Image
-                                source={require('../../../img/My/arrowleft.png')}
-                                style={styles.closeIcon}
-                            />
-                        </TouchableOpacity>
-                    </View>
 
-                    <View style={styles.TopTextContainer}>
-                        <View style={[styles.rowContainer, { marginBottom: 10 }]}>
-                            <Text style={styles.GreenText}>{formattedDate}</Text>
-                            <Text style={[styles.GreenText, { color: colors.lightblack }]}> 오늘의 퀴즈</Text>
-                        </View>
-                        <View style={styles.rowContainer}>
-                            <Text style={styles.questionMark}>Q. </Text>
-                            <Text style={styles.BoldLargeText}>정답을 입력해주세요.</Text>
-                        </View>
-                    </View>
+            <View style={styles.header}>
+                <TouchableOpacity onPress={() => navigation.pop()}>
+                    <Image
+                        source={require('../../../img/My/arrowleft.png')}
+                        style={styles.closeIcon}
+                    />
+                </TouchableOpacity>
+            </View>
 
-                    <View style={styles.quizTextContainer}>
-                        <View style={styles.QuizTitleContainer}>
-                            <Text style={styles.QuizTitle}>{quizTitle}</Text>
-                        </View>
-                        <View style={styles.inputContainer}>
-                            <TextInput
-                                style={styles.textInput}
-                                placeholder="정답은?"
-                                value={userAnswer}
-                                onChangeText={handleUserAnswer}
-                                multiline={false}
-                            />
-                        </View>
-                    </View>
-
-                    <View style={styles.hintContainer}>
-                        <Image
-                            source={require('../../../img/Home/Quiz/Hint.png')}
-                            style={[styles.Selected, { width: 15.27, height: 21 }]}
-                        />
-                        <Text style={styles.HintGreenText}>Hint! </Text>
-                        <Text style={styles.HintGreyText}>: 초성 힌트를 드릴게요. "{quizText}" </Text>
-                    </View>
+            <View style={styles.TopTextContainer}>
+                <View style={[styles.rowContainer, { marginBottom: 10 }]}>
+                    <Text style={styles.GreenText}>{formattedDate}</Text>
+                    <Text style={[styles.GreenText, { color: colors.lightblack }]}> 오늘의 퀴즈</Text>
                 </View>
-                <View style={styles.BtnContainer}>
-                    <GradientButton
-                        height={56}
-                        width={328}
-                        text="제출하기"
-                        onPress={handleNavigateQuizPress}
-                        isDisabled={userAnswer === ""}
+                <View style={styles.rowContainer}>
+                    <Text style={styles.questionMark}>Q. </Text>
+                    <Text style={styles.BoldLargeText}>정답을 입력해주세요.</Text>
+                </View>
+            </View>
+
+            <View style={styles.quizTextContainer}>
+                <View style={styles.QuizTitleContainer}>
+                    <Text style={styles.QuizTitle}>{quizTitle}</Text>
+                </View>
+                <View style={styles.inputContainer}>
+                    <TextInput
+                        style={styles.textInput}
+                        placeholder="정답은?"
+                        value={userAnswer}
+                        onChangeText={handleUserAnswer}
+                        multiline={false}
                     />
                 </View>
-            </ScrollView>
+            </View>
+
+            <View style={styles.hintContainer}>
+                <Image
+                    source={require('../../../img/Home/Quiz/Hint.png')}
+                    style={[styles.Selected, { width: 15.27, height: 21 }]}
+                />
+                <Text style={styles.HintGreenText}>Hint! </Text>
+                <Text style={styles.HintGreyText}>: 초성 힌트를 드릴게요. "{quizText}" </Text>
+            </View>
+
+            <TouchableOpacity
+                style={[
+                    styles.BtnContainer,
+                    { backgroundColor: userAnswer === "" ? '#D3D3D3' : 'transparent' }
+                ]}
+                disabled={userAnswer === ""}
+                onPress={handleNavigateQuizPress}
+            >
+                <LinearGradient
+                    colors={userAnswer === "" ? ['#D3D3D3', '#D3D3D3'] : ['#9BC9FE', '#69E6A2']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={styles.completeButton}
+                >
+                    <Text style={styles.completeButtonText}>제출하기</Text>
+                </LinearGradient>
+            </TouchableOpacity>
         </KeyboardAvoidingView>
     );
 }
@@ -200,8 +207,9 @@ const styles = StyleSheet.create({
         height: 56,
     },
     closeIcon: {
-        width: 7.13,
-        height: 14,
+        marginTop: 10,
+        width: 11.13,
+        height: 18,
     },
     TopTextContainer: {
         paddingHorizontal: 22,
@@ -228,7 +236,7 @@ const styles = StyleSheet.create({
         fontSize: getFontSize(15),
         fontWeight: '800',
         lineHeight: 25,
-        textAlign: 'center',
+        textAlign: 'flex-start' ,
         flexShrink: 1,
     },
     rowContainer: {
@@ -268,11 +276,13 @@ const styles = StyleSheet.create({
         fontSize: getFontSize(16),
     },
     hintContainer: {
-        width: '80%',
+        width: '100%',
+        paddingHorizontal: 22,
         marginTop: 20,
-        alignItems: 'center',
+        textAlign: 'center',
         justifyContent: 'center',
         flexDirection: 'row',
+        flexWrap: 'wrap',
     },
     HintGreenText: {
         fontSize: getFontSize(14),
@@ -284,8 +294,26 @@ const styles = StyleSheet.create({
         color: '#A7A7A7',
     },
     BtnContainer: {
-        alignSelf: 'center',
-        marginBottom: 43,
+        position: 'absolute',
+        bottom: 50,
+        left: 16,
+        right: 16,
+        height: 56, // 버튼 높이 고정
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 15,
+    },
+    completeButton: {
+        width: '100%',
+        height: '100%',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 15,
+    },
+    completeButtonText: {
+        color: '#FFFFFF',
+        fontSize: 16,
+        fontWeight: 'bold',
     },
 });
 

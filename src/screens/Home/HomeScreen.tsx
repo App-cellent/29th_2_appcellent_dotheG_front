@@ -27,7 +27,10 @@ import {
   Dimensions,
   TouchableOpacity,
   Alert,
-  Pressable
+  Modal,
+  Pressable,
+  BackHandler,
+  ToastAndroid,
 } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 
@@ -36,6 +39,8 @@ const { height } = Dimensions.get('window');
 function HomeScreen(): React.JSX.Element {
     const navigation = useNavigation();
     const apiUrl = process.env.REACT_APP_API_URL;
+
+    const [backPressedOnce, setBackPressedOnce] = useState(false);
 
     const [showTreeInfo, setShowTreeInfo] = useState(true);
     const [loading, setLoading] = useState(false);
@@ -110,6 +115,28 @@ function HomeScreen(): React.JSX.Element {
     const TreeInfo = useCallback(() => {
         setShowTreeInfo(prev => !prev);
     }, []);
+
+    const onBackPressEvent = useCallback(() => {
+        if (backPressedOnce) {
+            BackHandler.exitApp(); // 앱 종료
+        } else {
+            setBackPressedOnce(true);
+            ToastAndroid.show("한 번 더 누르면 종료됩니다.", ToastAndroid.SHORT);
+
+            setTimeout(() => {
+                setBackPressedOnce(false);
+            }, 2000); // 2초 안에 다시 누르면 종료
+        }
+        return true;
+    }, [backPressedOnce]);
+
+    useEffect(() => {
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', onBackPressEvent);
+
+        return () => {
+            backHandler.remove();
+        };
+    }, [onBackPressEvent]);
 
     const fetchHomeData = useCallback(async () => {
         try {
@@ -242,7 +269,6 @@ function HomeScreen(): React.JSX.Element {
         );
     };
 
-
     return (
         <View style={styles.container}>
             <MainHeader />
@@ -286,79 +312,81 @@ function HomeScreen(): React.JSX.Element {
                     </View>
 
                     <TouchableOpacity onPress={handleNavigateTodayQuiz}>
-                    <View style={styles.QuizBox}>
-                        <Text style={styles.BoldLargeText}>오늘의 퀴즈 풀기</Text>
-                        <RightArrowIcon width={8} height={14} />
-                    </View>
+                        <View style={styles.QuizBox}>
+                            <Text style={styles.BoldLargeText}>오늘의 퀴즈 풀기</Text>
+                            <RightArrowIcon width={8} height={14} />
+                        </View>
                     </TouchableOpacity>
                 </View>
                 </ImageBackground>
 
-                <View style={[styles.CenteredCountContainer, {height: 153}]}>
-                        <TouchableOpacity onPress={TreeInfo} style={styles.InfoContainer}>
-                            <Image source={require('../../img/Home/InfoIcon.png')} style={styles.InfoIcon} />
-                              {showTreeInfo && (
-                                  <View style={styles.InfoBox}>
-                                    <Image source={require('../../img/Home/CloseIcon.png')} style={{ width: 7, height: 7, position: 'absolute', alignSelf: 'flex-end', top: 12.5, right: 12.5 }}/>
-                                    <Text style={styles.InfoText}>내가 줄인 이산화탄소의 양을</Text>
-                                    <Text style={styles.InfoText}>나무 그루로 확인해볼 수 있어요!</Text>
-                                  </View>
-                              )}
-                        </TouchableOpacity>
-                    <View style={styles.TreeBox}>
-                        <CircleThisMonthTreeIcon width={36} height={36} />
-                        <View style={styles.TreeDetailBox}>
-                            <Text style={styles.BoldSmallText}>{monthSavedTree}그루</Text>
-                            <Text style={styles.GrayText}>이번 달 지킨 나무</Text>
-                        </View>
-                    </View>
-                    <View style={styles.TreeBox}>
-                        <CircleUserTreeIcon width={36} height={36} />
-                        <View style={styles.TreeDetailBox}>
-                            <Text style={styles.BoldSmallText}>{totalSavedTree}그루</Text>
-                            <Text style={styles.GrayText}>지금까지 지킨 나무</Text>
-                        </View>
-                    </View>
-                </View>
-
-                <View style={styles.HomeMenuContainer}>
-                    <View style={styles.HorizontalMenuBox}>
-                        <View style={[styles.MenuBoxHalf, { marginRight: 8 }]}>
-                            <View style={styles.HalfTitleContainer}>
-                                <CircleQuestionIcon width={21} />
-                                <Text style={[styles.BoldSmallText, {marginLeft: 7}]}>데일리 퀘스트</Text>
-                            </View>
-                            <Text style={styles.MediumText}>{dailyQuest}</Text>
-
-                            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 8 }}>
-                                <PedometerIcon width={39} />
+                <View style={styles.Wrapper}>
+                    <View style={[styles.CenteredCountContainer, {height: 153}]}>
+                            <TouchableOpacity onPress={TreeInfo} style={styles.InfoContainer}>
+                                <Image source={require('../../img/Home/InfoIcon.png')} style={styles.InfoIcon} />
+                                  {showTreeInfo && (
+                                      <View style={styles.InfoBox}>
+                                        <Image source={require('../../img/Home/CloseIcon.png')} style={{ width: 7, height: 7, position: 'absolute', alignSelf: 'flex-end', top: 12.5, right: 12.5 }}/>
+                                        <Text style={styles.InfoText}>내가 줄인 이산화탄소의 양을</Text>
+                                        <Text style={styles.InfoText}>나무 그루로 확인해볼 수 있어요!</Text>
+                                      </View>
+                                  )}
+                            </TouchableOpacity>
+                        <View style={styles.TreeBox}>
+                            <CircleThisMonthTreeIcon width={36} height={36} />
+                            <View style={styles.TreeDetailBox}>
+                                <Text style={styles.BoldSmallText}>{monthSavedTree}그루</Text>
+                                <Text style={styles.GrayText}>이번 달 지킨 나무</Text>
                             </View>
                         </View>
-
-
-                        <View style={[styles.MenuBoxHalf, { marginLeft: 8 }]}>
-                            <View style={styles.HalfTitleContainer}>
-                                <CircleStarIcon width={21} />
-                                <Text style={[styles.BoldSmallText, {marginLeft: 7}]}>스페셜 퀘스트</Text>
-                            </View>
-                            <Text style={styles.MediumText}>{specialQuest}</Text>
-
-                            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 8 }}>
-                                <QuestIcon width={56} />
+                        <View style={styles.TreeBox}>
+                            <CircleUserTreeIcon width={36} height={36} />
+                            <View style={styles.TreeDetailBox}>
+                                <Text style={styles.BoldSmallText}>{totalSavedTree}그루</Text>
+                                <Text style={styles.GrayText}>지금까지 지킨 나무</Text>
                             </View>
                         </View>
                     </View>
 
-                    <View style={[styles.MenuBox, {paddingLeft: 30}]} >
-                        <TouchableOpacity onPress={() => navigation.navigate("QuestViewScreen")}>
-                            <Text style={styles.BoldLargeText}>오늘의 인증</Text>
-                            <Text style={styles.GrayText}>나의 친환경 활동을 인증해보세요!</Text>
-                        </TouchableOpacity>
-                    </View>
+                    <View style={styles.HomeMenuContainer}>
+                        <View style={styles.HorizontalMenuBox}>
+                            <View style={[styles.MenuBoxHalf, { marginRight: 8 }]}>
+                                <View style={styles.HalfTitleContainer}>
+                                    <CircleQuestionIcon width={21} />
+                                    <Text style={[styles.BoldSmallText, {marginLeft: 7}]}>데일리 퀘스트</Text>
+                                </View>
+                                <Text style={styles.MediumText}>{dailyQuest}</Text>
 
-                    <View style={[styles.MenuBox, {paddingLeft: 30}]}>
-                        <Text style={styles.BoldLargeText}>친환경 활동 가이드</Text>
-                        <Text style={styles.GrayText}>오늘의 친환경 활동을 실천해보세요!</Text>
+                                <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 8 }}>
+                                    <PedometerIcon width={39} />
+                                </View>
+                            </View>
+
+
+                            <View style={[styles.MenuBoxHalf, { marginLeft: 8 }]}>
+                                <View style={styles.HalfTitleContainer}>
+                                    <CircleStarIcon width={21} />
+                                    <Text style={[styles.BoldSmallText, {marginLeft: 7}]}>스페셜 퀘스트</Text>
+                                </View>
+                                <Text style={styles.MediumText}>{specialQuest}</Text>
+
+                                <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 8 }}>
+                                    <QuestIcon width={56} />
+                                </View>
+                            </View>
+                        </View>
+
+                        <View style={[styles.MenuBox, {paddingLeft: 30}]} >
+                            <TouchableOpacity onPress={() => navigation.navigate("QuestViewScreen")}>
+                                <Text style={styles.BoldLargeText}>오늘의 인증</Text>
+                                <Text style={styles.GrayText}>나의 친환경 활동을 인증해보세요!</Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        <View style={[styles.MenuBox, {paddingLeft: 30}]}>
+                            <Text style={styles.BoldLargeText}>친환경 활동 가이드</Text>
+                            <Text style={styles.GrayText}>오늘의 친환경 활동을 실천해보세요!</Text>
+                        </View>
                     </View>
                 </View>
             </ScrollView>
@@ -369,18 +397,25 @@ function HomeScreen(): React.JSX.Element {
                 </TouchableOpacity>
             </View>
 
-            {modalVisible &&
-              <Pressable style={styles.modalContainer} onPress={() => setModalVisible(false)}>
-                <Pressable style={styles.modalView} onPress={e => e.stopPropagation()}>
+            {modalVisible && (
+              <Modal
+                animationType="fade"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => setModalVisible(false)} // onCancel 대신 직접 처리
+              >
+                <Pressable style={styles.modalOverlay} onPress={() => setModalVisible(false)}>
+                  <View style={styles.modalContainer}>
                     <View style={styles.rowContainer}>
                       <Text style={styles.modalLargeText}>이미 </Text>
-                      <Text style={[styles.modalLargeText, {color: colors.green}]}>오늘의 퀴즈를</Text>
+                      <Text style={[styles.modalLargeText, { color: colors.green }]}>오늘의 퀴즈를</Text>
                       <Text style={styles.modalLargeText}> 풀었어요!</Text>
                     </View>
                     <Text style={styles.modalSmallText}>내일 한 번 더 도전해보세요:)</Text>
+                  </View>
                 </Pressable>
-              </Pressable>
-            }
+              </Modal>
+            )}
 
             {openQuest &&
             <View style={styles.openQuestOption}>
@@ -446,7 +481,7 @@ const styles = StyleSheet.create({
     },
     scrollContainer: {
         backgroundColor: colors.lightgray,
-        height: "140%",
+        height: height * 1.3,
     },
     SeedsContainer: {
         paddingHorizontal: 16,
@@ -466,7 +501,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     QuizBox: {
-        top: 20,
         marginHorizontal: 16,
         marginTop: 12,
         backgroundColor: colors.white,
@@ -477,6 +511,9 @@ const styles = StyleSheet.create({
         paddingRight: 18,
         justifyContent: 'space-between',
         flexDirection: 'row',
+    },
+    Wrapper: {
+        top: 15,
     },
     CenteredCountContainer: {
         backgroundColor: colors.white,
@@ -643,34 +680,21 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
     },
+     modalOverlay: {
+         flex: 1,
+         justifyContent: 'center',
+         alignItems: 'center',
+         backgroundColor: 'rgba(0, 0, 0, 0.5)',
+     },
      modalContainer: {
-        position: 'absolute',
-        top: 0,
-        bottom: 0,
-        left: 0,
-        right: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.2)',
-        justifyContent: 'center',
-        alignItems: 'center',
-        zIndex: 10,
-    },
-    modalView: {
-        backgroundColor: colors.white,
-        borderRadius: 15,
-        alignItems: 'center',
-        justifyContent: 'center',
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 0,
-            blur: 10,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 2,
-        elevation: 5,
-        width: 295,
-        height: 172,
-    },
+         width: 310,
+         backgroundColor: '#FFFFFF',
+         borderRadius: 15,
+         paddingVertical: 42,
+         paddingHorizontal: 18,
+         alignItems: 'center',
+         justifyContent: 'center',
+     },
     modalLargeText: {
         textAlign: 'center',
         fontSize: getFontSize(20),

@@ -64,7 +64,7 @@ function TodayQuizGuideScreen(): React.JSX.Element {
                     console.log(result.data);
                     setQuizType(result.data.quizType);
                     setQuizAvailable(true);
-                } else {
+                 } else {
                     console.error(result.message);
                     setQuizAvailable(false);
                 }
@@ -206,8 +206,8 @@ const styles = StyleSheet.create({
         borderRadius: 15,
     },
     completeButton: {
-        width: '100%', // 너비를 100%로 설정하여 버튼 전체에 그라데이션 적용
-        height: '100%', // 높이도 100%로 설정
+        width: '100%',
+        height: '100%',
         justifyContent: 'center',
         alignItems: 'center',
         borderRadius: 15,
