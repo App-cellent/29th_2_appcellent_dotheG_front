@@ -3,7 +3,7 @@ import { useNavigation } from '@react-navigation/native';
 import colors from "../../../utils/colors";
 import { getFontSize } from '../../../utils/fontUtils';
 
-import GradientButton from "../../../components/GradientButton";
+import { LinearGradient } from 'react-native-linear-gradient';
 
 import LeftArrow from '../../../img/Home/Quiz/LeftArrow.svg';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -160,15 +160,23 @@ function TodayQuiz2Screen(): React.JSX.Element {
                 ))}
             </View>
 
-            <View style={styles.BtnContainer}>
-                <GradientButton
-                    height={56}
-                    width={350}
-                    text="제출하기"
-                    onPress={handleNavigateQuizPress}
-                    isDisabled={selectedAnswer === null}
-                />
-            </View>
+            <TouchableOpacity
+                style={[
+                    styles.BtnContainer,
+                    { backgroundColor: selectedAnswer === null ? '#D3D3D3' : 'transparent' }
+                ]}
+                disabled={userAnswer === ""}
+                onPress={handleNavigateQuizPress}
+            >
+                <LinearGradient
+                    colors={selectedAnswer === null ? ['#D3D3D3', '#D3D3D3'] : ['#9BC9FE', '#69E6A2']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={styles.completeButton}
+                >
+                    <Text style={styles.completeButtonText}>제출하기</Text>
+                </LinearGradient>
+            </TouchableOpacity>
         </View>
     );
 }
@@ -185,8 +193,9 @@ const styles = StyleSheet.create({
         height: 56,
     },
     closeIcon: {
-        width: 7.13,
-        height: 14,
+        marginTop: 10,
+        width: 11.13,
+        height: 18,
     },
     TopTextContainer: {
         paddingHorizontal: 22,
@@ -213,9 +222,9 @@ const styles = StyleSheet.create({
         borderWidth: 4,
     },
     answerImage: {
-        width: 100,  // 이미지 크기 설정
-        height: 100, // 이미지 크기 설정
-        resizeMode: 'contain',  // 이미지 비율을 유지하며 크기 조절
+        width: 100,
+        height: 100,
+        resizeMode: 'contain',
     },
     rowContainer: {
         flexDirection: 'row',
@@ -233,20 +242,26 @@ const styles = StyleSheet.create({
         marginBottom: 8,
     },
     BtnContainer: {
-        marginHorizontal: 16,
-        alignItems: 'center',
         position: 'absolute',
         bottom: 50,
-        alignSelf: 'center',
-    },
-    responseContainer: {
-        marginTop: 20,
+        left: 16,
+        right: 16,
+        height: 56,
+        justifyContent: 'center',
         alignItems: 'center',
+        borderRadius: 15,
     },
-    responseText: {
+    completeButton: {
+        width: '100%',
+        height: '100%',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 15,
+    },
+    completeButtonText: {
+        color: '#FFFFFF',
         fontSize: 16,
-        fontWeight: '600',
-        color: colors.black,
+        fontWeight: 'bold',
     },
 });
 

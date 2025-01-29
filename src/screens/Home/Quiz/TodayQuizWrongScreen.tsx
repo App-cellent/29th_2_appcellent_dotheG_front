@@ -1,9 +1,9 @@
-import React, { useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import colors from "../../../utils/colors";
 import { getFontSize } from '../../../utils/fontUtils';
 
-import GradientButton from "../../../components/GradientButton";
+import { LinearGradient } from 'react-native-linear-gradient';
 
 import {
   ScrollView,
@@ -12,7 +12,9 @@ import {
   View,
   Image,
   Dimensions,
-  TouchableOpacity
+  TouchableOpacity,
+  BackHandler,
+  ToastAndroid,
 } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
@@ -21,15 +23,37 @@ function TodayQuizWrongScreen(): React.JSX.Element {
     const navigation = useNavigation();
     const route = useRoute();
 
-    console.log(route.params);
+    const [backPressedOnce, setBackPressedOnce] = useState(false);
 
     const { data } = route.params;
     const imageUrl = data.quizSolImage;
-    const contentText = data.quizSol || '';  // Fallback if no hintText is provided
+    const contentText = data.quizSol || '';
 
     const handleNavigateQuizPress = useCallback(async () => {
         navigation.navigate('Main', { screen: 'Home' });
     }, [navigation]);
+
+    const onBackPressEvent = useCallback(() => {
+        if (backPressedOnce) {
+            BackHandler.exitApp(); // 앱 종료
+        } else {
+            setBackPressedOnce(true);
+            ToastAndroid.show("한 번 더 누르면 종료됩니다.", ToastAndroid.SHORT);
+
+            setTimeout(() => {
+                setBackPressedOnce(false);
+            }, 2000); // 2초 안에 다시 누르면 종료
+        }
+        return true;
+    }, [backPressedOnce]);
+
+    useEffect(() => {
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', onBackPressEvent);
+
+        return () => {
+            backHandler.remove();
+        };
+    }, [onBackPressEvent]);
 
     return (
         <View style={styles.container}>
@@ -53,9 +77,19 @@ function TodayQuizWrongScreen(): React.JSX.Element {
                 <Text style={styles.ContentText}>{contentText}</Text>
             </View>
 
-            <View style={styles.BtnContainer}>
-                <GradientButton height={56} width={358} text="홈으로 돌아가기" onPress={handleNavigateQuizPress} />
-            </View>
+            <TouchableOpacity
+                style={[styles.BtnContainer]}
+                onPress={handleNavigateQuizPress}
+            >
+                <LinearGradient
+                    colors={['#9BC9FE', '#69E6A2']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={styles.completeButton} // 여기서 스타일을 조정
+                >
+                    <Text style={styles.completeButtonText}>홈으로 돌아가기</Text>
+                </LinearGradient>
+            </TouchableOpacity>
         </View>
     );
 }
@@ -111,11 +145,26 @@ const styles = StyleSheet.create({
         lineHeight: 25,
     },
     BtnContainer: {
-        marginHorizontal: 16,
-        alignItems: 'center',
         position: 'absolute',
         bottom: 50,
-        alignSelf: 'center',
+        left: 16,
+        right: 16,
+        height: 56, // 버튼 높이 고정
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 15,
+    },
+    completeButton: {
+        width: '100%',
+        height: '100%',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 15,
+    },
+    completeButtonText: {
+        color: '#FFFFFF',
+        fontSize: 16,
+        fontWeight: 'bold',
     },
 });
 
