@@ -24,7 +24,28 @@ function CharacterScreen(): React.JSX.Element {
     const [loading, setLoading] = useState(true);
 
     const apiUrl = process.env.REACT_APP_API_URL;
-    //const accessToken = process.env.ACCESS_TOKEN;
+
+    const characterImages: { [key: number]: any } = {
+        1: require('../../img/Character/Image/1.png'),
+        2: require('../../img/Character/Image/2.png'),
+        3: require('../../img/Character/Image/3.png'),
+        4: require('../../img/Character/Image/4.png'),
+        5: require('../../img/Character/Image/5.png'),
+        6: require('../../img/Character/Image/6.png'),
+        7: require('../../img/Character/Image/7.png'),
+        8: require('../../img/Character/Image/8.png'),
+        9: require('../../img/Character/Image/9.png'),
+        10: require('../../img/Character/Image/10.png'),
+        11: require('../../img/Character/Image/11.png'),
+        12: require('../../img/Character/Image/12.png'),
+        13: require('../../img/Character/Image/13.png'),
+        14: require('../../img/Character/Image/14.png'),
+        15: require('../../img/Character/Image/15.png'),
+        16: require('../../img/Character/Image/16.png'),
+        17: require('../../img/Character/Image/17.png'),
+        18: require('../../img/Character/Image/18.png'),
+        19: require('../../img/Character/Image/19.png'),
+    };
 
     //로그아웃 테스트
     const handleLogout = async () => {
@@ -69,7 +90,7 @@ function CharacterScreen(): React.JSX.Element {
         setLoading(true);
         try {
             const accessToken = await AsyncStorage.getItem('token');
-            console.log('Access Token:', accessToken);
+            //console.log('Access Token:', accessToken);
                 
             const response = await fetch(`${apiUrl}/characters/main?timestamp=${new Date().getTime()}`, {
                 method: 'GET',
@@ -80,9 +101,7 @@ function CharacterScreen(): React.JSX.Element {
                 },
             });
 
-            // 토큰 갱신
             if (response.status === 401) {
-                console.warn('Token expired, refreshing token...');
                 const newToken = await refreshToken();
                 if (newToken) {
                     accessToken = newToken;
@@ -103,6 +122,8 @@ function CharacterScreen(): React.JSX.Element {
             if (result.success) {
                 setCharacter(result.data);
                 console.log('Success');
+                console.log("캐릭터 ID:", character?.characterId);
+                console.log("캐릭터 Image:", characterImages[Number(character?.characterId)]);
             } else {
                 console.error(result.message);
                 setCharacter(null);
@@ -157,8 +178,9 @@ function CharacterScreen(): React.JSX.Element {
                 <View style={styles.bodyContainer}>
                     {/* 캐릭터 이미지 */}
                     <Image
-                        source={{ uri: character.characterImageUrl }}
+                        source={characterImages[character?.characterId]}
                         style={styles.characterImg}
+                        resizeMode="contain"
                     />
                     {/* 캐릭터 이름 */}
                     <Text style={styles.characterName}>
@@ -184,17 +206,11 @@ function CharacterScreen(): React.JSX.Element {
                     </View>
                 </View>
 
-                {/* for test.. */}
-                <TouchableOpacity onPress={() => navigation.navigate('LoginScreen')}>
-                    <Text style={{ textAlign: 'center' }}>LoginScreen</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => navigation.navigate('SignupScreen')}>
-                    <Text style={{ textAlign: 'center' }}>SignupScreen</Text>
-                </TouchableOpacity>
+                {/* 로그아웃 테스트 */}
                 <TouchableOpacity onPress={handleLogout}>
                     <Text style={{ textAlign: 'center' }}>로그아웃</Text>
                 </TouchableOpacity>
-                {/* for test.. */}
+                {/* 로그아웃 테스트 */}
             </LinearGradient>
         </View>
     );

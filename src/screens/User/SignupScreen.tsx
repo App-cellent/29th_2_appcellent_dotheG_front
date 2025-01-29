@@ -215,7 +215,7 @@ function SignupScreen() {
                         />
                         {id.length > 0 && (
                             <Image
-                                source={isIdValid
+                                source={isIdValid && idCheckResult?.includes('사용 가능')
                                     ? require('../../img/User/checkIcon.png')
                                     : require('../../img/User/warnIcon.png')}
                                 style={styles.smallCheckIcon}
@@ -223,28 +223,34 @@ function SignupScreen() {
                         )}
                     </View>
                     <TouchableOpacity
-                        style={[styles.confirmButton, isIdValid && { backgroundColor: '#69E6A2' }]}
+                        style={[
+                            styles.confirmButton, 
+                            isIdValid && { backgroundColor: '#69E6A2' }
+                        ]}
                         onPress={checkIdAvailability}
+                        disabled={!isIdValid}
                     >
                         <Text 
                             style={[styles.confirmButtonText, isIdValid && { color: '#FFFFFF' }]}
                         >중복확인</Text>
                     </TouchableOpacity>
                 </View>
-                <Text 
+                <Text
                     style={
                         id.length === 0
                             ? styles.redText
-                            : isIdValid
-                            ? styles.greenText
-                            : styles.redText
+                            : idCheckResult?.includes('사용 가능')
+                                ? styles.greenText
+                                : styles.redText
                     }
                 >
                     {id.length === 0
                         ? '영문 소문자와 숫자만 사용해서 4~12자의 아이디를 입력해주세요.'
-                        : isIdValid
-                        ? '사용 가능한 아이디입니다.'
-                        : '중복되는 아이디입니다.'}
+                        : idCheckResult?.includes('사용 가능')
+                            ? '사용 가능한 아이디입니다.'
+                            : idCheckResult?.includes('중복')
+                            ? '중복되는 아이디입니다.'
+                            : '조건에 맞게 입력 후 중복확인을 진행해주세요.'}
                 </Text>
                 
                 {/* 비밀번호 */}
@@ -329,30 +335,45 @@ function SignupScreen() {
                             value={nickname}
                             onChangeText={handleNicknameCheck}
                         />
+                        {nickname.length > 0 && (
+                            <Image
+                                source={isNicknameValid && nicknameCheckResult?.includes('사용 가능')
+                                    ? require('../../img/User/checkIcon.png')
+                                    : require('../../img/User/warnIcon.png')}
+                                style={styles.smallCheckIcon}
+                            />
+                        )}
                     </View>
                     <TouchableOpacity
-                        style={[styles.confirmButton, isNicknameValid && { backgroundColor: '#69E6A2' }]}
+                        style={[
+                            styles.confirmButton, 
+                            isNicknameValid && { backgroundColor: '#69E6A2' }
+                        ]}
                         onPress={checkNicknameAvailability}
+                        disabled={!isNicknameValid}
                     >
                         <Text 
                             style={[styles.confirmButtonText, isNicknameValid && { color: '#FFFFFF' }]}
                         >중복확인</Text>
                     </TouchableOpacity>
                 </View>
+
                 <Text 
                     style={
                         nickname.length === 0
                             ? styles.redText
-                            : isNicknameValid
-                            ? styles.greenText
-                            : styles.redText
+                            : nicknameCheckResult?.includes('사용 가능')
+                                ? styles.greenText
+                                : styles.redText
                     }
                 >
                     {nickname.length === 0
                         ? '한글로만 닉네임을 설정해주세요.'
-                        : isNicknameValid
-                        ? '사용 가능한 닉네임입니다.'
-                        : '중복 닉네임입니다.'}
+                        : nicknameCheckResult?.includes('사용 가능')
+                            ? '사용 가능한 닉네임입니다.'
+                            : nicknameCheckResult?.includes('중복')
+                            ? '중복 닉네임입니다.'
+                            : '조건에 맞게 입력 후 중복확인을 진행해주세요.'}
                 </Text>
                 
                 {/* 개인정보 동의 */}

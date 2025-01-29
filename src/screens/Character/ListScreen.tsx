@@ -43,6 +43,27 @@ function ListScreen(): React.JSX.Element {
     const [secondModalVisible, setSecondModalVisible] = useState(false);
     const [selectedCharacterData, setSelectedCharacterData] = useState<Character | null>(null);
 
+    const characterImages: { [key: number]: any } = {
+        1: require('../../img/Character/Image/1.png'),
+        2: require('../../img/Character/Image/2.png'),
+        3: require('../../img/Character/Image/3.png'),
+        4: require('../../img/Character/Image/4.png'),
+        5: require('../../img/Character/Image/5.png'),
+        6: require('../../img/Character/Image/6.png'),
+        7: require('../../img/Character/Image/7.png'),
+        8: require('../../img/Character/Image/8.png'),
+        9: require('../../img/Character/Image/9.png'),
+        10: require('../../img/Character/Image/10.png'),
+        11: require('../../img/Character/Image/11.png'),
+        12: require('../../img/Character/Image/12.png'),
+        13: require('../../img/Character/Image/13.png'),
+        14: require('../../img/Character/Image/14.png'),
+        15: require('../../img/Character/Image/15.png'),
+        16: require('../../img/Character/Image/16.png'),
+        17: require('../../img/Character/Image/17.png'),
+        18: require('../../img/Character/Image/18.png'),
+        19: require('../../img/Character/Image/19.png'),
+    };
 
     // 탭 매핑
     const tabMapping = {
