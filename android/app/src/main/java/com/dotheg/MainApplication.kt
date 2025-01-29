@@ -1,4 +1,4 @@
-package com.dothegnav
+package com.dotheg
 
 import android.app.Application
 import com.facebook.react.PackageList
