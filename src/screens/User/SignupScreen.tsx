@@ -13,7 +13,7 @@ import {
 
 import GradientButton from '../../components/GradientButton';
 
-function SignupScreen(): React.JSX.Element {
+function SignupScreen() {
     const navigation = useNavigation();
 
     const [id, setId] = useState('');
@@ -70,40 +70,78 @@ function SignupScreen(): React.JSX.Element {
     };
 
     // 아이디 중복확인
-    // const checkIdAvailability = async () => {
-    //     try {
-    //         const response = await fetch(`${apiUrl}/users/check-userlogin`, {
-    //             method: 'POST',
-    //             headers: {
-    //                 "Cache-Control":'no-store',
-    //                 "Accept":"application/json",
-    //             },
-    //         });
-    //     }
-    //     // if (id === 'duplicateId') {
-    //     //     setIdCheckResult('중복되는 아이디입니다.');
-    //     // } else {
-    //     //     setIdCheckResult('사용 가능한 아이디입니다.');
-    //     // }
-    // };
+    const checkIdAvailability = async () => {
+        if (!id) {
+            Alert.alert("아이디를 입력해주세요.");
+            return;
+        }
+
+        try {
+            const formData = new FormData();
+            formData.append("userLogin", id);
+
+            const response = await fetch(`${apiUrl}/users/check-userlogin`, {
+                method: 'POST',
+                headers: {
+                    "Cache-Control":'no-store',
+                    "Accept":"application/json",
+                },
+                body: formData,
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                console.log('중복 확인 성공 : 사용 가능한 아이디');
+                setIdCheckResult(result.message); // 사용 가능한 아이디
+                //Alert.alert(result.message);
+            } else {
+                console.log('중복 확인 성공 : 중복되는 아이디');
+                setIdCheckResult(result.message); // 중복되는 아이디
+                //Alert.alert(result.message);
+            }
+        } catch (error) {
+            console.error("아이디 중복 확인 에러:", error);
+            Alert.alert("Error");
+        }
+    };
 
     // 닉네임 중복확인
-    // const checkNicknameAvailability = async () => {
-    //     try {
-    //         const response = await fetch(`${apiUrl}/users/check-username`, {
-    //             method: 'POST',
-    //             headers: {
-    //                 "Cache-Control":'no-store',
-    //                 "Accept":"application/json",
-    //             },
-    //         });
-    //     }
-    //     // if (nickname === '중복닉네임') {
-    //     //     setNicknameCheckResult('중복 닉네임입니다.');
-    //     // } else {
-    //     //     setNicknameCheckResult('사용 가능한 닉네임입니다.');
-    //     // }
-    // };
+    const checkNicknameAvailability = async () => {
+        if (!nickname) {
+            Alert.alert("닉네임을 입력해주세요.");
+            return;
+        }
+
+        try {
+            const formData = new FormData();
+            formData.append("userName", nickname);
+
+            const response = await fetch(`${apiUrl}/users/check-username`, {
+                method: 'POST',
+                headers: {
+                    "Cache-Control":'no-store',
+                    "Accept":"application/json",
+                },
+                body: formData,
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                console.log('중복 확인 성공 : 사용 가능한 닉네임');
+                setNicknameCheckResult(result.message); // 사용 가능한 닉네임
+                //Alert.alert(result.message);
+            } else {
+                console.log('중복 확인 성공 : 중복되는 닉네임');
+                setNicknameCheckResult(result.message); // 중복 닉네임
+                //Alert.alert(result.message);
+            }
+        } catch (error) {
+            console.error("닉네임 중복 확인 에러:", error);
+            Alert.alert("Error");
+        }
+    };
 
     // 모든 입력 조건 충족 시 가입하기 버튼 활성화
     const isFormValid =
@@ -244,7 +282,7 @@ function SignupScreen(): React.JSX.Element {
                         ? '영문 대문자와 소문자, 숫자, 특수문자를 조합하여 6~20자로 입력해주세요.'
                         : isPasswordValid
                             ? '사용 가능한 비밀번호입니다.'
-                            : '사용 불가능한 비밀번호입니다. 특수문자를 조합해주세요.'}
+                            : '사용 불가능한 비밀번호입니다.'}
                 </Text>
 
                 {/* 비밀번호 확인 */}

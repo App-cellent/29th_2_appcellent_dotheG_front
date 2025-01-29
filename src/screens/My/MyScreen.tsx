@@ -155,7 +155,9 @@ function MyScreen({ navigation }): React.JSX.Element {
   const handleLogout = async () => {
     try {
       const accessToken = await AsyncStorage.getItem('token');
+      const refreshToken = await AsyncStorage.getItem('refreshToken');
       console.log('Access Token:', accessToken);
+      console.log('Refresh Token:', refreshToken);
       
       const response = await fetch(`${apiUrl}/logout`, {
         method: 'POST',
@@ -163,29 +165,30 @@ function MyScreen({ navigation }): React.JSX.Element {
         headers: {
           "Cache-Control":"no-store",
           "Content-Type": "application/json",
-          access: `${accessToken}`
         },
         body: JSON.stringify({
-          refresh: '',
+          refresh: refreshToken,
         }),
       });
 
       if (response.ok) {
-        const data = await response.json();
+        console.log('Logout Success:', response.status);
+        Alert.alert('Success', '로그아웃 성공');
 
-        if (data.success) {
-          Alert.alert('Success', data.message);
-        } else {
-          Alert.alert('Fail', data.message);
-        }
+        await AsyncStorage.removeItem('token');
+        await AsyncStorage.removeItem('refreshToken');
+
+        navigation.navigate('LoginScreen');
       } else {
-        Alert.alert('Error', `status: ${response.status}`);
+        console.error('Logout Failed');
+        Alert.alert('Error', `로그아웃 실패: ${response.status}`);
       }
     } catch (error) {
       console.error('Logout Error:', error);
-      Alert.alert('Error', '로그아웃 실패');
+      Alert.alert('Error', '로그아웃 오류 발생');
     }
   };
+  
   // const handleLogout = async () => {
   //   try {
   //     // 저장된 토큰 제거
