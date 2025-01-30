@@ -43,7 +43,26 @@ function ReportScreen(): React.JSX.Element {
   ];
 
   const apiUrl = process.env.REACT_APP_API_URL;
-  const [weeklyReport, setWeeklyReport] = useState(null);
+  const [weeklyReport, setWeeklyReport] = useState({
+    userName: "",
+    yearMonthWeek: "",
+    weeklyAvgSteps: 0,
+    totalCertifications: 0,
+    activityCounts: {
+      "": 0
+    }
+  });
+  const [monthlyReport, setMonthlyReport] = useState({
+    userName: "",
+    reportMonth: "",
+    treesSaved: 0,
+    monthlyTotalCertifications: 0,
+    activityCounts: {
+      "": 0
+    },
+    userPercentage: 0,
+    userRange: ""
+  });
 
   const fetchWeeklyReportData = async () => {
       try {
@@ -92,6 +111,80 @@ function ReportScreen(): React.JSX.Element {
     useEffect(() => {
       fetchWeeklyReportData();
     }, []);
+
+  const fetchMonthlyReportData = async () => {
+        try {
+          const accessToken = await AsyncStorage.getItem('token');
+          console.log('Access Token:', accessToken);
+
+          const response = await fetch(`${apiUrl}/reports/monthly?timestamp=${new Date().getTime()}`, {
+            method: 'GET',
+            headers: {
+              "Cache-Control": 'no-store',
+              "Content-Type": "application/json",
+              access: `${accessToken}`,
+            },
+          });
+
+          if (response.status === 401) {
+            console.warn('Token expired, refreshing token...');
+            const newToken = await refreshToken();
+            if (newToken) {
+              await AsyncStorage.setItem('token', newToken);
+              return fetchMonthlyReportData();
+            } else {
+              throw new Error('Failed to refresh token');
+            }
+          }
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const result = await response.json();
+
+          if (result.success) {
+            setMonthlyReport(result.data);
+            console.log('Monthly report fetched successfully:', result.data);
+          } else {
+            console.error(result.message);
+            setMonthlyReport(null);
+          }
+        } catch (error) {
+          console.error('Error fetching weekly report data:', error);
+          setMonthlyReport(null);
+        }
+      };
+
+      useEffect(() => {
+        fetchMonthlyReportData();
+      }, []);
+
+  const [barPosition, setBarPosition] = useState(0);
+  const barWidth = 22; // 막대 너비
+  const barSpacing = 2.4; // 막대 간격
+  const containerPadding = 25; // 그래프 컨테이너 패딩
+
+    useEffect(() => {
+      // userRange로 막대 인덱스 계산
+      const barIndex = calculateBarIndex(monthlyReport.userRange);
+      if (barIndex !== -1) {
+        const position = calculatePosition(barIndex, barWidth, barSpacing, containerPadding);
+        setBarPosition(position); // 계산된 위치 설정
+      }
+    }, [monthlyReport.userRange]);
+
+    const calculateBarIndex = (range) => {
+      const ranges = [
+        "0 ~ 5kg", "5 ~ 10kg", "10 ~ 15kg", "15 ~ 20kg", "20 ~ 25kg",
+        "25 ~ 30kg", "30 ~ 35kg", "35 ~ 40kg", "40 ~ 45kg", "45 ~ 50kg", "50kg 이상"
+      ];
+      return ranges.indexOf(range);
+    };
+
+    const calculatePosition = (barIndex, barWidth, barSpacing, containerPadding) => {
+      return containerPadding + barIndex * (barWidth + barSpacing) + barWidth / 2;
+    };
 
   const handleTabSwitch = (tab: string) => {
     setSelectedTab(tab);
@@ -230,7 +323,7 @@ function ReportScreen(): React.JSX.Element {
 
       {selectedTab === '월간' && (
         <View style={styles.content}>
-          <Text style={styles.dateText}>{year.toString()}년 {month.toString()}월</Text>
+          <Text style={styles.dateText}>{monthlyReport.reportMonth}</Text>
           <View style={styles.usernameContainer}>
             <View style={styles.userTextContainer}>
               <Svg
@@ -250,7 +343,7 @@ function ReportScreen(): React.JSX.Element {
                   x="0"
                   y={usernameFontSize}
                 >
-                  {username}
+                  {monthlyReport.userName}
                 </SvgText>
               </Svg>
 
@@ -258,7 +351,7 @@ function ReportScreen(): React.JSX.Element {
                 style={[styles.hiddenText, { fontSize: usernameFontSize }]}
                 onLayout={handleTextLayout}
               >
-                {username}
+                {monthlyReport.userName}
               </Text>
               <Text style={styles.usernameText}>님의 지난 달</Text>
             </View>
@@ -276,7 +369,7 @@ function ReportScreen(): React.JSX.Element {
                   <Image source={require('../../img/Report/savetreeinfo.png')} style={styles.infoIcon} />
                 </TouchableOpacity>
                 <View style={styles.countContainer}>
-                  <Text style={styles.countNum}>{savedTree.toLocaleString()}</Text>
+                  <Text style={styles.countNum}>{monthlyReport.treesSaved.toLocaleString()}</Text>
                   <Text style={styles.countText}>그루</Text>
                 </View>
               </View>
@@ -310,10 +403,10 @@ function ReportScreen(): React.JSX.Element {
                   <View style={styles.graphContainer}>
                     <BarGraph />
                   </View>
-                  <View style={styles.rankAndEarth}>
+                  <View style={[styles.rankAndEarth,{ marginLeft: barPosition },]}>
                     <ImageBackground source={require('../../img/Report/carbonrankbox.png')} style={styles.rankImage}>
-                      <Text style={styles.appText}>앱설런트</Text>
-                      <Text style={styles.rankText}>상위 {topPercentage.toString()}%</Text>
+                      <Text style={styles.appText}>{monthlyReport.userName}</Text>
+                      <Text style={styles.rankText}>상위 {monthlyReport.userPercentage}%</Text>
                     </ImageBackground>
                     <Image source={require('../../img/Report/carbonearth.png')} style={styles.earthImage} />
                   </View>
@@ -330,7 +423,7 @@ function ReportScreen(): React.JSX.Element {
                   <Text style={styles.historyTitle}>지난 달 인증 히스토리 (횟수)</Text>
                 </View>
                 <View style={styles.historyCountContainer}>
-                  <Text style={styles.historyCount}>{monthlyHistoryCount.toLocaleString()}</Text>
+                  <Text style={styles.historyCount}>{monthlyReport.monthlyTotalCertifications.toLocaleString()}</Text>
                   <Text style={styles.historyText}>회</Text>
                 </View>
               </View>
@@ -351,10 +444,10 @@ function ReportScreen(): React.JSX.Element {
 
               {isMonthlyHistoryOpen && (
                 <View style={styles.historyDetailsContainer}>
-                  {monthlyHistoryDetails.map((detail, index) => (
+                  {Object.entries(monthlyReport.activityCounts).map(([key, value], index) => (
                     <View key={index} style={styles.historyDetail}>
-                      <Text style={styles.historyDetailContent}>{detail.content}</Text>
-                      <Text style={styles.historyDetailCount}>{detail.count}회</Text>
+                      <Text style={styles.historyDetailContent}>{key}</Text>
+                      <Text style={styles.historyDetailCount}>{value}회</Text>
                     </View>
                   ))}
                 </View>
