@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import colors from "../../utils/colors";
 import { getFontSize } from '../../utils/fontUtils';
@@ -7,6 +7,8 @@ import LeftArrow from '../../img/Home/Quiz/LeftArrow.svg';
 import CheckIcon from '../../img/Home/QuestView/checkIcon.svg';
 import GreenCircle from '../../img/Home/QuestView/greenCircle.svg';
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import {
   StyleSheet,
   Text,
@@ -14,45 +16,145 @@ import {
   Image,
   Dimensions,
   TouchableOpacity,
-  FlatList
+  ActivityIndicator,
 } from 'react-native';
 
 const { width } = Dimensions.get('window');
-const imageData = [
-  require('../../img/Home/QuestView/Example.png'),
-  require('../../img/Home/CloseIcon.png'),
-  require('../../img/Home/InfoIcon.png'),
-];
 
 function QuestViewScreen(): React.JSX.Element {
     const navigation = useNavigation();
     const route = useRoute();
-    const currentDate = new Date();
+    const apiUrl = process.env.REACT_APP_API_URL;
 
+    const currentDate = new Date();
     const formattedDate = currentDate.toLocaleDateString('ko-KR', {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
     });
 
-    const [selectedImage, setSelectedImage] = useState(null);
+    const [userName, setUserName] = useState("");
+    const [listSize, setListSize] = useState(0);
+    const [activityData, setActivityData] = useState([]);
 
-    const handleImagePress = useCallback((image) => {
-        setSelectedImage(image);
+    const [isSelected, setIsSelected] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [imageLoadError, setImageLoadError] = useState(false);
+
+    useEffect(() => {
+        const fetchQuestData = async () => {
+            try {
+                setIsLoading(true);
+                setImageLoadError(false);
+
+                const accessToken = await AsyncStorage.getItem('token');
+                if (!accessToken) {
+                    console.error('토큰이 없습니다');
+                    setIsLoading(false);
+                    return;
+                }
+
+                const response = await fetch(`${apiUrl}/upload/viewToday?timestamp=${new Date().getTime()}`, {
+                    method: 'GET',
+                    headers: {
+                        "Cache-Control": 'no-store',
+                        "Content-Type": "application/json",
+                        access: `${accessToken}`,
+                    },
+                });
+
+                if (response.status === 404) {
+                    setActivityData(null);
+                    setIsLoading(false);
+                    return;
+                }
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                if (result.success) {
+                    console.log(result.data);
+                    setUserName(result.data.userName);
+                    setListSize(result.data.listSize);
+                    setActivityData(result.data.activities);
+                }
+            } catch (error) {
+                console.error('퀘스트 데이터 불러오기 실패:', error);
+                setActivityData(null);
+                setImageLoadError(true);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchQuestData();
     }, []);
 
-    const renderImageItem = ({ item }) => {
-        const isSelected = selectedImage === item;
+    const handleImagePress = () => {
+        setIsSelected(!isSelected);
+    };
+
+    const formatImageUrl = (imagePath) => {
+        if (!imagePath) return null;
+        try {
+            // URL이 유효한지 확인
+            if (imagePath.startsWith('http')) {
+                return imagePath;
+            }
+            // apiUrl과 imagePath 사이에 중복 슬래시 제거
+            const baseUrl = apiUrl.replace(/\/+$/, '');
+            const cleanImagePath = imagePath.replace(/^\/+/, '');
+            return `${baseUrl}/${cleanImagePath}`;
+        } catch (error) {
+            console.error('URL 포맷팅 에러:', error);
+            return null;
+        }
+    };
+
+    const renderImage = () => {
+        if (!activityData) return null;
+
+        const imageUrl = formatImageUrl(activityData.activityImage);
+        if (!imageUrl) return null;
 
         return (
-            <TouchableOpacity onPress={() => handleImagePress(item)}>
+            <TouchableOpacity onPress={handleImagePress}>
                 <View style={[styles.imageWrapper, isSelected && styles.selectedImageWrapper]}>
                     <Image
-                        source={item}
+                        source={{
+                            uri: imageUrl,
+                            cache: 'reload'
+                        }}
                         style={styles.imageItem}
+                        onLoadStart={() => setImageLoadError(false)}
+                        onError={(e) => {
+                            console.error("이미지 로드 실패:", e.nativeEvent.error);
+                            setImageLoadError(true);
+                        }}
                     />
-                    <CheckIcon style={styles.checkIcon} width={30} height={30} />
+                    {isSelected && <CheckIcon style={styles.checkIcon} width={30} height={30} />}
                 </View>
+
+                {isSelected && !imageLoadError && (
+                    <View>
+                        <Image
+                            source={{
+                                uri: imageUrl,
+                                cache: 'reload'
+                            }}
+                            style={styles.selectedImage}
+                            onError={(e) => console.error("큰 이미지 로드 실패:", e.nativeEvent.error)}
+                        />
+                        <View>
+                            <Text style={styles.headerText}>인증완료 퀘스트</Text>
+                            <Text style={styles.DateText}>{formattedDate}</Text>
+                            <Text style={styles.redText}>
+                                {activityData.activityName}. 탄소를 10g 절감했어요!
+                            </Text>
+                        </View>
+                    </View>
+                )}
             </TouchableOpacity>
         );
     };
@@ -61,58 +163,46 @@ function QuestViewScreen(): React.JSX.Element {
         <View style={styles.container}>
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => navigation.pop()}>
-                    <LeftArrow
-                        style={styles.closeIcon}
-                    />
+                    <LeftArrow style={styles.closeIcon} />
                 </TouchableOpacity>
                 <Text style={styles.headerText}>나의 퀘스트 인증</Text>
             </View>
 
             <View style={styles.profileContainer}>
                 <Image
-                  source={require('../../img/My/profileimage.png')}
-                  style={styles.profileImage}
+                    source={require('../../img/My/profileimage.png')}
+                    style={styles.profileImage}
                 />
                 <View>
                     <View style={styles.rowContainer}>
-                        <Text style={styles.boldText}>앱설런트</Text>
+                        <Text style={styles.boldText}>{userName}</Text>
                         <Text style={styles.mediumText}>님의  </Text>
                     </View>
                     <Text style={styles.mediumText}>오늘의 퀘스트를 보여드릴게요.</Text>
-                    <View style={[styles.rowContainer, {marginTop: 6} ]}>
+                    <View style={[styles.rowContainer, {marginTop: 6}]}>
                         <Text style={styles.smallText}>오늘의 인증  </Text>
-                        <Text style={styles.smallText}>2</Text>
+                        <Text style={styles.smallText}>{listSize}</Text>
                         <Text style={styles.smallText}>개</Text>
                     </View>
                 </View>
             </View>
 
             <View style={styles.imageContainer}>
-                <View style={[styles.rowContainer, {alignItems: 'center', alignSelf: 'flex-end', marginBottom: 5,}]}>
+                <View style={[styles.rowContainer, {alignItems: 'center', alignSelf: 'flex-end', marginBottom: 5}]}>
                     <GreenCircle width={6} height={6}/>
                     <Text style={[styles.smallText, {color: '#C9C9C9', marginLeft: 3}]}>최신순</Text>
                 </View>
 
-                <FlatList
-                    data={imageData}
-                    renderItem={renderImageItem}
-                    keyExtractor={(item, index) => index.toString()}
-                    numColumns={3}
-                    columnWrapperStyle={styles.row}
-                />
-
-                {selectedImage && (
-                    <View>
-                        <Image
-                            source={selectedImage}
-                            style={styles.selectedImage}
-                        />
-                        <View>
-                            <Text style={styles.headerText}>인증완료 퀘스트</Text>
-                            <Text style={styles.DateText}>{formattedDate}</Text>
-                            <Text style={styles.redText}>텀블러를 사용했어요. 탄소를 10g 절감했어요!</Text>
-                        </View>
+                {isLoading ? (
+                    <View style={styles.loadingContainer}>
+                        <ActivityIndicator size="large" color={colors.green} />
                     </View>
+                ) : imageLoadError ? (
+                    <View style={styles.errorContainer}>
+                        <Text style={styles.errorText}>이미지를 불러올 수 없습니다.</Text>
+                    </View>
+                ) : (
+                    renderImage()
                 )}
             </View>
         </View>
@@ -120,6 +210,23 @@ function QuestViewScreen(): React.JSX.Element {
 }
 
 const styles = StyleSheet.create({
+    loadingContainer: {
+        height: 200,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    errorContainer: {
+        height: 200,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#f8f8f8',
+        borderRadius: 5,
+    },
+    errorText: {
+        color: '#666',
+        fontSize: getFontSize(14),
+        textAlign: 'center',
+    },
     container: {
         flex: 1,
         backgroundColor: '#FFFFFF',
@@ -156,7 +263,7 @@ const styles = StyleSheet.create({
     rowContainer: {
         flexDirection: 'row',
     },
-    boldText:{
+    boldText: {
         color: colors.black,
         fontSize: getFontSize(15),
         fontWeight: '800',
@@ -168,21 +275,16 @@ const styles = StyleSheet.create({
         fontWeight: '400',
         lineHeight: 19,
     },
-    smallText:{
-         color: '#7E7E82',
-         fontSize: getFontSize(10),
-         fontWeight: '400',
+    smallText: {
+        color: '#7E7E82',
+        fontSize: getFontSize(10),
+        fontWeight: '400',
     },
     imageContainer: {
         paddingHorizontal: 22,
     },
-    row: {
-        justifyContent: 'space-between',
-    },
     imageWrapper: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        flexWrap: 'wrap',
+        position: 'relative',
     },
     imageItem: {
         width: (width - 44) / 3 - 5,
