@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from "axios";
-import { REACT_APP_API_URL, ACCESS_TOKEN } from '@env';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   StyleSheet,
   Text,
@@ -26,6 +25,8 @@ function WithdrawalScreen({ navigation }): React.JSX.Element {
   const [isAgreed, setIsAgreed] = useState(false);
   const isWithdrawButtonEnabled = isPasswordValid && (selectedReasons.length > 0 || customReason.length > 0) && isAgreed;
 
+  const apiUrl = process.env.REACT_APP_API_URL;
+
   const openWithdrawalModal = () => {
     setWithdrawalModalVisible(true);
   };
@@ -34,20 +35,117 @@ function WithdrawalScreen({ navigation }): React.JSX.Element {
     setWithdrawalModalVisible(false);
   };
 
-  const handleWithdrawal = () => {
-    alert("탈퇴가 완료되었습니다.");
-    setWithdrawalModalVisible(false);
-  };
+  const handleWithdrawal = async () => {
+    if (password.trim() && (selectedReasons.length > 0 || customReason.length > 0)) {
+      try {
+        const accessToken = await AsyncStorage.getItem('token');
+        console.log('Access Token:', accessToken);
 
-  const handlePasswordCheck = () => {
-    if (password === '1234') {
-      setIsPasswordValid(true);
-      alert('비밀번호 확인 완료');
+        if (!accessToken) {
+          alert("로그인 토큰이 유효하지 않습니다. 다시 로그인해주세요.");
+          return;
+        }
+
+        // 요청 본문 데이터 설정
+        const requestBody = {
+          currentPassword: password,
+          withdrawalReason: selectedReasons.join(', ') || customReason,
+        };
+
+        const response = await fetch(`${apiUrl}/mypage/withdraw?timestamp=${new Date().getTime()}`, {
+          method: 'POST',
+          headers: {
+            "Cache-Control": 'no-store',
+            "Content-Type": "application/json",
+            access: `${accessToken}`, // 토큰 헤더에 추가
+          },
+          body: JSON.stringify(requestBody), // 요청 본문
+        });
+
+        if (response.status === 401) {
+          console.warn('Token expired, refreshing token...');
+          const newToken = await refreshToken(); // 토큰 갱신 함수 호출
+          if (newToken) {
+            await AsyncStorage.setItem('token', newToken);
+            return handleWithdrawal(); // 갱신된 토큰으로 재요청
+          } else {
+            throw new Error('Failed to refresh token');
+          }
+        }
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (data.success) {
+          alert("탈퇴가 완료되었습니다.");
+          navigation.navigate('LoginScreen');
+        } else {
+          alert("탈퇴 처리에 실패했습니다.");
+        }
+      } catch (error) {
+        console.error("탈퇴 처리 중 오류가 발생했습니다.", error);
+        alert("서버 오류로 탈퇴 처리에 실패했습니다.");
+      }
     } else {
-      setIsPasswordValid(false);
-      alert('비밀번호가 일치하지 않습니다.');
+      alert("모든 항목을 채워주세요.");
     }
   };
+
+  const handlePasswordCheck = async () => {
+      try {
+        const accessToken = await AsyncStorage.getItem('token');
+        console.log('Access Token:', accessToken);
+
+        if (!accessToken) {
+          alert("로그인 토큰이 유효하지 않습니다. 다시 로그인해주세요.");
+          return;
+        }
+
+        if (!password.trim()) {
+          alert("현재 비밀번호를 입력해주세요.");
+          return;
+        }
+
+        // 비밀번호 확인을 위한 요청
+        const response = await fetch(`${apiUrl}/mypage/checkCurrentPassword?currentPassword=${password}&timestamp=${new Date().getTime()}`, {
+          method: 'GET',
+          headers: {
+            "Cache-Control": 'no-store',
+            "Content-Type": "application/json",
+            access: `${accessToken}`,
+          },
+        });
+
+        if (response.status === 401) {
+          console.warn('Token expired, refreshing token...');
+          const newToken = await refreshToken(); // 토큰 갱신 함수
+          if (newToken) {
+            await AsyncStorage.setItem('token', newToken);
+            return handlePasswordCheck();  // 재귀 호출로 요청 재시도
+          } else {
+            throw new Error('Failed to refresh token');
+          }
+        }
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (data.success) {
+          setIsPasswordValid(true);
+        } else {
+          setIsPasswordValid(false);
+          alert('비밀번호가 일치하지 않습니다.');
+        }
+      } catch (error) {
+        console.error("비밀번호 확인 중 오류가 발생했습니다.", error);
+        alert("서버 오류로 비밀번호 확인에 실패했습니다.");
+      }
+    };
 
   const toggleReasonSelection = (reasonText: string) => {
     setSelectedReasons((prevSelectedReasons) => {
@@ -124,6 +222,8 @@ function WithdrawalScreen({ navigation }): React.JSX.Element {
             </Text>
           </TouchableOpacity>
         </View>
+
+        {isPasswordValid?(<Text style={[styles.passwordRuleText, { color: '#69E6A2' }]}>비밀번호 확인이 완료되었습니다.</Text>):(null)}
 
         {/* 탈퇴 사유 선택 */}
         <Text style={styles.inputLabel}>탈퇴 사유 선택</Text>
@@ -299,6 +399,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 5,
     paddingHorizontal: 24,
+  },
+  passwordRuleText: {
+    fontSize: 11,
+    color: '#FF5959',
+    marginTop: 10,
+    alignSelf: 'flex-start',
+    marginLeft: 27,
   },
   inputBox: {
     height: 47,
