@@ -167,7 +167,7 @@ function TodayQuiz3Screen(): React.JSX.Element {
                     styles.BtnContainer,
                     { backgroundColor: selectedAnswer === null ? '#D3D3D3' : 'transparent' }
                 ]}
-                disabled={selectedAnswer === ""}
+                disabled={selectedAnswer === null}
                 onPress={handleNavigateQuizPress}
             >
                 <LinearGradient
