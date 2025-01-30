@@ -96,7 +96,7 @@ function HomeScreen(): React.JSX.Element {
         15: require('../../img/Character/Image/15.png'),
         16: require('../../img/Character/Image/16.png'),
         17: require('../../img/Character/Image/17.png'),
-        18: require('../../img/Character/Image/18.png'),
+        18: require('../../img/Character/Image/18_back.png'),
         19: require('../../img/Character/Image/19.png'),
     };
 
