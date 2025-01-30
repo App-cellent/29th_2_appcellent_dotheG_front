@@ -136,7 +136,8 @@ function TodayQuiz2Screen(): React.JSX.Element {
                     <Text style={[styles.GreenText, { color: colors.lightblack }]}> 오늘의 퀴즈</Text>
                 </View>
                 <View style={styles.rowContainer}>
-                    <Text style={styles.BoldLargeText}>Q. {quizTitle}</Text>
+                    <Text style={styles.questionMark}>Q. </Text>
+                    <Text style={styles.BoldLargeText}>{quizTitle}</Text>
                 </View>
             </View>
 
@@ -165,7 +166,7 @@ function TodayQuiz2Screen(): React.JSX.Element {
                     styles.BtnContainer,
                     { backgroundColor: selectedAnswer === null ? '#D3D3D3' : 'transparent' }
                 ]}
-                disabled={userAnswer === ""}
+                disabled={selectedAnswer === null}
                 onPress={handleNavigateQuizPress}
             >
                 <LinearGradient
@@ -235,11 +236,18 @@ const styles = StyleSheet.create({
         fontWeight: '400',
     },
     BoldLargeText: {
-        color: colors.black,
+            color: colors.black,
+            fontSize: getFontSize(25),
+            fontWeight: '800',
+            lineHeight: 34,
+            flex: 1,
+            flexShrink: 1,
+    },
+    questionMark: {
         fontSize: getFontSize(25),
         fontWeight: '800',
+        color: colors.green,
         lineHeight: 34,
-        marginBottom: 8,
     },
     BtnContainer: {
         position: 'absolute',

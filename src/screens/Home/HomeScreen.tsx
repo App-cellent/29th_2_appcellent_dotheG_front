@@ -447,17 +447,18 @@ const styles = StyleSheet.create({
         height: height * 0.62,
     },
     HomeMainContainer: {
+
     },
     MainBackgroundWrapper: {
         width: '100%',
-        height: 200,
+        height: height * 0.25,
         paddingHorizontal: 10,
         alignItems: 'center',
         justifyContent: 'center',
     },
     NullBackgroundWrapper: {
         width: '100%',
-        height: 200,
+        height: height * 0.25,
         justifyContent: 'center',
         alignItems: 'center',
     },
