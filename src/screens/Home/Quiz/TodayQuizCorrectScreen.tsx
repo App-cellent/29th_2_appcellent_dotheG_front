@@ -1,16 +1,14 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import { useNavigation } from '@react-navigation/native';
-import colors from "../../utils/colors";
-import { getFontSize } from '../../utils/fontUtils';
+import colors from "../../../utils/colors";
+import { getFontSize } from '../../../utils/fontUtils';
 
-import SeedIcon from '../../img/Home/SeedIcon.svg';
+import SeedIcon from '../../../img/Home/SeedIcon.svg';
 
 import {
-  ScrollView,
   StyleSheet,
   Text,
   View,
-  Image,
   ImageBackground,
   Dimensions,
   TouchableOpacity
@@ -21,23 +19,28 @@ const { height } = Dimensions.get('window');
 function TodayQuizCorrectScreen(): React.JSX.Element {
     const navigation = useNavigation();
 
+    const navigateHome = async () => {
+        navigation.navigate('Main', { screen: 'Home' });
+    };
+
     return (
-        <View style={styles.container}>
-           <ImageBackground source={require('../../img/Home/Quiz/QuizCorrectBackgroundImage.png')}
-            style={styles.backgroundImage}>
+        <TouchableOpacity style={styles.container} onPress={navigateHome}>
+            <ImageBackground
+                source={require('../../../img/Home/Quiz/QuizCorrectBackgroundImage.png')}
+                style={styles.backgroundImage}
+            >
                 <View style={styles.rowItem}>
                     <Text style={styles.GreenText}>정답</Text>
                     <Text style={styles.BoldLargeText}>이에요:)</Text>
                 </View>
 
                 <Text style={styles.SmallText}>내일도 오늘의 퀴즈에 도전해보세요!</Text>
-                <View style={[styles.rowItem, {marginTop: 14}]}>
+                <View style={[styles.rowItem, { marginTop: 14 }]}>
                     <SeedIcon width={15} height={20} />
-                    <Text style={styles.SmallBoldText}>20 획득!</Text>
+                    <Text style={styles.SmallBoldText}>2 획득!</Text>
                 </View>
-
-           </ImageBackground>
-        </View>
+            </ImageBackground>
+        </TouchableOpacity>
     );
 }
 
@@ -85,4 +88,3 @@ const styles = StyleSheet.create({
 });
 
 export default TodayQuizCorrectScreen;
-

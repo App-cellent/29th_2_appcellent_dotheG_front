@@ -1,9 +1,11 @@
 import React, { useCallback, useState, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import colors from "../../utils/colors";
-import { getFontSize } from '../../utils/fontUtils';
+import colors from "../../../utils/colors";
+import { getFontSize } from '../../../utils/fontUtils';
 
-import GradientButton from "../../components/GradientButton";
+import { LinearGradient } from 'react-native-linear-gradient';
+
+import LeftArrow from '../../../img/Home/Quiz/LeftArrow.svg';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {
@@ -38,7 +40,7 @@ function TodayQuiz2Screen(): React.JSX.Element {
             try {
                 const accessToken = await AsyncStorage.getItem('token');
                 const selectedAnswerInt = parseInt(selectedAnswer, 10);
-                                const response = await fetch(`${apiUrl}/quiz/answer?myAnswer=${selectedAnswerInt}`, {
+                const response = await fetch(`${apiUrl}/quiz/getQuiz?timestamp=${new Date().getTime()}`, {
                     method: 'GET',
                     headers: {
                         "Cache-Control": 'no-store',
@@ -94,13 +96,19 @@ function TodayQuiz2Screen(): React.JSX.Element {
             }
 
             const result = await response.json();
-
+            console.log(result);
             if (result.success) {
-                console.log(result.message);
-                setResponseMessage(result.data);  // 서버에서 받은 메시지 처리
+                if (result.data === "정답입니다.") {
+                    navigation.navigate("TodayQuizCorrectScreen");
+                } else {
+                    setResponseMessage(result.data);
+                    navigation.navigate("TodayQuizWrongScreen", {
+                        data: result.data,
+                    });
+                }
             } else {
                 console.error(result.message);
-                setResponseMessage(result.message);  // 실패 메시지도 처리
+                setResponseMessage(result.message);  // Handle failure messages
             }
         } catch (error) {
             console.error('Error submitting quiz answer:', error);
@@ -116,8 +124,7 @@ function TodayQuiz2Screen(): React.JSX.Element {
         <View style={styles.container}>
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => navigation.pop()}>
-                    <Image
-                        source={require('../../img/My/arrowleft.png')}
+                    <LeftArrow
                         style={styles.closeIcon}
                     />
                 </TouchableOpacity>
@@ -129,7 +136,8 @@ function TodayQuiz2Screen(): React.JSX.Element {
                     <Text style={[styles.GreenText, { color: colors.lightblack }]}> 오늘의 퀴즈</Text>
                 </View>
                 <View style={styles.rowContainer}>
-                    <Text style={styles.BoldLargeText}>Q. {quizTitle}</Text>
+                    <Text style={styles.questionMark}>Q. </Text>
+                    <Text style={styles.BoldLargeText}>{quizTitle}</Text>
                 </View>
             </View>
 
@@ -139,8 +147,10 @@ function TodayQuiz2Screen(): React.JSX.Element {
                         key={index}
                         onPress={() => handleSelectAnswer(`${index + 1}`)}
                     >
-                        <View style={[styles.Answer, selectedAnswer === `quiz${index + 1}` && styles.selected]}>
-                            {/* 만약 quizText 항목이 URL인 경우 이미지로 렌더링 */}
+                        <View style={[
+                              styles.Answer,
+                              selectedAnswer === `${index + 1}` && styles.selected, // 비교 조건 수정
+                        ]}>
                             {isImageUrl(answer) ? (
                                 <Image source={{ uri: answer }} style={styles.answerImage} />
                             ) : (
@@ -151,15 +161,23 @@ function TodayQuiz2Screen(): React.JSX.Element {
                 ))}
             </View>
 
-            <View style={styles.BtnContainer}>
-                <GradientButton
-                    height={56}
-                    width={328}
-                    text="제출하기"
-                    onPress={handleNavigateQuizPress}
-                    isDisabled={selectedAnswer === null}
-                />
-            </View>
+            <TouchableOpacity
+                style={[
+                    styles.BtnContainer,
+                    { backgroundColor: selectedAnswer === null ? '#D3D3D3' : 'transparent' }
+                ]}
+                disabled={selectedAnswer === null}
+                onPress={handleNavigateQuizPress}
+            >
+                <LinearGradient
+                    colors={selectedAnswer === null ? ['#D3D3D3', '#D3D3D3'] : ['#9BC9FE', '#69E6A2']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={styles.completeButton}
+                >
+                    <Text style={styles.completeButtonText}>제출하기</Text>
+                </LinearGradient>
+            </TouchableOpacity>
         </View>
     );
 }
@@ -176,8 +194,9 @@ const styles = StyleSheet.create({
         height: 56,
     },
     closeIcon: {
-        width: 7.13,
-        height: 14,
+        marginTop: 10,
+        width: 11.13,
+        height: 18,
     },
     TopTextContainer: {
         paddingHorizontal: 22,
@@ -204,9 +223,9 @@ const styles = StyleSheet.create({
         borderWidth: 4,
     },
     answerImage: {
-        width: 100,  // 이미지 크기 설정
-        height: 100, // 이미지 크기 설정
-        resizeMode: 'contain',  // 이미지 비율을 유지하며 크기 조절
+        width: 100,
+        height: 100,
+        resizeMode: 'contain',
     },
     rowContainer: {
         flexDirection: 'row',
@@ -217,25 +236,40 @@ const styles = StyleSheet.create({
         fontWeight: '400',
     },
     BoldLargeText: {
-        color: colors.black,
+            color: colors.black,
+            fontSize: getFontSize(25),
+            fontWeight: '800',
+            lineHeight: 34,
+            flex: 1,
+            flexShrink: 1,
+    },
+    questionMark: {
         fontSize: getFontSize(25),
         fontWeight: '800',
+        color: colors.green,
         lineHeight: 34,
-        marginBottom: 8,
     },
     BtnContainer: {
-        marginHorizontal: 16,
+        position: 'absolute',
+        bottom: 50,
+        left: 16,
+        right: 16,
+        height: 56,
+        justifyContent: 'center',
         alignItems: 'center',
-        marginTop: 151,
+        borderRadius: 15,
     },
-    responseContainer: {
-        marginTop: 20,
+    completeButton: {
+        width: '100%',
+        height: '100%',
+        justifyContent: 'center',
         alignItems: 'center',
+        borderRadius: 15,
     },
-    responseText: {
+    completeButtonText: {
+        color: '#FFFFFF',
         fontSize: 16,
-        fontWeight: '600',
-        color: colors.black,
+        fontWeight: 'bold',
     },
 });
 

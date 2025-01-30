@@ -52,90 +52,85 @@ function CharacterStackNavigator() {
 
 function BottomTabNavigator(): React.JSX.Element {
   return (
-    <Tab.Navigator
-      screenOptions={{
-          headerShown: false,
-          animation: 'fade',
+      <Tab.Navigator
+      screenOptions={({ route }) => {
+        const isQuizScreen = ["TodayQuizGuideScreen", "TodayQuiz1Screen", "TodayQuiz2Screen", "TodayQuiz3Screen", "TodayQuizCorrectScreen", "TodayQuizWrongScreen"].includes(route.name);
+        return {
+          tabBarStyle: isQuizScreen ? { display: "none" } : {
+            height: 70,
+            elevation: 0,
+          },
           tabBarActiveTintColor: '#69E6A2',
           tabBarInactiveTintColor: '#D9D9D9',
-        tabBarLabelStyle: {
-          fontSize: 11,
-          fontWeight: '800',
-          paddingTop: 5,
-        },
-        tabBarStyle: {
-          height: 70,
-          elevation: 0,
-        },
-        tabBarItemStyle: {
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-          marginVertical: 5,
-        },
-      }}>
+          tabBarLabelStyle: {
+              fontSize: 11,
+              fontWeight: '800',
+              paddingTop: 5,
+          },
+          tabBarItemStyle: {
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              marginVertical: 5,
+          },
+          headerShown: false,
+        };
+      }}
+    >
+
       <Tab.Screen
-          name="Home"
-          component={HomeScreen}
-          options={{
-            title: '홈',
-            tabBarIcon: ({focused}) => (
-                focused
-                ? <HomeActiveIcon width={24} height={24} />
-                : <HomeIcon width={24} height={24} />
-            ),
-          }}
-        />
+        name="Home"
+        component={HomeScreen}
+        options={{
+          title: '홈',
+          tabBarIcon: ({ focused }) => (
+            focused ? <HomeActiveIcon width={24} height={24} /> : <HomeIcon width={24} height={24} />
+          ),
+        }}
+      />
       <Tab.Screen
         name="Pedometer"
         component={PedometerScreen}
         options={{
           title: '만보기',
-          tabBarIcon: ({focused}) => (
-              focused
-              ? <PedometerActiveIcon width={24} height={24} />
-              : <PedometerIcon width={24} height={24} />
+          tabBarIcon: ({ focused }) => (
+            focused ? <PedometerActiveIcon width={24} height={24} /> : <PedometerIcon width={24} height={24} />
           ),
         }}
       />
       <Tab.Screen
-          name="Character"
-          component={CharacterStackNavigator}
-          options={{
-            title: '캐릭터',
-            tabBarIcon: ({focused}) => (
-            focused
-              ? <CharacterActiveIcon width={24} height={24} />
-              : <CharacterIcon width={24} height={24} />
-            ),
-          }}
-        />
+        name="Character"
+        component={CharacterStackNavigator}
+        options={{
+          title: '캐릭터',
+          tabBarIcon: ({ focused }) => (
+            focused ? <CharacterActiveIcon width={24} height={24} /> : <CharacterIcon width={24} height={24} />
+          ),
+        }}
+      />
       <Tab.Screen
         name="Report"
         component={ReportScreen}
         options={{
-            title: '성과보고서',
-            tabBarIcon: ({focused}) => (
-            focused
-              ? <ReportActiveIcon width={24} height={24} />
-              : <ReportIcon width={24} height={24} />
-            ),
+          title: '성과보고서',
+          tabBarIcon: ({ focused }) => (
+            focused ? <ReportActiveIcon width={24} height={24} /> : <ReportIcon width={24} height={24} />
+          ),
         }}
-        />
-        <Tab.Screen
+      />
+      <Tab.Screen
         name="My"
         component={MyScreen}
         options={{
-            title: '마이페이지',
-            tabBarIcon: ({focused}) => (
-            focused
-              ? <MyActiveIcon width={24} height={24} />
-              : <MyIcon width={24} height={24} />
-            ),
+          title: '마이페이지',
+          tabBarIcon: ({ focused }) => (
+            focused ? <MyActiveIcon width={24} height={24} /> : <MyIcon width={24} height={24} />
+          ),
         }}
-        />
+      />
     </Tab.Navigator>
   );
 }
+
 
 export default BottomTabNavigator;

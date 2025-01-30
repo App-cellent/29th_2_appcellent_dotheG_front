@@ -13,7 +13,7 @@ import {
 
 import GradientButton from '../../components/GradientButton';
 
-function SignupScreen(): React.JSX.Element {
+function SignupScreen() {
     const navigation = useNavigation();
 
     const [id, setId] = useState('');
@@ -31,10 +31,12 @@ function SignupScreen(): React.JSX.Element {
 
     const [isAgreeChecked, setIsAgreeChecked] = useState(false);
 
+    // 개인정보 동의
     const handleAgreeCheck = () => {
         setIsAgreeChecked(!isAgreeChecked);
     };
 
+    // 아이디
     const handleIdCheck = (text: string) => {
         setId(text);
         const idRegex = /^[a-z0-9]{4,12}$/;
@@ -42,6 +44,7 @@ function SignupScreen(): React.JSX.Element {
         setIdCheckResult(null); // 중복 확인 결과 초기화
     };
 
+    // 비밀번호
     const handlePasswordCheck = (text: string) => {
         setPassword(text);
         // 대문자 or 소문자, 숫자, 특수문자
@@ -52,11 +55,13 @@ function SignupScreen(): React.JSX.Element {
         setIsPasswordMatch(text === confirmPassword);
     };
 
+    // 비밀번호 확인
     const handleConfirmPasswordCheck = (text: string) => {
         setConfirmPassword(text);
         setIsPasswordMatch(password === text);
     };
 
+    // 닉네임
     const handleNicknameCheck = (text: string) => {
         setNickname(text);
         const nicknameRegex = /^[가-힣]+$/;
@@ -64,19 +69,77 @@ function SignupScreen(): React.JSX.Element {
         setNicknameCheckResult(null); // 중복 확인 결과 초기화
     };
 
-    const checkIdAvailability = () => {
-        if (id === 'duplicateId') {
-            setIdCheckResult('중복되는 아이디입니다.');
-        } else {
-            setIdCheckResult('사용 가능한 아이디입니다.');
+    // 아이디 중복확인
+    const checkIdAvailability = async () => {
+        if (!id) {
+            Alert.alert("아이디를 입력해주세요.");
+            return;
+        }
+
+        try {
+            const formData = new FormData();
+            formData.append("userLogin", id);
+
+            const response = await fetch(`${apiUrl}/users/check-userlogin`, {
+                method: 'POST',
+                headers: {
+                    "Cache-Control":'no-store',
+                    "Accept":"application/json",
+                },
+                body: formData,
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                console.log('중복 확인 성공 : 사용 가능한 아이디');
+                setIdCheckResult(result.message); // 사용 가능한 아이디
+                //Alert.alert(result.message);
+            } else {
+                console.log('중복 확인 성공 : 중복되는 아이디');
+                setIdCheckResult(result.message); // 중복되는 아이디
+                //Alert.alert(result.message);
+            }
+        } catch (error) {
+            console.error("아이디 중복 확인 에러:", error);
+            Alert.alert("Error");
         }
     };
 
-    const checkNicknameAvailability = () => {
-        if (nickname === '중복닉네임') {
-            setNicknameCheckResult('중복 닉네임입니다.');
-        } else {
-            setNicknameCheckResult('사용 가능한 닉네임입니다.');
+    // 닉네임 중복확인
+    const checkNicknameAvailability = async () => {
+        if (!nickname) {
+            Alert.alert("닉네임을 입력해주세요.");
+            return;
+        }
+
+        try {
+            const formData = new FormData();
+            formData.append("userName", nickname);
+
+            const response = await fetch(`${apiUrl}/users/check-username`, {
+                method: 'POST',
+                headers: {
+                    "Cache-Control":'no-store',
+                    "Accept":"application/json",
+                },
+                body: formData,
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                console.log('중복 확인 성공 : 사용 가능한 닉네임');
+                setNicknameCheckResult(result.message); // 사용 가능한 닉네임
+                //Alert.alert(result.message);
+            } else {
+                console.log('중복 확인 성공 : 중복되는 닉네임');
+                setNicknameCheckResult(result.message); // 중복 닉네임
+                //Alert.alert(result.message);
+            }
+        } catch (error) {
+            console.error("닉네임 중복 확인 에러:", error);
+            Alert.alert("Error");
         }
     };
 
@@ -87,7 +150,6 @@ function SignupScreen(): React.JSX.Element {
         isPasswordMatch &&
         isNicknameValid &&
         isAgreeChecked;
-
     
     // 회원가입 API (GradientButton onPress)
     const apiUrl = process.env.REACT_APP_API_URL;
@@ -95,9 +157,9 @@ function SignupScreen(): React.JSX.Element {
     const fetchSignupData = async () => {
         const formData = new FormData();
 
-        formData.append('userName', nickname); // 두더지, 수달, 참매, 꿀벌
-        formData.append('userLogin', id); // user1, user2, user3, user4
-        formData.append('userPassword', password); // test123@
+        formData.append('userName', nickname);
+        formData.append('userLogin', id);
+        formData.append('userPassword', password);
 
         try {
             const response = await fetch(`${apiUrl}/users/signup`, {
@@ -153,7 +215,7 @@ function SignupScreen(): React.JSX.Element {
                         />
                         {id.length > 0 && (
                             <Image
-                                source={isIdValid
+                                source={isIdValid && idCheckResult?.includes('사용 가능')
                                     ? require('../../img/User/checkIcon.png')
                                     : require('../../img/User/warnIcon.png')}
                                 style={styles.smallCheckIcon}
@@ -161,28 +223,34 @@ function SignupScreen(): React.JSX.Element {
                         )}
                     </View>
                     <TouchableOpacity
-                        style={[styles.confirmButton, isIdValid && { backgroundColor: '#69E6A2' }]}
+                        style={[
+                            styles.confirmButton, 
+                            isIdValid && { backgroundColor: '#69E6A2' }
+                        ]}
                         onPress={checkIdAvailability}
+                        disabled={!isIdValid}
                     >
                         <Text 
                             style={[styles.confirmButtonText, isIdValid && { color: '#FFFFFF' }]}
                         >중복확인</Text>
                     </TouchableOpacity>
                 </View>
-                <Text 
+                <Text
                     style={
                         id.length === 0
                             ? styles.redText
-                            : isIdValid
-                            ? styles.greenText
-                            : styles.redText
+                            : idCheckResult?.includes('사용 가능')
+                                ? styles.greenText
+                                : styles.redText
                     }
                 >
                     {id.length === 0
                         ? '영문 소문자와 숫자만 사용해서 4~12자의 아이디를 입력해주세요.'
-                        : isIdValid
-                        ? '사용 가능한 아이디입니다.'
-                        : '중복되는 아이디입니다.'}
+                        : idCheckResult?.includes('사용 가능')
+                            ? '사용 가능한 아이디입니다.'
+                            : idCheckResult?.includes('중복')
+                            ? '중복되는 아이디입니다.'
+                            : '조건에 맞게 입력 후 중복확인을 진행해주세요.'}
                 </Text>
                 
                 {/* 비밀번호 */}
@@ -220,7 +288,7 @@ function SignupScreen(): React.JSX.Element {
                         ? '영문 대문자와 소문자, 숫자, 특수문자를 조합하여 6~20자로 입력해주세요.'
                         : isPasswordValid
                             ? '사용 가능한 비밀번호입니다.'
-                            : '사용 불가능한 비밀번호입니다. 특수문자를 조합해주세요.'}
+                            : '사용 불가능한 비밀번호입니다.'}
                 </Text>
 
                 {/* 비밀번호 확인 */}
@@ -267,30 +335,45 @@ function SignupScreen(): React.JSX.Element {
                             value={nickname}
                             onChangeText={handleNicknameCheck}
                         />
+                        {nickname.length > 0 && (
+                            <Image
+                                source={isNicknameValid && nicknameCheckResult?.includes('사용 가능')
+                                    ? require('../../img/User/checkIcon.png')
+                                    : require('../../img/User/warnIcon.png')}
+                                style={styles.smallCheckIcon}
+                            />
+                        )}
                     </View>
                     <TouchableOpacity
-                        style={[styles.confirmButton, isNicknameValid && { backgroundColor: '#69E6A2' }]}
+                        style={[
+                            styles.confirmButton, 
+                            isNicknameValid && { backgroundColor: '#69E6A2' }
+                        ]}
                         onPress={checkNicknameAvailability}
+                        disabled={!isNicknameValid}
                     >
                         <Text 
                             style={[styles.confirmButtonText, isNicknameValid && { color: '#FFFFFF' }]}
                         >중복확인</Text>
                     </TouchableOpacity>
                 </View>
+
                 <Text 
                     style={
                         nickname.length === 0
                             ? styles.redText
-                            : isNicknameValid
-                            ? styles.greenText
-                            : styles.redText
+                            : nicknameCheckResult?.includes('사용 가능')
+                                ? styles.greenText
+                                : styles.redText
                     }
                 >
                     {nickname.length === 0
                         ? '한글로만 닉네임을 설정해주세요.'
-                        : isNicknameValid
-                        ? '사용 가능한 닉네임입니다.'
-                        : '중복 닉네임입니다.'}
+                        : nicknameCheckResult?.includes('사용 가능')
+                            ? '사용 가능한 닉네임입니다.'
+                            : nicknameCheckResult?.includes('중복')
+                            ? '중복 닉네임입니다.'
+                            : '조건에 맞게 입력 후 중복확인을 진행해주세요.'}
                 </Text>
                 
                 {/* 개인정보 동의 */}

@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import colors from "../../utils/colors";
 import { getFontSize } from '../../utils/fontUtils';
 import LinearGradient from 'react-native-linear-gradient';
@@ -27,7 +27,10 @@ import {
   Dimensions,
   TouchableOpacity,
   Alert,
-  Pressable
+  Modal,
+  Pressable,
+  BackHandler,
+  ToastAndroid,
 } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 
@@ -37,8 +40,12 @@ function HomeScreen(): React.JSX.Element {
     const navigation = useNavigation();
     const apiUrl = process.env.REACT_APP_API_URL;
 
-    const [showTreeInfo, setShowTreeInfo] = useState(true);
+    const [backPressedOnce, setBackPressedOnce] = useState(false);
 
+    const [showTreeInfo, setShowTreeInfo] = useState(true);
+    const [loading, setLoading] = useState(false);
+
+    // User state
     const [userName, setUserName] = useState('');
     const [userReward, setUserReward] = useState(0);
     const [mainChar, setMainChar] = useState(null);
@@ -47,13 +54,11 @@ function HomeScreen(): React.JSX.Element {
     const [dailyActivity, setDailyActivity] = useState(1);
     const [specialActivity, setSpecialActivity] = useState(11);
 
+    // Quiz state
     const [quizYN, setQuizYN] = useState();
     const [modalVisible, setModalVisible] = useState(false);
 
-    const TreeInfo = () => {
-        setShowTreeInfo(!showTreeInfo);
-    }
-
+    // Quest state
     const [dailyQuest, setDailyQuest] = useState(null);
     const [specialQuest, setSpecialQuest] = useState(null);
 
@@ -73,88 +78,79 @@ function HomeScreen(): React.JSX.Element {
         '반려 식물 키우기'
     ];
 
-    const getDailyQuest = (activity: number) => {
+    const charImages = {
+        1: require('../../img/Character/Image/1.png'),
+        2: require('../../img/Character/Image/2.png'),
+        3: require('../../img/Character/Image/3.png'),
+        4: require('../../img/Character/Image/4.png'),
+        5: require('../../img/Character/Image/5.png'),
+        6: require('../../img/Character/Image/6.png'),
+        7: require('../../img/Character/Image/7.png'),
+        8: require('../../img/Character/Image/8.png'),
+        9: require('../../img/Character/Image/9.png'),
+        10: require('../../img/Character/Image/10.png'),
+        11: require('../../img/Character/Image/11.png'),
+        12: require('../../img/Character/Image/12.png'),
+        13: require('../../img/Character/Image/13.png'),
+        14: require('../../img/Character/Image/14.png'),
+        15: require('../../img/Character/Image/15.png'),
+        16: require('../../img/Character/Image/16.png'),
+        17: require('../../img/Character/Image/17.png'),
+        18: require('../../img/Character/Image/18.png'),
+        19: require('../../img/Character/Image/19.png'),
+    };
+
+    const getDailyQuest = useCallback((activity: number) => {
         return dailyQuests[activity - 1];
-    };
+    }, []);
 
-    const getSpecialQuest = (activity: number) => {
+    const getSpecialQuest = useCallback((activity: number) => {
         return specialQuests[activity - 11];
-    };
+    }, []);
 
-  const charImages = {
-    1: require('../../img/Character/Image/1.png'),
-    2: require('../../img/Character/Image/2.png'),
-    3: require('../../img/Character/Image/3.png'),
-    4: require('../../img/Character/Image/4.png'),
-    5: require('../../img/Character/Image/5.png'),
-    6: require('../../img/Character/Image/6.png'),
-    7: require('../../img/Character/Image/7.png'),
-    8: require('../../img/Character/Image/8.png'),
-    9: require('../../img/Character/Image/9.png'),
-    10: require('../../img/Character/Image/10.png'),
-    11: require('../../img/Character/Image/11.png'),
-    12: require('../../img/Character/Image/12.png'),
-    13: require('../../img/Character/Image/13.png'),
-    14: require('../../img/Character/Image/14.png'),
-    15: require('../../img/Character/Image/15.png'),
-    16: require('../../img/Character/Image/16.png'),
-    17: require('../../img/Character/Image/17.png'),
-    18: require('../../img/Character/Image/18.png'),
-    19: require('../../img/Character/Image/19.png'),
-  };
+    const getMainCharImage = useCallback(() => {
+        return charImages[mainChar];
+    }, [mainChar]);
+
+    const TreeInfo = useCallback(() => {
+        setShowTreeInfo(prev => !prev);
+    }, []);
+
+    const onBackPressEvent = useCallback(() => {
+        if (backPressedOnce) {
+            BackHandler.exitApp(); // 앱 종료
+        } else {
+            setBackPressedOnce(true);
+            ToastAndroid.show("한 번 더 누르면 종료됩니다.", ToastAndroid.SHORT);
+
+            setTimeout(() => {
+                setBackPressedOnce(false);
+            }, 2000); // 2초 안에 다시 누르면 종료
+        }
+        return true;
+    }, [backPressedOnce]);
 
     useEffect(() => {
-        const fetchHomeData = async () => {
-            try {
-                const accessToken = await AsyncStorage.getItem('token');
-                const response = await fetch(`${apiUrl}/mainpage/getInfo?timestamp=${new Date().getTime()}`, {
-                    method: 'GET',
-                    headers: {
-                        "Cache-Control":'no-store',
-                        "Content-Type":"application/json",
-                        access: `${accessToken}`,
-                    },
-                });
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', onBackPressEvent);
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const result = await response.json();
-
-                if (result.success) {
-                    console.log(result.data);
-                    setUserName(result.data.userName);
-                    setUserReward(result.data.userReward);
-                    setMainChar(result.data.mainChar);
-                    setMonthSavedTree(result.data.monthSavedTree);
-                    setTotalSavedTree(result.data.totalSavedTree);
-                    setDailyQuest(getDailyQuest(result.data.dailyActivity));
-                    setSpecialQuest(getSpecialQuest(result.data.specialActivity));
-                } else {
-                    console.error(result.message);
-                }
-            } catch (error) {
-                console.error('Error fetching Home User data:', error);
-                setTodayStep(result.data);
-            } finally {
-                setLoading(false);
-            }
+        return () => {
+            backHandler.remove();
         };
+    }, [onBackPressEvent]);
 
-    const fetchQuizYNData = async () => {
+    const fetchHomeData = useCallback(async () => {
         try {
+            setLoading(true);
             const accessToken = await AsyncStorage.getItem('token');
-            const response = await fetch(`${apiUrl}/quiz?timestamp=${new Date().getTime()}`, {
+            const response = await fetch(`${apiUrl}/mainpage/getInfo?timestamp=${new Date().getTime()}`, {
                 method: 'GET',
                 headers: {
-                    "Cache-Control":'no-store',
-                    "Content-Type":"application/json",
+                    "Cache-Control": 'no-store',
+                    "Content-Type": "application/json",
                     access: `${accessToken}`,
                 },
             });
 
-            // 응답 상태
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -162,35 +158,79 @@ function HomeScreen(): React.JSX.Element {
             const result = await response.json();
 
             if (result.success) {
-                console.log(result.data);
+                const {
+                    userName,
+                    userReward,
+                    mainChar,
+                    monthSavedTree,
+                    totalSavedTree,
+                    dailyActivity,
+                    specialActivity
+                } = result.data;
+
+                setUserName(userName);
+                setUserReward(userReward);
+                setMainChar(mainChar);
+                setMonthSavedTree(monthSavedTree);
+                setTotalSavedTree(totalSavedTree);
+                setDailyQuest(getDailyQuest(dailyActivity));
+                setSpecialQuest(getSpecialQuest(specialActivity));
+            } else {
+                console.error(result.message);
+            }
+        } catch (error) {
+            console.error('Error fetching Home User data:', error);
+        } finally {
+            setLoading(false);
+        }
+    }, [getDailyQuest, getSpecialQuest]);
+
+    const fetchQuizYNData = useCallback(async () => {
+        try {
+            const accessToken = await AsyncStorage.getItem('token');
+            const response = await fetch(`${apiUrl}/quiz?timestamp=${new Date().getTime()}`, {
+                method: 'GET',
+                headers: {
+                    "Cache-Control": 'no-store',
+                    "Content-Type": "application/json",
+                    access: `${accessToken}`,
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+
+            if (result.success) {
                 setQuizYN(result.data);
             } else {
                 console.error(result.message);
             }
         } catch (error) {
             console.error('Error fetching quizYN:', error);
-            setTodayStep(result.data);
-        } finally {
-            setLoading(false);
         }
-    };
+    }, []);
 
-        fetchHomeData();
-        fetchQuizYNData();
-    }, [userName, userReward, mainChar, monthSavedTree, totalSavedTree, dailyActivity, specialActivity]);
-
-    const getMainCharImage = () => {
-        // If mainChar is null, use image 1, otherwise use the image for the corresponding mainChar
-        const charId = mainChar !== null ? mainChar : 1;
-        return charImages[charId] || charImages[1];  // Fallback to image 1 if charId is invalid
-      };
+    useFocusEffect(
+        useCallback(() => {
+            fetchHomeData();
+            fetchQuizYNData();
+        }, [fetchHomeData, fetchQuizYNData])
+    );
 
     const [selectedImage, setSelectedImage] = useState(null);
 
-    const handleNavigateTodayQuiz = useCallback(async () => {
-        if(!quizYN) navigation.navigate('TodayQuizGuideScreen');
-        else setModalVisible(true);
-    }, []);
+    const handleNavigateTodayQuiz = useCallback(() => {
+        if(!quizYN) {
+            navigation.navigate('TodayQuizGuideScreen', {
+                screen: 'TodayQuizGuideScreen'
+            });
+        } else {
+            setModalVisible(true);
+        }
+    }, [quizYN]);
 
     const handleNavigateCamera = useCallback(() => {
         navigation.navigate('CameraScreen');
@@ -229,7 +269,6 @@ function HomeScreen(): React.JSX.Element {
         );
     };
 
-
     return (
         <View style={styles.container}>
             <MainHeader />
@@ -254,84 +293,100 @@ function HomeScreen(): React.JSX.Element {
                         <Text style={styles.TitleText2}>오늘도 우리 함께 달려보아요:)</Text>
                     </View>
                     <View style={{justifyContent: 'center', alignItems: 'center', marginTop: 5, marginBottom: 10}}>
-                        <View style={styles.MainBackgroundWrapper}>
-                            <Image source={require('../../img/Home/HomeCharBackground.png')} style={styles.MainBackground} />
-                            <Image source={getMainCharImage()} style={styles.MainChar} />
-                        </View>
+                            {mainChar === null && (
+                                <View style={styles.NullBackgroundWrapper}>
+                                <Text style={styles.NullText}>하단 캐릭터 버튼을 눌러</Text>
+                                <Text style={styles.NullText}>캐릭터 뽑기를 진행해보세요!</Text>
+                                </View>
+                            )}
+                            {mainChar !== null && (
+                                <View style={styles.MainBackgroundWrapper}>
+                                    <ImageBackground
+                                        style={styles.MainChar}
+                                        source={getMainCharImage()}
+                                        resizeMode="contain"
+                                    />
+                                    <Image source={require('../../img/Home/HomeCharBackground.png')} style={styles.MainBackground} />
+                                </View>
+                            )}
                     </View>
 
                     <TouchableOpacity onPress={handleNavigateTodayQuiz}>
-                    <View style={styles.QuizBox}>
-                        <Text style={styles.BoldLargeText}>오늘의 퀴즈 풀기</Text>
-                        <RightArrowIcon width={8} height={14} />
-                    </View>
+                        <View style={styles.QuizBox}>
+                            <Text style={styles.BoldLargeText}>오늘의 퀴즈 풀기</Text>
+                            <RightArrowIcon width={8} height={14} />
+                        </View>
                     </TouchableOpacity>
                 </View>
                 </ImageBackground>
 
-                <View style={[styles.CenteredCountContainer, {height: 153}]}>
-                        <TouchableOpacity onPress={TreeInfo} style={styles.InfoContainer}>
-                            <Image source={require('../../img/Home/InfoIcon.png')} style={styles.InfoIcon} />
-                              {showTreeInfo && (
-                                  <View style={styles.InfoBox}>
-                                    <Image source={require('../../img/Home/CloseIcon.png')} style={{ width: 7, height: 7, position: 'absolute', alignSelf: 'flex-end', top: 12.5, right: 12.5 }}/>
-                                    <Text style={styles.InfoText}>내가 줄인 이산화탄소의 양을</Text>
-                                    <Text style={styles.InfoText}>나무 그루로 확인해볼 수 있어요!</Text>
-                                  </View>
-                              )}
-                        </TouchableOpacity>
-                    <View style={styles.TreeBox}>
-                        <CircleThisMonthTreeIcon width={36} height={36} />
-                        <View style={styles.TreeDetailBox}>
-                            <Text style={styles.BoldSmallText}>{monthSavedTree}그루</Text>
-                            <Text style={styles.GrayText}>이번 달 지킨 나무</Text>
-                        </View>
-                    </View>
-                    <View style={styles.TreeBox}>
-                        <CircleUserTreeIcon width={36} height={36} />
-                        <View style={styles.TreeDetailBox}>
-                            <Text style={styles.BoldSmallText}>{totalSavedTree}그루</Text>
-                            <Text style={styles.GrayText}>지금까지 지킨 나무</Text>
-                        </View>
-                    </View>
-                </View>
-
-                <View style={styles.HomeMenuContainer}>
-                    <View style={styles.HorizontalMenuBox}>
-                        <View style={[styles.MenuBoxHalf, { marginRight: 8 }]}>
-                            <View style={styles.HalfTitleContainer}>
-                                <CircleQuestionIcon width={21} />
-                                <Text style={[styles.BoldSmallText, {marginLeft: 7}]}>데일리 퀘스트</Text>
-                            </View>
-                            <Text style={styles.MediumText}>{dailyQuest}</Text>
-
-                            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 8 }}>
-                                <PedometerIcon width={39} />
+                <View style={styles.Wrapper}>
+                    <View style={[styles.CenteredCountContainer, {height: 153}]}>
+                            <TouchableOpacity onPress={TreeInfo} style={styles.InfoContainer}>
+                                <Image source={require('../../img/Home/InfoIcon.png')} style={styles.InfoIcon} />
+                                  {showTreeInfo && (
+                                      <View style={styles.InfoBox}>
+                                        <Image source={require('../../img/Home/CloseIcon.png')} style={{ width: 7, height: 7, position: 'absolute', alignSelf: 'flex-end', top: 12.5, right: 12.5 }}/>
+                                        <Text style={styles.InfoText}>내가 줄인 이산화탄소의 양을</Text>
+                                        <Text style={styles.InfoText}>나무 그루로 확인해볼 수 있어요!</Text>
+                                      </View>
+                                  )}
+                            </TouchableOpacity>
+                        <View style={styles.TreeBox}>
+                            <CircleThisMonthTreeIcon width={36} height={36} />
+                            <View style={styles.TreeDetailBox}>
+                                <Text style={styles.BoldSmallText}>{monthSavedTree}그루</Text>
+                                <Text style={styles.GrayText}>이번 달 지킨 나무</Text>
                             </View>
                         </View>
-
-
-                        <View style={[styles.MenuBoxHalf, { marginLeft: 8 }]}>
-                            <View style={styles.HalfTitleContainer}>
-                                <CircleStarIcon width={21} />
-                                <Text style={[styles.BoldSmallText, {marginLeft: 7}]}>스페셜 퀘스트</Text>
-                            </View>
-                            <Text style={styles.MediumText}>{specialQuest}</Text>
-
-                            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 8 }}>
-                                <QuestIcon width={56} />
+                        <View style={styles.TreeBox}>
+                            <CircleUserTreeIcon width={36} height={36} />
+                            <View style={styles.TreeDetailBox}>
+                                <Text style={styles.BoldSmallText}>{totalSavedTree}그루</Text>
+                                <Text style={styles.GrayText}>지금까지 지킨 나무</Text>
                             </View>
                         </View>
                     </View>
 
-                    <View style={[styles.MenuBox, {paddingLeft: 30}]}>
-                        <Text style={styles.BoldLargeText}>오늘의 인증</Text>
-                        <Text style={styles.GrayText}>나의 친환경 활동을 인증해보세요!</Text>
-                    </View>
+                    <View style={styles.HomeMenuContainer}>
+                        <View style={styles.HorizontalMenuBox}>
+                            <View style={[styles.MenuBoxHalf, { marginRight: 8 }]}>
+                                <View style={styles.HalfTitleContainer}>
+                                    <CircleQuestionIcon width={21} />
+                                    <Text style={[styles.BoldSmallText, {marginLeft: 7}]}>데일리 퀘스트</Text>
+                                </View>
+                                <Text style={styles.MediumText}>{dailyQuest}</Text>
 
-                    <View style={[styles.MenuBox, {paddingLeft: 30}]}>
-                        <Text style={styles.BoldLargeText}>친환경 활동 가이드</Text>
-                        <Text style={styles.GrayText}>오늘의 친환경 활동을 실천해보세요!</Text>
+                                <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 8 }}>
+                                    <PedometerIcon width={39} />
+                                </View>
+                            </View>
+
+
+                            <View style={[styles.MenuBoxHalf, { marginLeft: 8 }]}>
+                                <View style={styles.HalfTitleContainer}>
+                                    <CircleStarIcon width={21} />
+                                    <Text style={[styles.BoldSmallText, {marginLeft: 7}]}>스페셜 퀘스트</Text>
+                                </View>
+                                <Text style={styles.MediumText}>{specialQuest}</Text>
+
+                                <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 8 }}>
+                                    <QuestIcon width={56} />
+                                </View>
+                            </View>
+                        </View>
+
+                        <View style={[styles.MenuBox, {paddingLeft: 30}]} >
+                            <TouchableOpacity onPress={() => navigation.navigate("QuestViewScreen")}>
+                                <Text style={styles.BoldLargeText}>오늘의 인증</Text>
+                                <Text style={styles.GrayText}>나의 친환경 활동을 인증해보세요!</Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        <View style={[styles.MenuBox, {paddingLeft: 30}]}>
+                            <Text style={styles.BoldLargeText}>친환경 활동 가이드</Text>
+                            <Text style={styles.GrayText}>오늘의 친환경 활동을 실천해보세요!</Text>
+                        </View>
                     </View>
                 </View>
             </ScrollView>
@@ -342,18 +397,25 @@ function HomeScreen(): React.JSX.Element {
                 </TouchableOpacity>
             </View>
 
-            {modalVisible &&
-              <Pressable style={styles.modalContainer} onPress={() => setModalVisible(false)}>
-                <Pressable style={styles.modalView} onPress={e => e.stopPropagation()}>
+            {modalVisible && (
+              <Modal
+                animationType="fade"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => setModalVisible(false)} // onCancel 대신 직접 처리
+              >
+                <Pressable style={styles.modalOverlay} onPress={() => setModalVisible(false)}>
+                  <View style={styles.modalContainer}>
                     <View style={styles.rowContainer}>
                       <Text style={styles.modalLargeText}>이미 </Text>
-                      <Text style={[styles.modalLargeText, {color: colors.green}]}>오늘의 퀴즈를 </Text>
+                      <Text style={[styles.modalLargeText, { color: colors.green }]}>오늘의 퀴즈를</Text>
                       <Text style={styles.modalLargeText}> 풀었어요!</Text>
                     </View>
                     <Text style={styles.modalSmallText}>내일 한 번 더 도전해보세요:)</Text>
+                  </View>
                 </Pressable>
-              </Pressable>
-            }
+              </Modal>
+            )}
 
             {openQuest &&
             <View style={styles.openQuestOption}>
@@ -385,28 +447,42 @@ const styles = StyleSheet.create({
         height: height * 0.62,
     },
     HomeMainContainer: {
+
     },
     MainBackgroundWrapper: {
-        position: 'relative',
-        width: '95%',
-        height: 200,
+        width: '100%',
+        height: height * 0.25,
+        paddingHorizontal: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    NullBackgroundWrapper: {
+        width: '100%',
+        height: height * 0.25,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    NullText: {
+        color: '#C1F6E6',
+        fontSize: getFontSize(16),
+        fontWeight: '800',
+        lineHeight: 25,
+        textAlign: 'center',
     },
     MainBackground: {
+        position: 'absolute',
         width: '100%',
         height: '100%',
         resizeMode: 'cover',
     },
     MainChar: {
-        position: 'absolute',
-        bottom: '50%',
-        left: '50%',
-        transform: [{ translateX: -114 }, { translateY: +98 }],
-        width: 228,
-        height: 196,
+        width: '100%',
+        height: '100%',
+        resizeMode: 'contain'
     },
     scrollContainer: {
         backgroundColor: colors.lightgray,
-        height: "140%",
+        height: height * 1.3,
     },
     SeedsContainer: {
         paddingHorizontal: 16,
@@ -426,7 +502,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     QuizBox: {
-        top: 20,
         marginHorizontal: 16,
         marginTop: 12,
         backgroundColor: colors.white,
@@ -437,6 +512,9 @@ const styles = StyleSheet.create({
         paddingRight: 18,
         justifyContent: 'space-between',
         flexDirection: 'row',
+    },
+    Wrapper: {
+        top: 15,
     },
     CenteredCountContainer: {
         backgroundColor: colors.white,
@@ -603,34 +681,21 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
     },
+     modalOverlay: {
+         flex: 1,
+         justifyContent: 'center',
+         alignItems: 'center',
+         backgroundColor: 'rgba(0, 0, 0, 0.5)',
+     },
      modalContainer: {
-        position: 'absolute',
-        top: 0,
-        bottom: 0,
-        left: 0,
-        right: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.2)',
-        justifyContent: 'center',
-        alignItems: 'center',
-        zIndex: 10,
-    },
-    modalView: {
-        backgroundColor: colors.white,
-        borderRadius: 15,
-        alignItems: 'center',
-        justifyContent: 'center',
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 0,
-            blur: 10,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 2,
-        elevation: 5,
-        width: 285,
-        height: 162,
-    },
+         width: 310,
+         backgroundColor: '#FFFFFF',
+         borderRadius: 15,
+         paddingVertical: 42,
+         paddingHorizontal: 18,
+         alignItems: 'center',
+         justifyContent: 'center',
+     },
     modalLargeText: {
         textAlign: 'center',
         fontSize: getFontSize(20),

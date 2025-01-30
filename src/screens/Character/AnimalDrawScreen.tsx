@@ -51,7 +51,8 @@ function AnimalDrawScreen(): React.JSX.Element {
                             access: `${accessToken}`,
                         },
                         body: JSON.stringify({ 
-                            drawType: 'ANIMAL', animalName: selectedAnimal.label 
+                            drawType: 'ANIMAL', 
+                            animalName: selectedAnimal.label 
                         }),
                     });
 
@@ -71,7 +72,7 @@ function AnimalDrawScreen(): React.JSX.Element {
                 }
             }
         } else {
-            Alert.alert('동물을 선택해주세요.');
+            Alert.alert('동물 옵션을 선택해주세요.');
         }
     };
 

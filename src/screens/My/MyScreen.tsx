@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   TextInput,
   Modal,
+  Alert
 } from 'react-native';
 
 function MyScreen({ navigation }): React.JSX.Element {
@@ -153,26 +154,63 @@ function MyScreen({ navigation }): React.JSX.Element {
 
   const handleLogout = async () => {
     try {
-      // 저장된 토큰 제거
-      await AsyncStorage.removeItem('token');
-
-      // 상태 초기화
-      setUserName(null);
-      setUserId(null);
-      setAlarmEnabled(false);
-
-      // 로그인 화면으로 이동
-      navigation.reset({
-          index: 0,
-          routes: [{ name: 'LoginScreen' }],
+      const accessToken = await AsyncStorage.getItem('token');
+      const refreshToken = await AsyncStorage.getItem('refreshToken');
+      console.log('Access Token:', accessToken);
+      console.log('Refresh Token:', refreshToken);
+      
+      const response = await fetch(`${apiUrl}/logout`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          "Cache-Control":"no-store",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          refresh: refreshToken,
+        }),
       });
+
+      if (response.ok) {
+        console.log('Logout Success:', response.status);
+        Alert.alert('Success', '로그아웃 성공');
+
+        await AsyncStorage.removeItem('token');
+        await AsyncStorage.removeItem('refreshToken');
+
+        navigation.navigate('LoginScreen');
+      } else {
+        console.error('Logout Failed');
+        Alert.alert('Error', `로그아웃 실패: ${response.status}`);
+      }
     } catch (error) {
-      console.error('로그아웃 중 오류 발생:', error);
-      alert('로그아웃 처리 중 오류가 발생했습니다. 다시 시도해주세요.');
-    } finally {
-      setLogoutModalVisible(false);
+      console.error('Logout Error:', error);
+      Alert.alert('Error', '로그아웃 오류 발생');
     }
   };
+  
+  // const handleLogout = async () => {
+  //   try {
+  //     // 저장된 토큰 제거
+  //     await AsyncStorage.removeItem('token');
+
+  //     // 상태 초기화
+  //     setUserName(null);
+  //     setUserId(null);
+  //     setAlarmEnabled(false);
+
+  //     // 로그인 화면으로 이동
+  //     navigation.reset({
+  //         index: 0,
+  //         routes: [{ name: 'LoginScreen' }],
+  //     });
+  //   } catch (error) {
+  //     console.error('로그아웃 중 오류 발생:', error);
+  //     alert('로그아웃 처리 중 오류가 발생했습니다. 다시 시도해주세요.');
+  //   } finally {
+  //     setLogoutModalVisible(false);
+  //   }
+  // };
 
   const goToWithdrawalScreen = () => {
     navigation.navigate('WithdrawalScreen');

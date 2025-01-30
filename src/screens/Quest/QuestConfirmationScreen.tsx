@@ -86,7 +86,7 @@ const QuestConfirmationScreen = () => {
         setDailyConfirmCount(dailyConfirmCount + 1);
         Alert.alert('알림', '퀘스트 인증이 완료되었습니다.');
         setSelectedQuest(null);
-        navigation.navigate('Main');
+        navigation.navigate('QuestViewScreen');
       } else {
         Alert.alert('알림', result.message || '퀘스트 인증에 실패했습니다.');
       }

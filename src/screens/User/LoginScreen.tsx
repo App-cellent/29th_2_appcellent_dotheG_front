@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { useState, useEffect, useRef } from 'react';
 import { useNavigation } from '@react-navigation/native';
+import LinearGradient from 'react-native-linear-gradient';
 import { 
     StyleSheet,
     Text,
@@ -12,8 +13,8 @@ import {
     Alert
 } from 'react-native';
 
+import DoTheG from '../../img/Navigator/DoTheG.svg';
 import GradientButton from '../../components/GradientButton';
-
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 function LoginScreen(): React.JSX.Element {
@@ -21,8 +22,40 @@ function LoginScreen(): React.JSX.Element {
     const [isChecked, setIsChecked] = useState(false);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [tutorialYN, setTutorialYN] = useState(true);
 
     const apiUrl = process.env.REACT_APP_API_URL;
+
+    const fetchTutorialYNData = async () => {
+        try {
+            const accessToken = await AsyncStorage.getItem('token');
+            const response = await fetch(`${apiUrl}/mainpage/tutorial?timestamp=${new Date().getTime()}`, {
+                method: 'POST',
+                headers: {
+                    "Cache-Control": 'no-store',
+                    "Content-Type": "application/json",
+                    access: `${accessToken}`,
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+
+            if (result.success) {
+                console.log(result);
+                setTutorialYN(result.status);
+                navigation.navigate('Tutorial'); // 튜토리얼 진행 여부가 true일 때 Main으로 이동
+            } else {
+                console.error(result.message);
+                navigation.navigate('Tutorial'); // 튜토리얼 진행 여부가 false일 때 Tutorial로 이동
+            }
+        } catch (error) {
+            console.error('Error fetching quizYN:', error);
+        }
+    };
 
     // 로그인 API (GradientButton onPress)
     const handleLogin = async () => {
@@ -57,18 +90,18 @@ function LoginScreen(): React.JSX.Element {
                 await AsyncStorage.setItem('token', token); // AsyncStorage에 토큰 저장
                 //console.log('Saved Token:', token);
                 console.log('Login Success');
-                console.log('ID:', username);
-                console.log('PW:', password)
-                navigation.navigate('Main');
+//                 console.log('ID:', username);
+//                 console.log('PW:', password);
+                fetchTutorialYNData();
             } else {
                 console.error('Token not found in headers');
                 Alert.alert('로그인 실패', '아이디나 비밀번호를 다시 확인해주세요.');
             }
-            } catch (error) {
+        } catch (error) {
             console.error('Login Error:', error);
             Alert.alert('로그인 실패', '아이디나 비밀번호를 다시 확인해주세요.');
-            }
-    };
+        }
+    }
 
     // 간편하게 시작하기 애니메이션
     const speechBubbleAnimated = useRef(new Animated.Value(0)).current;
@@ -101,10 +134,16 @@ function LoginScreen(): React.JSX.Element {
                 source={require('../../img/User/appLogo.png')}
                 style={styles.appLogo}
             />
-            <Text style={styles.textLarge}>
-                지금, <Text style={{ color: '#69E6A2' }}>Do the G</Text>와 함께{"\n"}달려보세요!
-            </Text>
+                <View style={styles.header}>
+                    <View style={styles.rowContainer}>
+                    <Text style={styles.textBoldLarge}>지금, </Text>
+                    <DoTheG width={93} height={34}/>
+                    <Text style={styles.textSemiBoldLarge}>와 함께</Text>
+                    </View>
+                    <Text style={styles.textBoldLarge}>달려보세요!</Text>
+                </View>
 
+            <View style={styles.Wrapper}>
             <TextInput
                 style={styles.inputText}
                 placeholder="아이디를 입력해주세요"
@@ -123,29 +162,39 @@ function LoginScreen(): React.JSX.Element {
             />
 
             <View style={styles.option}>
-                <TouchableOpacity 
-                    style={styles.checkContainer} 
+                <TouchableOpacity
+                    style={styles.checkContainer}
                     onPress={autoLoginCheck}
                 >
-                    <Image 
-                        source={isChecked 
-                            ? require('../../img/User/checkIcon.png') 
+                    <Image
+                        source={isChecked
+                            ? require('../../img/User/checkIcon.png')
                             : require('../../img/User/checkIconGray.png')}
                         style={styles.checkIcon}
                     />
                     <Text style={styles.checkText}>자동로그인</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                    onPress={() => navigation.navigate('FindIdPwScreen')}
+                    //onPress={() => navigation.navigate('FindIdPwScreen')}
                 >
                     <Text style={styles.findText}>아이디/비밀번호 찾기</Text>
                 </TouchableOpacity>
             </View>
 
-            <GradientButton
-                height={47} width={286} text='로그인'
+            <TouchableOpacity
+                style={[styles.BtnContainer]}
                 onPress={handleLogin}
-            />
+            >
+                <LinearGradient
+                    colors={['#9BC9FE', '#69E6A2']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={styles.completeButton}
+                >
+                    <Text style={styles.completeButtonText}>로그인</Text>
+                </LinearGradient>
+            </TouchableOpacity>
+
             <TouchableOpacity
                 style={styles.signupButton}
                 onPress={() => navigation.navigate('SignupScreen')}
@@ -161,6 +210,7 @@ function LoginScreen(): React.JSX.Element {
                 source={require('../../img/User/naverIcon.png')}
                 style={styles.naverLogo}
             />
+            </View>
         </View>
     );
 }
@@ -171,21 +221,37 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     appLogo: {
-        width: 130,
-        height: 130,
-        marginTop: 100,
+        width: 150,
+        height: 150,
         marginBottom: 16,
+        marginTop: 70,
     },
-    textLarge: {
+    header: {
+        marginBottom: 26,
+    },
+    rowContainer: {
+        flexDirection: 'row',
+    },
+    Wrapper: {
+        paddingHorizontal: 37,
+        width: '100%'
+    },
+    textBoldLarge: {
         fontSize: 24,
-        fontWeight: 700,
+        fontWeight: 800,
         lineHeight: 34,
         color: '#121212',
         textAlign: 'center',
-        marginBottom: 29,
+    },
+    textSemiBoldLarge: {
+        fontSize: 24,
+        fontWeight: 600,
+        lineHeight: 34,
+        color: '#121212',
+        textAlign: 'center',
     },
     inputText: {
-        width: 286,
+        width: '100%',
         height: 47,
         fontSize: 14,
         fontWeight: 500,
@@ -196,6 +262,7 @@ const styles = StyleSheet.create({
         paddingLeft: 14,
     },
     option: {
+        width: '100%',
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
@@ -226,8 +293,26 @@ const styles = StyleSheet.create({
         lineHeight: 34,
         textDecorationLine: 'underline',
     },
+    BtnContainer: {
+        height: 47,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 15,
+    },
+    completeButton: {
+        width: '100%',
+        height: '100%',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 15,
+    },
+    completeButtonText: {
+        color: '#FFFFFF',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
     signupButton: {
-        width: 286,
+        width: '100%',
         height: 47,
         backgroundColor: '#FFFFFF',
         borderRadius: 15,
@@ -241,7 +326,7 @@ const styles = StyleSheet.create({
     signupText: {
         color: '#69E6A2',
         fontSize: 16,
-        fontWeight: 500,
+        fontWeight: 'bold',
         lineHeight: 30,
         textAlign: 'center',
     },
@@ -249,10 +334,12 @@ const styles = StyleSheet.create({
         width: 130,
         height: 40,
         marginBottom: 7,
+        alignSelf: 'center'
     },
     naverLogo: {
         width: 36,
         height: 36,
+        alignSelf: 'center'
     },
 })
 

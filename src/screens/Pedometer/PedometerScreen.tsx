@@ -45,6 +45,7 @@ function PedometerScreen(): React.JSX.Element {
     const [weekStep, setWeekStep] = useState(0);
     const [totalStep, setTotalStep] = useState(0);
     const [carbonReduction, setCarbonReduction] = useState(0.0);
+    const [lastStepCount, setLastStepCount] = useState(0);  // 초기값을 0으로 설정
     const todayTargetStep = 7000;
     const monthTargetStep = 50000;
 
@@ -61,8 +62,6 @@ function PedometerScreen(): React.JSX.Element {
     }
 
     useEffect(() => {
-        confirmTargetStep();
-
         const fetchStepData = async () => {
             try {
                 const accessToken = await AsyncStorage.getItem('token');
@@ -83,10 +82,11 @@ function PedometerScreen(): React.JSX.Element {
 
                 if (result.success) {
                     console.log(result.data);
-                    setTodayStep(result.data.today);  // 오늘 걸음수
-                    setWeekStep(result.data.week);     // 주간 걸음수
-                    setTotalStep(result.data.total);   // 총 걸음수
-                    setCarbonReduction(result.data.carbonReduction);  // 탄소 감소량
+                    setTodayStep(result.data.today);
+                    setLastStepCount(result.data.today);  // API에서 받아온 today 값으로 lastStepCount 초기화
+                    setWeekStep(result.data.week);
+                    setTotalStep(result.data.total);
+                    setCarbonReduction(result.data.carbonReduction);
                 } else {
                     console.error(result.message);
                 }
@@ -101,7 +101,6 @@ function PedometerScreen(): React.JSX.Element {
     }, []);
 
     const stepRef = useRef(todayStep);
-    const [lastStepCount, setLastStepCount] = useState(0);
 
     useEffect(() => {
         const config = {
@@ -109,12 +108,15 @@ function PedometerScreen(): React.JSX.Element {
             default_delay: 150000000,
             cheatInterval: 3000,
             onStepCountChange: (stepCount) => {
-                if (stepCount > lastStepCount) {
-                    setTodayStep(stepCount);
-                    setLastStepCount(stepCount);
+                // API에서 받아온 이전 걸음 수에 새로운 걸음 수를 더함
+                const newStepCount = lastStepCount + (stepCount - (stepRef.current || 0));
+                if (newStepCount > lastStepCount) {
+                    setTodayStep(newStepCount);
+                    setLastStepCount(newStepCount);
+                    stepRef.current = stepCount;
                 }
 
-                if (stepCount >= todayTargetStep) {
+                if (newStepCount >= todayTargetStep) {
                     setWeekGoalYN(true);
                 }
             },
@@ -162,6 +164,7 @@ function PedometerScreen(): React.JSX.Element {
 
                     if (summaryResult.success) {
                         setTodayStep(summaryResult.data.today);
+                        setLastStepCount(summaryResult.data.today);  // API 업데이트 후에도 lastStepCount 업데이트
                         setWeekStep(summaryResult.data.week);
                         setTotalStep(summaryResult.data.total);
                         setCarbonReduction(summaryResult.data.carbonReduction);
@@ -320,7 +323,7 @@ function PedometerScreen(): React.JSX.Element {
                     >오늘의 목표를 달성해보세요!</SvgText>
                 </Svg>
 
-                <Text style={[styles.SmallText, {marginTop: 15}]}>오늘 걸음수</Text>
+                <Text style={[styles.SmallText, {marginTop: 10}]}>오늘 걸음수</Text>
                 <Text style={styles.BoldLargeText}>{todayStep}</Text>
 
                 <View style={styles.walkingContainer}>
@@ -387,7 +390,7 @@ function PedometerScreen(): React.JSX.Element {
                 )}
 
                 { weekGoalYN && (
-                  <View>  {/* 최상위 View를 추가 */}
+                  <View>
                     <Animated.View style={[styles.gradientContainer, { opacity: opacityAnimation }]}>
                       <LinearGradientBackground
                         colors={['rgb(155, 201, 254)', 'rgb(105, 230, 162)']}
@@ -433,7 +436,7 @@ function PedometerScreen(): React.JSX.Element {
                     </View>
                 </View>
 
-                <View style={[styles.MenuBox, { height: 207, flexDirection: 'column',justifyContent: 'center', alignItems: 'flex-start' }]}>
+                <View style={[styles.MenuBox, { height: 187, flexDirection: 'column',justifyContent: 'center', alignItems: 'flex-start' }]}>
                     <View style={{flexDirection: 'row'}}>
                         <Text style={styles.BoldSmallText}>걸어서 약 </Text>
                         <Text style={[styles.BoldSmallText, {color: colors.green}]}>{carbonReduction}</Text>
@@ -449,47 +452,61 @@ function PedometerScreen(): React.JSX.Element {
             </View>
 
             { weekModalVisible && weekGoalYN && !weekReward && (
-              <Pressable style={styles.modalContainer} onPress={() => setWeekModalVisible(false)}>
-                <Pressable style={styles.modalView} onPress={e => e.stopPropagation()}>
-                    <View style={styles.rowContainer}>
-                      <SeedIcon width={15} height={20} />
-                      <Text style={styles.modalLargeText}>리워드 획득!</Text>
-                      <SeedIcon width={15} height={20} />
-                  </View>
-                  <View style={styles.modalSmallTextContainer}>
-                      <Text style={styles.modalSmallText}>주간 목표달성으로 열매 10개를</Text>
-                      <Text style={styles.modalSmallText}>획득했어요!</Text>
-                  </View>
-                    <TouchableOpacity style={styles.modalButton} onPress={() => {
-                        setWeekModalVisible(false);
-                        fetchWeekReward();
-                        }}>
-                        <Text style={styles.modalButtonText}>확인</Text>
-                    </TouchableOpacity>
-                </Pressable>
-              </Pressable>
+              <Modal
+                  animationType="fade"
+                  transparent={true}
+                  visible={weekModalVisible}
+                  onRequestClose={() => {setWeekModalVisible(false); fetchWeekReward();}}
+                >
+                  <Pressable style={styles.modalOverlay} onPress={() => {setWeekModalVisible(false); fetchWeekReward();}}>
+                    <View style={styles.modalContainer}>
+                        <View style={styles.rowContainer}>
+                          <SeedIcon width={15} height={20} />
+                          <Text style={styles.modalLargeText}>리워드 획득!</Text>
+                          <SeedIcon width={15} height={20} />
+                        </View>
+                          <View style={styles.modalSmallTextContainer}>
+                              <Text style={styles.modalSmallText}>주간 목표달성으로 열매 10개를</Text>
+                              <Text style={styles.modalSmallText}>획득했어요!</Text>
+                          </View>
+                        <TouchableOpacity style={styles.modalButton} onPress={() => {
+                            setWeekModalVisible(false);
+                            fetchWeekReward();
+                            }}>
+                            <Text style={styles.modalButtonText}>확인</Text>
+                        </TouchableOpacity>
+                    </View>
+                  </Pressable>
+                </Modal>
             )}
 
             { todayModalVisible && todayGoalYN && !todayReward && (
-              <Pressable style={styles.modalContainer} onPress={() => setTodayModalVisible(false)}>
-                <Pressable style={styles.modalView} onPress={e => e.stopPropagation()}>
-                    <View style={styles.rowContainer}>
-                      <SeedIcon width={15} height={20} />
-                      <Text style={styles.modalLargeText}>리워드 획득!</Text>
-                      <SeedIcon width={15} height={20} />
-                  </View>
-                  <View style={styles.modalSmallTextContainer}>
-                      <Text style={styles.modalSmallText}>일일 목표달성으로 열매 3개를</Text>
-                      <Text style={styles.modalSmallText}>획득했어요!</Text>
-                  </View>
-                    <TouchableOpacity style={styles.modalButton} onPress={() => {
-                        setTodayModalVisible(false);
-                        fetchTodayReward();
-                        }}>
-                        <Text style={styles.modalButtonText}>확인</Text>
-                    </TouchableOpacity>
-                </Pressable>
-              </Pressable>
+                <Modal
+                    animationType="fade"
+                    transparent={true}
+                    visible={todayModalVisible}
+                    onRequestClose={() => {setTodayModalVisible(false); fetchTodayReward();}}
+                  >
+                    <Pressable style={styles.modalOverlay} onPress={() => {setTodayModalVisible(false); fetchTodayReward();}}>
+                      <View style={styles.modalContainer}>
+                            <View style={styles.rowContainer}>
+                              <SeedIcon width={15} height={20} />
+                              <Text style={styles.modalLargeText}>리워드 획득!</Text>
+                              <SeedIcon width={15} height={20} />
+                          </View>
+                          <View style={styles.modalSmallTextContainer}>
+                              <Text style={styles.modalSmallText}>일일 목표달성으로 열매 3개를</Text>
+                              <Text style={styles.modalSmallText}>획득했어요!</Text>
+                          </View>
+                            <TouchableOpacity style={styles.modalButton} onPress={() => {
+                                setTodayModalVisible(false);
+                                fetchTodayReward();
+                                }}>
+                                <Text style={styles.modalButtonText}>확인</Text>
+                            </TouchableOpacity>
+                      </View>
+                    </Pressable>
+                  </Modal>
             )}
         </View>
     );
@@ -500,7 +517,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     topContainer:{
-        flex: 1.5,
+        flex: 1.7,
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -577,7 +594,7 @@ const styles = StyleSheet.create({
     MenuBox: {
         backgroundColor: colors.white,
         width: '100%',
-        height: 91,
+        height: 81,
         borderRadius: 15,
         alignItems: 'center',
         flexDirection: 'row',
@@ -626,35 +643,20 @@ const styles = StyleSheet.create({
         fontWeight: '800',
         lineHeight: 22,
     },
-    modalContainer: {
-        position: 'absolute',
-        top: 0,
-        bottom: 0,
-        left: 0,
-        right: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.2)',
-        justifyContent: 'center',
-        alignItems: 'center',
-        zIndex: 10,
+    modalOverlay: {
+         flex: 1,
+         justifyContent: 'center',
+         alignItems: 'center',
+         backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
-    modalView: {
-        backgroundColor: colors.white,
-        borderRadius: 15,
-        paddingHorizontal: 16,
-        paddingVertical: 33,
-        alignItems: 'center',
-        justifyContent: 'center',
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 0,
-            blur: 10,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 2,
-        elevation: 5,
-        width: 289,
-        height: 269,
+    modalContainer: {
+         width: 310,
+         backgroundColor: '#FFFFFF',
+         borderRadius: 15,
+         paddingVertical: 42,
+         paddingHorizontal: 18,
+         alignItems: 'center',
+         justifyContent: 'center',
     },
     modalLargeText: {
         textAlign: 'center',
@@ -696,7 +698,7 @@ const styles = StyleSheet.create({
         top: '50%',
         transform: [
             { translateX: -15 },
-            { translateY: -57 },
+            { translateY: -60 },
         ],
         width: 51,
         height: 28,
@@ -714,6 +716,9 @@ const styles = StyleSheet.create({
         fontWeight: '800',
         lineHeight: 28,
         textAlign: 'center',
+    },
+    GoalBubble:{
+        right: 10,
     },
     BubbleIcon:{
         position: 'absolute',

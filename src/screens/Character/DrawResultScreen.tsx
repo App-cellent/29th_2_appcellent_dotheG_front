@@ -1,15 +1,45 @@
 import * as React from 'react';
+import { useRoute } from '@react-navigation/native';
 import { StyleSheet, Text, View, Image, ImageBackground } from 'react-native';
 
 import CharacterRarity from '../../components/CharacterRarity';
 
-type DrawResultProps = {
-    characterName: string;
-    characterImage: string;
-    rarity: number;
+type DrawResultParams = {
+    characterData: {
+        characterId: number;
+        characterName: string;
+        characterImageUrl: string;
+        characterRarity: number;
+    };
 };
 
-function DrawResultScreen({ characterName, characterImage, rarity }: DrawResultProps): React.JSX.Element {
+function DrawResultScreen(): React.JSX.Element {
+    const route = useRoute();
+    const { characterData } = route.params as DrawResultParams;
+    const { characterId, characterName, characterImageUrl, characterRarity } = characterData || {};
+    
+    const characterImages: { [key: number]: any } = {
+        1: require('../../img/Character/Image/1.png'),
+        2: require('../../img/Character/Image/2.png'),
+        3: require('../../img/Character/Image/3.png'),
+        4: require('../../img/Character/Image/4.png'),
+        5: require('../../img/Character/Image/5.png'),
+        6: require('../../img/Character/Image/6.png'),
+        7: require('../../img/Character/Image/7.png'),
+        8: require('../../img/Character/Image/8.png'),
+        9: require('../../img/Character/Image/9.png'),
+        10: require('../../img/Character/Image/10.png'),
+        11: require('../../img/Character/Image/11.png'),
+        12: require('../../img/Character/Image/12.png'),
+        13: require('../../img/Character/Image/13.png'),
+        14: require('../../img/Character/Image/14.png'),
+        15: require('../../img/Character/Image/15.png'),
+        16: require('../../img/Character/Image/16.png'),
+        17: require('../../img/Character/Image/17.png'),
+        18: require('../../img/Character/Image/18.png'),
+        19: require('../../img/Character/Image/19.png'),
+    };
+
     return(
         <View style={styles.container}>
             <ImageBackground
@@ -21,11 +51,12 @@ function DrawResultScreen({ characterName, characterImage, rarity }: DrawResultP
                     {'가 나왔어요!'}
                 </Text>
                 <Image
-                    source={{ uri: characterImage }}
+                    source={characterImages[characterId]}
                     style={styles.characterImg}
+                    resizeMode="contain"
                 />
                 <Text style={[styles.text, styles.marginBottom9]}>{characterName}</Text>
-                <CharacterRarity rarity={rarity} />
+                <CharacterRarity rarity={characterRarity} />
             </ImageBackground>
         </View>
     );
@@ -52,9 +83,10 @@ const styles = StyleSheet.create({
         color: '#9BC9FE',
     },
     characterImg: {
-        width: 210,
-        height: 144,
-        margin: 46,
+        width: '50%',
+        height: '50%',
+        marginTop: 40,
+        marginBottom: 20,
     },
     marginBottom9: {
         marginBottom: 9,

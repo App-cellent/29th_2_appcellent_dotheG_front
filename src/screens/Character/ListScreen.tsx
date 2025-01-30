@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, NavigationProp } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import LinearGradient from 'react-native-linear-gradient';
 import Svg, { Text as SvgText, Defs, LinearGradient as SvgLinearGradient, Stop, Line } from 'react-native-svg';
 import { 
@@ -11,6 +12,7 @@ import {
     TouchableOpacity, 
     FlatList, 
     Modal,
+    Alert
 } from 'react-native';
 
 import CharacterRarity from '../../components/CharacterRarity';
@@ -18,60 +20,10 @@ import GradientButton from '../../components/GradientButton';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// 임시 더미 데이터
-const characters = [
-    { id: 1, name: '땅에서 갓 튀어나온 두더지', rarity: '흔함', image: require('../../img/Character/Image/1.png') },
-    { id: 2, name: '비행하는 꿀벌', rarity: '흔함', image: require('../../img/Character/Image/13.png') },
-    { id: 3, name: '흙이 부족해 화난 두더지', rarity: '보통', image: require('../../img/Character/Image/2.png') },
-    { id: 4, name: '꽃에 물주는 꿀벌', rarity: '보통', image: require('../../img/Character/Image/14.png') },
-    { id: 5, name: '수줍은 두더지', rarity: '희귀', image: require('../../img/Character/Image/3.png') },
-    { id: 6, name: '꽃을 떼다 만 꿀벌', rarity: '희귀', image: require('../../img/Character/Image/15.png') },
-    { id: 7, name: '삽을 든 두더지', rarity: '매우희귀', image: require('../../img/Character/Image/4.png') },
-    { id: 8, name: '행복한 꿀벌', rarity: '매우희귀', image: require('../../img/Character/Image/16.png') },
-    { id: 9, name: '파란 지구', rarity: '매우희귀', image: require('../../img/Character/Image/17.png') },
-    { id: 10, name: '네잎클로버', rarity: '매우희귀', image: require('../../img/Character/Image/18.png') },
-    { id: 11, name: '구름에 가려진 햇빛', rarity: '매우희귀', image: require('../../img/Character/Image/19.png') },
-];
-
-// 대표 캐릭터 지정 팝업창
-interface SecondModalProps {
-    visible: boolean;
-    onConfirm: () => void;
-    onCancel: () => void;
-    characterName: string;
-}
-
-const SecondModal: React.FC<SecondModalProps> = ({ visible, onConfirm, onCancel, characterName }) => (
-    <Modal
-        animationType='fade'
-        transparent={true}
-        visible={visible}
-        onRequestClose={onCancel}
-    >
-        <View style={styles.modalOverlay}>
-            <View style={styles.secondModalContainer}>
-                <Text style={styles.secondModalTitle}>
-                    <Text style={{ color: '#69E6A2' }}>'{characterName}'</Text>가 {"\n"}대표 캐릭터로 지정되었어요!
-                </Text>
-                <Text style={styles.secondModalText}>
-                    이 캐릭터로 선택하시겠습니까?
-                </Text>
-                <View style={styles.secondModalBtnContainer}>
-                    <GradientButton
-                        height={57} width={247} text="확인"
-                        onPress={onConfirm}
-                    />
-                    <TouchableOpacity
-                        style={styles.cancelButton}
-                        onPress={onCancel}
-                    >
-                        <Text style={styles.cancelButtonText}>취소</Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
-        </View>   
-    </Modal>
-)
+type RootStackParamList = {
+    ListScreen: undefined;
+    CharacterScreen: { updatedCharacter: Character | null };
+};
 
 interface Character {
     id: number;
@@ -81,7 +33,7 @@ interface Character {
 }
 
 function ListScreen(): React.JSX.Element {
-    const navigation = useNavigation();
+    const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'ListScreen'>>();
 
     const [selectedTab, setSelectedTab] = useState<keyof typeof tabMapping>('전체보기');
     const [characters, setCharacters] = useState<Character[]>([]);
@@ -89,7 +41,29 @@ function ListScreen(): React.JSX.Element {
     const [selectedCharacter, setSelectedCharacter] = useState<number | null>(null);
     const [modalVisible, setModalVisible] = useState(false);
     const [secondModalVisible, setSecondModalVisible] = useState(false);
-    //const [userId, setUserId] = useState<string | null>(null);
+    const [selectedCharacterData, setSelectedCharacterData] = useState<Character | null>(null);
+
+    const characterImages: { [key: number]: any } = {
+        1: require('../../img/Character/Image/1.png'),
+        2: require('../../img/Character/Image/2.png'),
+        3: require('../../img/Character/Image/3.png'),
+        4: require('../../img/Character/Image/4.png'),
+        5: require('../../img/Character/Image/5.png'),
+        6: require('../../img/Character/Image/6.png'),
+        7: require('../../img/Character/Image/7.png'),
+        8: require('../../img/Character/Image/8.png'),
+        9: require('../../img/Character/Image/9.png'),
+        10: require('../../img/Character/Image/10.png'),
+        11: require('../../img/Character/Image/11.png'),
+        12: require('../../img/Character/Image/12.png'),
+        13: require('../../img/Character/Image/13.png'),
+        14: require('../../img/Character/Image/14.png'),
+        15: require('../../img/Character/Image/15.png'),
+        16: require('../../img/Character/Image/16.png'),
+        17: require('../../img/Character/Image/17.png'),
+        18: require('../../img/Character/Image/18.png'),
+        19: require('../../img/Character/Image/19.png'),
+    };
 
     // 탭 매핑
     const tabMapping = {
@@ -110,48 +84,30 @@ function ListScreen(): React.JSX.Element {
             case 3:
                 return '희귀';
             case 4:
-                return '매우희귀';
+                return '매우 희귀';
             default:
                 return '';
         }
     };
 
-    const apiUrl = process.env.REACT_APP_API_URL;
+    const getRarityLevel = (rarity: string) => {
+        switch (rarity) {
+            case '흔함':
+                return 1;
+            case '보통':
+                return 2;
+            case '희귀':
+                return 3;
+            case '매우 희귀':
+                return 4;
+            default:
+                return 0;
+        }
+    };
 
-    // 사용자 ID API 호출
-    // const fetchUserId = async () => {
-    //     try {
-    //         const accessToken = await AsyncStorage.getItem('token');
-    //         console.log('Access Token:', accessToken);
-
-    //         //${apiUrl}/characters/main?timestamp=${new Date().getTime()}
-
-    //         const response = await fetch(`${apiUrl}/characters/collection`, {
-    //             method: 'GET',
-    //             headers: {
-    //                 "Cache-Control": 'no-store',
-    //                 "Content-Type": "application/json",
-    //                 access: `${accessToken}`,
-    //             },
-    //         });
-    //         const result = await response.json();
-    //         if (response.ok) {
-    //             setUserId(result.userId);
-    //         } else {
-    //             console.error(result.message);
-    //         }
-    //     } catch (error) {
-    //         console.error('Error fetching userId:', error);
-    //     }
-    // };
-
-    // useEffect(() => {
-    //     fetchUserId();
-    // }, []);
-    
+    // 캐릭터 도감 조회 API
     const fetchCharacterData = async (viewType: string) => {
-        //if (!userId) return;
-        
+        const apiUrl = process.env.REACT_APP_API_URL;
         setIsLoading(true);
         try {
             const accessToken = await AsyncStorage.getItem('token');
@@ -191,6 +147,35 @@ function ListScreen(): React.JSX.Element {
         fetchCharacterData(tabMapping[selectedTab]);
     }, [selectedTab]);
 
+    // 캐릭터 상세 조회 API
+    const fetchCharacterDetail = async (characterId: number) => {
+        const apiUrl = process.env.REACT_APP_API_URL;
+        setIsLoading(true);
+        try {
+            const accessToken = await AsyncStorage.getItem('token');
+            const response = await fetch(`${apiUrl}/characters/detail/${characterId}`, {
+                method: 'GET',
+                headers: {
+                    "Cache-Control": "no-store",
+                    "Content-Type": "application/json",
+                    access: `${accessToken}`
+                },
+            });
+
+            const result = await response.json();
+            if (response.ok && result.success) {
+                return result.data;
+            } else {
+                console.error(result.message);
+                return null;
+            }
+        } catch (error) {
+            console.error("Error fetchCharacterDetail:", error);
+            return null;
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     // const sortedCharacters = 
     //     selectedTab === '전체보기'
@@ -202,42 +187,105 @@ function ListScreen(): React.JSX.Element {
     //     groupedCharacters.push(sortedCharacters.slice(i, i + 3));
     // }
 
-    const handleCharacterModal = (id: number) => {
-        setSelectedCharacter(id);
-        setModalVisible(true);
+    const handleCharacterModal = async (id: number) => {
+        const characterDetail = await fetchCharacterDetail(id); // 상세 정보 요청
+        if (characterDetail) {
+            setSelectedCharacterData({
+                id: characterDetail.charId,
+                name: characterDetail.charName,
+                rarity: mapRarity(characterDetail.charRarity),
+                image: { uri: characterDetail.charImageUrl },
+            });
+            setModalVisible(true);
+        }
     };
-
-    const selectedCharacterData = characters.find(
-        (character) => character.id === selectedCharacter
-    );
 
     const handleFirstModalConfirm = () => {
         setModalVisible(false);
         setSecondModalVisible(true);
     };
 
-    const handleSecondModalConfirm = () => {
-        setSecondModalVisible(false);
-        navigation.navigate('CharacterScreen');
+    // 대표 캐릭터 지정 팝업창
+    interface SecondModalProps {
+        visible: boolean;
+        onConfirm: () => void;
+        onCancel: () => void;
+        characterName: string;
+    }
+
+    const SecondModal: React.FC<SecondModalProps> = ({ visible, onConfirm, onCancel, characterName }) => (
+        <Modal
+            animationType='fade'
+            transparent={true}
+            visible={visible}
+            onRequestClose={onCancel}
+        >
+            <View style={styles.modalOverlay}>
+                <View style={styles.secondModalContainer}>
+                    <Text style={styles.secondModalTitle}>
+                        <Text style={{ color: '#69E6A2' }}>'{characterName}'</Text>가 {"\n"}대표 캐릭터로 지정되었어요!
+                    </Text>
+                    <Text style={styles.secondModalText}>
+                        이 캐릭터로 선택하시겠습니까?
+                    </Text>
+                    <View style={styles.secondModalBtnContainer}>
+                        <GradientButton
+                            height={57} width={247} text="확인"
+                            onPress={handleSecondModalConfirm}
+                        />
+                        <TouchableOpacity
+                            style={styles.cancelButton}
+                            onPress={onCancel}
+                        >
+                            <Text style={styles.cancelButtonText}>취소</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </View>   
+        </Modal>
+    )
+
+    // 대표 캐릭터 지정 API
+    const handleSecondModalConfirm = async () => {
+        const apiUrl = process.env.REACT_APP_API_URL;
+        setIsLoading(true);
+        try {
+            const accessToken = await AsyncStorage.getItem('token');
+            const response = await fetch(`${apiUrl}/characters/main/set`, {
+                method: 'PUT',
+                headers: {
+                    "Cache-Control": "no-store",
+                    "Content-Type": "application/json",
+                    access: `${accessToken}`,
+                },
+                body: JSON.stringify({
+                    characterId: selectedCharacterData?.id,
+                }),
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                if (result.success) {
+                    await AsyncStorage.setItem('selectedCharacter', JSON.stringify(selectedCharacterData));
+
+                    Alert.alert("대표 캐릭터가 설정되었습니다!");
+                    console.log("대표 캐릭터 지정 성공", selectedCharacterData);
+                    navigation.navigate("CharacterScreen", { updatedCharacter: selectedCharacterData });
+                } else {
+                    console.error(result.message);
+                    Alert.alert(result.message);
+                }
+            } else {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+        } catch (error) {
+            console.error("API error:", error);
+            Alert.alert("대표 캐릭터 지정 중 오류가 발생했습니다. 다시 시도해주세요.");
+        }
     };
 
     const handleSecondModalCancel = () => {
         setSecondModalVisible(false);
-    };
-
-    const getRarityLevel = (rarity: string) => {
-        switch (rarity) {
-            case '흔함':
-                return 1;
-            case '보통':
-                return 2;
-            case '희귀':
-                return 3;
-            case '매우 희귀':
-                return 4;
-            default:
-                return 0;
-        }
     };
 
     return(

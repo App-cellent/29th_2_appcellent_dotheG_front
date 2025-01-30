@@ -1,12 +1,14 @@
 import React, { useCallback, useState, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import colors from "../../utils/colors";
-import { getFontSize } from '../../utils/fontUtils';
+import colors from "../../../utils/colors";
+import { getFontSize } from '../../../utils/fontUtils';
 
-import GradientButton from "../../components/GradientButton";
-import GradientBackground from "../../img/Home/GradientBackground.png";
-import GradientEarth from "../../img/Home/GradientEarth.png";
+import GradientButton from "../../../components/GradientButton";
+import { LinearGradient } from 'react-native-linear-gradient';
+import GradientBackground from "../../../img/Home/GradientBackground.png";
+import GradientEarth from "../../../img/Home/GradientEarth.png";
 
+import LeftArrow from '../../../img/Home/Quiz/LeftArrow.svg';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {
@@ -106,9 +108,8 @@ function TodayQuiz3Screen(): React.JSX.Element {
                     } else {
                         setResponseMessage(result.data);
                         navigation.navigate("TodayQuizWrongScreen", {
-                            hintText: result.data,
-                            imageUrl: result.data.imageUrl || null,
-                        }); // Wrong screen
+                            data: result.data,
+                        });
                     }
                 } else {
                     console.error(result.message);
@@ -124,11 +125,10 @@ function TodayQuiz3Screen(): React.JSX.Element {
     return (
         <View style={styles.container}>
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()}>
-                  <Image
-                    source={require('../../img/My/arrowleft.png')}
-                    style={styles.closeIcon}
-                  />
+                <TouchableOpacity onPress={() => navigation.pop()}>
+                    <LeftArrow
+                        style={styles.closeIcon}
+                    />
                 </TouchableOpacity>
             </View>
 
@@ -138,7 +138,8 @@ function TodayQuiz3Screen(): React.JSX.Element {
                     <Text style={[styles.GreenText, { color: colors.lightblack }]}> 오늘의 퀴즈</Text>
                 </View>
                 <View style={styles.rowContainer}>
-                    <Text style={styles.BoldLargeText}>Q. {quizTitle}</Text>
+                    <Text style={styles.questionMark}>Q. </Text>
+                    <Text style={styles.BoldLargeText}>{quizTitle}</Text>
                 </View>
             </View>
 
@@ -147,20 +148,37 @@ function TodayQuiz3Screen(): React.JSX.Element {
                 onPress={() => handleSelectAnswer('O')}
               >
                   <View style={[styles.Answer, selectedAnswer === 'O' && styles.selected]}>
-                    <Text style={styles.Selected}>O</Text>
+                    <Image source={require('../../../img/Home/Quiz/O.png')} style={[styles.Selected, {width: 63, height: 62}]} />
+                    <Text style={styles.OText}>그렇다</Text>
                   </View>
               </TouchableOpacity>
               <TouchableOpacity
                   onPress={() => handleSelectAnswer('X')}
                 >
                 <View style={[styles.Answer, selectedAnswer === 'X' && styles.selected]}>
-                    <Text style={styles.Selected}>X</Text>
+                    <Image source={require('../../../img/Home/Quiz/X.png')} style={[styles.Selected, {width: 56, height: 63} ]} />
+                    <Text style={styles.XText}>아니다</Text>
                 </View>
                 </TouchableOpacity>
             </View>
-            <View style={styles.BtnContainer}>
-                <GradientButton height={56} width={328} text="제출하기" onPress={handleNavigateQuizPress} isDisabled={selectedAnswer === null}/>
-            </View>
+
+            <TouchableOpacity
+                style={[
+                    styles.BtnContainer,
+                    { backgroundColor: selectedAnswer === null ? '#D3D3D3' : 'transparent' }
+                ]}
+                disabled={selectedAnswer === null}
+                onPress={handleNavigateQuizPress}
+            >
+                <LinearGradient
+                    colors={selectedAnswer === null ? ['#D3D3D3', '#D3D3D3'] : ['#9BC9FE', '#69E6A2']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={styles.completeButton}
+                >
+                    <Text style={styles.completeButtonText}>제출하기</Text>
+                </LinearGradient>
+            </TouchableOpacity>
         </View>
     );
 }
@@ -177,8 +195,9 @@ const styles = StyleSheet.create({
         height: 56,
     },
     closeIcon: {
-        width: 7.13,
-        height: 14,
+        marginTop: 10,
+        width: 11.13,
+        height: 18,
     },
     TopTextContainer: {
         paddingHorizontal: 22,
@@ -191,7 +210,7 @@ const styles = StyleSheet.create({
     Answer: {
         width: 168,
         height: 158,
-        margin: 10,
+        marginHorizontal: 10,
         backgroundColor: '#EFF0F2',
         borderRadius: 15,
         alignItems: 'center',
@@ -201,8 +220,23 @@ const styles = StyleSheet.create({
         borderColor: colors.green,
         borderWidth: 4,
     },
+    OText: {
+        color: "#2088FF",
+        fontSize: getFontSize(14),
+        fontWeight: '800',
+        marginTop: 8,
+    },
+    XText: {
+        color: "#FF5F5F",
+        marginTop: 8,
+        fontSize: getFontSize(14),
+        fontWeight: '800',
+    },
     rowContainer:{
         flexDirection: 'row',
+        flexWrap: 'wrap',
+        marginBottom: 20,
+        alignItems: 'flex-start',
     },
     GreenText: {
         color: colors.green,
@@ -214,12 +248,36 @@ const styles = StyleSheet.create({
         fontSize: getFontSize(25),
         fontWeight: '800',
         lineHeight: 34,
-        marginBottom: 8,
+        flex: 1,
+        flexShrink: 1,
+    },
+    questionMark: {
+        fontSize: getFontSize(25),
+        fontWeight: '800',
+        color: colors.green,
+        lineHeight: 34,
     },
     BtnContainer: {
-        marginHorizontal: 16,
+        position: 'absolute',
+        bottom: 50,
+        left: 16,
+        right: 16,
+        height: 56,
+        justifyContent: 'center',
         alignItems: 'center',
-        marginTop: 191,
+        borderRadius: 15,
+    },
+    completeButton: {
+        width: '100%',
+        height: '100%',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 15,
+    },
+    completeButtonText: {
+        color: '#FFFFFF',
+        fontSize: 16,
+        fontWeight: 'bold',
     },
     Selected:{
         color: colors.lightblack,
