@@ -30,44 +30,62 @@ function QuestLoadingScreen(): React.JSX.Element {
 
     const [modalVisible, setModalVisible] = useState(false);
     const [loading, setLoading] = useState(true);
-    const apiUrl = process.env.REACT_APP_API_URL;
+    //const apiUrl = process.env.REACT_APP_API_URL;
     const { formData } = route.params;
 
     useEffect(() => {
-        const submitQuest = async () => {
-            try {
-                const accessToken = await AsyncStorage.getItem('token');
-                console.log('Access Token:', accessToken);
+            const submitQuest = async () => {
+                try {
+                    const accessToken = await AsyncStorage.getItem('token');
+                    console.log('Access Token:', accessToken);
 
-                const response = await fetch(`${apiUrl}/upload/certification?timestamp=${new Date().getTime()}`, {
-                    method: 'POST',
-                    headers: {
-                        "Cache-Control": 'no-store',
-                        access: `${accessToken}`,
-                    },
-                    body: formData,
-                });
+                    const response = await fetch(`http://3.38.124.43:5001/upload/detect?timestamp=${new Date().getTime()}`, {
+                        method: 'POST',
+                        headers: {
+                            "Cache-Control": 'no-store',
+                            access: `${accessToken}`,
+                        },
+                        body: formData,
+                    });
 
-                const responseText = await response.text();
-                console.log('Response Text:', responseText);
-                const result = JSON.parse(responseText);
+                    if (!response) {
+                        throw new Error('서버 응답이 없습니다.');
+                    }
 
-                if (response.ok && result.success) {
-                    navigation.navigate('QuestCompleteScreen', { formData });
-                } else {
-                    setModalVisible(true); // 인증 실패 시 모달 띄움
+                    const responseText = await response.text();
+                    console.log('Response Text:', responseText);
+
+                    if (!response.ok) {
+                        console.error('Server Error:', response.status);
+                        Alert.alert('알림', `서버 오류 발생: ${response.status}`);
+                        setModalVisible(true);
+                        return;
+                    }
+
+                    try {
+                        const result = JSON.parse(responseText);
+                        console.log('Parsed Result:', result);
+
+                        if (result.success) {
+                            navigation.navigate('QuestCompleteScreen', { formData });
+                        } else {
+                            setModalVisible(true);
+                        }
+                    } catch (jsonError) {
+                        console.error('JSON Parsing Error:', jsonError);
+                        Alert.alert('알림', '서버 응답을 처리할 수 없습니다. 다시 시도해주세요.');
+                    }
+                } catch (error) {
+                    console.error('퀘스트 인증 중 오류:', error);
+                    Alert.alert('알림', error.message || '퀘스트 인증 중 문제가 발생했습니다.');
+                    setModalVisible(true);
+                } finally {
+                    setLoading(false);
                 }
-            } catch (error) {
-                console.error('퀘스트 인증 중 오류:', error);
-                Alert.alert('알림', '퀘스트 인증 중 오류가 발생했습니다. 다시 시도해주세요.');
-                setModalVisible(true);
-            } finally {
-                setLoading(false);
-            }
-        };
+            };
 
-        submitQuest();
-    }, []);
+            submitQuest();
+        }, [formData]);
 
     return (
         <View style={styles.container}>
