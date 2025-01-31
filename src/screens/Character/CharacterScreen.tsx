@@ -162,7 +162,7 @@ function CharacterScreen(): React.JSX.Element {
                 style={styles.container}
             >
                 <View style={styles.header}>
-                    <TouchableOpacity onPress={() => navigation.goBack()}>
+                    <TouchableOpacity>
                         <Image
                             source={require('../../img/Character/backIcon.png')}
                         />
