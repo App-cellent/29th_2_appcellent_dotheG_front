@@ -7,96 +7,34 @@ import QuestList from "../../utils/QuestList";
 
 const { width, height } = Dimensions.get('window');
 
-const QuestConfirmationScreen = () => {
+const QuestCompleteScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { photoPath } = route.params;
   const screenWidth = Dimensions.get('window').width;
   const today = new Date();
-  const year = today.getFullYear();
-  const month = String(today.getMonth() + 1).padStart(2, '0');
-  const date = String(today.getDate()).padStart(2, '0');
-  const [selectedQuest, setSelectedQuest] = useState(1); // 기본 선택 퀘스트 ID
+  const [selectedQuest, setSelectedQuest] = useState(1);
   const [dailyConfirmCount, setDailyConfirmCount] = useState(0);
 
   const apiUrl = process.env.REACT_APP_API_URL;
 
-  const handleCompleteQuest = async () => {
-    const formData = new FormData();
-    const correctedPhotoPath = `file://${photoPath}`;
+  const currentDate = new Date();
+  const formattedDate = `${currentDate.getFullYear()}.${String(currentDate.getMonth() + 1).padStart(2, '0')}.${String(currentDate.getDate()).padStart(2, '0')}`;
 
-    formData.append('activityImage', {
-      uri: correctedPhotoPath,
-      type: 'image/jpeg',
-      name: 'activityImage.jpg',
-    });
-    formData.append('activityId', selectedQuest);
-
-    if (dailyConfirmCount >= 3) {
-      Alert.alert('알림', '오늘의 퀘스트 인증 한도(3회)를 초과했습니다. 내일 다시 시도해주세요.');
-      navigation.navigate('Main');
-      return;
-    }
-
-    if (!selectedQuest) {
-      Alert.alert('알림', '퀘스트를 선택해주세요.');
-      return;
-    }
-
-    try {
-      console.log('FormData:', formData);
-      console.log('Corrected Photo Path:', correctedPhotoPath);
-
-      const accessToken = await AsyncStorage.getItem('token');
-      console.log('Access Token:', accessToken);
-
-      const response = await fetch(`${apiUrl}/upload/certification?timestamp=${new Date().getTime()}`, {
-        method: 'POST',
-        headers: {
-          "Cache-Control": 'no-store',
-          access: `${accessToken}`,
-        },
-        body: formData,
-      });
-
-      if (response.status === 401) {
-        console.warn('Token expired, refreshing token...');
-        const newToken = await refreshToken();
-        if (newToken) {
-          await AsyncStorage.setItem('token', newToken);
-          return handleCompleteQuest(); // 갱신된 토큰으로 재요청
-        } else {
-          throw new Error('Failed to refresh token');
-        }
-      }
-
-      const responseText = await response.text();
-      console.log('Response Text:', responseText);
-      const result = JSON.parse(responseText);
-
-      if (response.ok && result.success) {
-        setDailyConfirmCount(dailyConfirmCount + 1);
-        //Alert.alert('알림', '퀘스트 인증이 완료되었습니다.');
-        setSelectedQuest(null);
-        navigation.navigate('QuestLoadingScreen');
-      } else {
-        Alert.alert('알림', result.message || '퀘스트 인증에 실패했습니다.');
-      }
-    } catch (error) {
-      console.error('퀘스트 인증 중 오류:', error);
-      Alert.alert('알림', '퀘스트 인증 중 오류가 발생했습니다. 다시 시도해주세요.');
-    }
+  const getQuestDescription = (activityId) => {
+      return QuestList.find(quest => quest.activityId === activityId)?.Description || "인증완료 퀘스트";
   };
 
-  const dynamicStyles = StyleSheet.create({
-    photo: {
-      width: width,
-      height: width,
-      resizeMode: 'cover',
-      marginTop: 10,
-      marginBottom: 10,
-    },
-  });
+  useEffect(() => {
+
+  }, []);
+
+  const handleCompleteQuest = async () => {
+      navigation.navigate('QuestViewScreen');
+  }
+
+
+
 
   return (
     <View style={styles.container}>
@@ -106,25 +44,23 @@ const QuestConfirmationScreen = () => {
         </TouchableOpacity>
       </View>
 
-      <Text style={styles.greenText}>오늘의 퀘스트 분석 중...</Text>
-      <Text style={styles.title}>인증할 퀘스트를 선택하세요</Text>
+      <Text style={styles.greenText}>{formattedDate}</Text>
+      <Text style={styles.title}>오늘의 퀘스트 인증완료!</Text>
 
       {/* 촬영된 사진 */}
       <View style={styles.photoContainer}>
         <Image source={{ uri: `file://${photoPath}` }} style={dynamicStyles.photo} />
+        <Image
+            source={{ uri: formatImageUrl(selectedActivity.activityImage) }}
+            style={styles.selectedImage}
+        />
       </View>
 
       {/* 퀘스트 목록 */}
-      <ScrollView style={styles.scrollView}>
-        {QuestList.map((quest) => (
-          <TouchableOpacity
-            key={quest.activityId}
-            style={[
-              styles.questButton,
-              selectedQuest === quest.activityId && styles.selectedQuestButton,
-            ]}
-            onPress={() => setSelectedQuest(quest.activityId)}
-          >
+        <View style={[
+            styles.questButton,
+                selectedQuest === quest.activityId && styles.selectedQuestButton, // 선택된 퀘스트 스타일
+        ]}>
             <Image
               source={
                 selectedQuest === quest.activityId
@@ -134,12 +70,10 @@ const QuestConfirmationScreen = () => {
               style={styles.checkbox}
             />
             <View style={styles.questTextContainer}>
-              <Text style={styles.questTitle}>{quest.Description}</Text>
-              <Text style={styles.questDescription}>더 많은 활동을 인증해서 탄소를 절감해보세요!</Text> {/* Description 출력 */}
+              <Text style={styles.questTitle}>{getQuestDescription(selectedActivity.activityId)}</Text>
+              <Text style={styles.questDescription}>더 많은 활동을 인증해서 탄소를 절감해보세요!</Text>
             </View>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+        </View>
 
       {/* 퀘스트 인증하기 버튼 */}
       <TouchableOpacity style={styles.completeButtonContainer} onPress={handleCompleteQuest}>
@@ -149,7 +83,7 @@ const QuestConfirmationScreen = () => {
           end={{ x: 1, y: 0 }}
           style={styles.completeButton}
         >
-          <Text style={styles.completeButtonText}>퀘스트 인증하기</Text>
+          <Text style={styles.completeButtonText}>퀘스트 인증 완료하기</Text>
         </LinearGradient>
       </TouchableOpacity>
     </View>
@@ -200,6 +134,14 @@ const styles = StyleSheet.create({
     width: width,
     height: width,
   },
+  checkboxCenter: {
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+      transform: [{ translateX: -40 }, { translateY: -40 }],
+      width: 80,
+      height: 80,
+    },
   scrollView: {
     flex: 1,
     paddingHorizontal: 16,
@@ -256,4 +198,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default QuestConfirmationScreen;
+export default QuestCompleteScreen;

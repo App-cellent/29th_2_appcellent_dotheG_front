@@ -17,6 +17,8 @@ import AlarmScreen from '../screens/My/AlarmScreen';
 import PasswordChangeScreen from '../screens/My/PasswordChangeScreen';
 import CameraScreen from '../screens/Quest/CameraScreen';
 import QuestConfirmationScreen from '../screens/Quest/QuestConfirmationScreen';
+import QuestLoadingScreen from '../screens/Quest/QuestLoadingScreen';
+import QuestCompleteScreen from '../screens/Quest/QuestCompleteScreen';
 
 // Character
 // import CharacterScreen from '../screens/Character/CharacterScreen';
@@ -93,6 +95,18 @@ const StackNavigator = () => {
             <Stack.Screen
                 name="QuestConfirmationScreen"
                 component={QuestConfirmationScreen}
+                options={{ headerShown: false }}
+            />
+
+            <Stack.Screen
+                name="QuestLoadingScreen"
+                component={QuestLoadingScreen}
+                options={{ headerShown: false }}
+            />
+
+            <Stack.Screen
+                name="QuestCompleteScreen"
+                component={QuestCompleteScreen}
                 options={{ headerShown: false }}
             />
 
