@@ -180,7 +180,7 @@ function CharacterScreen(): React.JSX.Element {
                     <Image
                         source={characterImages[character?.characterId]}
                         style={styles.characterImg}
-                        resizeMode="contain"
+                        resizeMode="center"
                     />
                     {/* 캐릭터 이름 */}
                     <Text style={styles.characterName}>
@@ -237,9 +237,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     characterImg: {
-        width: 268,
-        height: 184,
-        marginTop: 116,
+        width: 300,
+        height: 200,
+        marginTop: 110,
         marginBottom: 40,
     },
     characterName: {
