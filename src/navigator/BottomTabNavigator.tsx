@@ -12,10 +12,15 @@ import { SvgXml } from 'react-native-svg';
 
 import HomeScreen from '../screens/Home/HomeScreen';
 import PedometerScreen from '../screens/Pedometer/PedometerScreen';
-import CharacterScreen from '../screens/Character/CharacterScreen';
-import ListScreen from '../screens/Character/ListScreen';
 import ReportScreen from '../screens/Report/ReportScreen';
 import MyScreen from '../screens/My/MyScreen';
+
+import CharacterScreen from '../screens/Character/CharacterScreen';
+import ListScreen from '../screens/Character/ListScreen';
+// import DrawScreen from '../screens/Character/DrawScreen';
+// import AnimalDrawScreen from '../screens/Character/AnimalDrawScreen';
+// import DrawLoadingScreen from '../screens/Character/DrawLoadingScreen';
+// import DrawResultScreen from '../screens/Character/DrawResultScreen';
 
 import HomeIcon from '../img/Navigator/HomeIcon.svg';
 import PedometerIcon from '../img/Navigator/PedometerIcon.svg';

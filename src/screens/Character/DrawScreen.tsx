@@ -28,12 +28,12 @@ function DrawScreen(): React.JSX.Element {
     const navigation = useNavigation<NavigationProp>();
 
     const options = [
-        { id: 1, label: '동물 정해서\n뽑기', modalTitle: '동물 정해서 뽑기', fruit: 35, },
-        { id: 2, label: '랜덤 뽑기', modalTitle: '랜덤 캐릭터 뽑기', fruit: 20, },
-        { id: 3, label: '희귀도1 뽑기', modalTitle: '희귀도1 캐릭터 뽑기', fruit: 19, },
-        { id: 4, label: '희귀도2 뽑기', modalTitle: '희귀도2 캐릭터 뽑기', fruit: 25, },
-        { id: 5, label: '희귀도3 뽑기', modalTitle: '희귀도3 캐릭터 뽑기', fruit: 35 },
-        { id: 6, label: '희귀도4 뽑기', modalTitle: '희귀도4 캐릭터 뽑기', fruit: 55 },
+        { id: 1, label: '동물 정해서\n뽑기', modalTitle: '동물 정해서 뽑기', fruit: 70, },
+        { id: 2, label: '랜덤 뽑기', modalTitle: '랜덤 캐릭터 뽑기', fruit: 25, },
+        { id: 3, label: '희귀도1 뽑기', modalTitle: '희귀도1 캐릭터 뽑기', fruit: 20, },
+        { id: 4, label: '희귀도2 뽑기', modalTitle: '희귀도2 캐릭터 뽑기', fruit: 50, },
+        { id: 5, label: '희귀도3 뽑기', modalTitle: '희귀도3 캐릭터 뽑기', fruit: 100 },
+        { id: 6, label: '희귀도4 뽑기', modalTitle: '희귀도4 캐릭터 뽑기', fruit: 150 },
     ];
 
     const [selectedOption, setSelectedOption] = useState<number | null>(null);
