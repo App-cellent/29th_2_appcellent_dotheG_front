@@ -88,7 +88,7 @@ function QuestViewScreen() {
     return (
         <View style={styles.container}>
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.pop()}>
+                <TouchableOpacity onPress={() =>  navigation.navigate('Main')}>
                     <LeftArrow style={styles.closeIcon} />
                 </TouchableOpacity>
                 <Text style={styles.headerText}>나의 퀘스트 인증</Text>
