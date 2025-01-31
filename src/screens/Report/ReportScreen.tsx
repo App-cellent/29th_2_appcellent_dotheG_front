@@ -10,6 +10,7 @@ import {
   Image,
   ImageBackground,
   ScrollView,
+  useWindowDimensions,
 } from 'react-native';
 import Svg, { Text as SvgText, Defs, LinearGradient, Stop } from 'react-native-svg';
 
@@ -21,28 +22,9 @@ function ReportScreen(): React.JSX.Element {
   const [textWidth, setTextWidth] = useState(0);
   const usernameFontSize=25;
 
-  const year = 2024;
-  const month = 10;
-  const week = '첫째주';
-  const username = '앱설런트';
-  const averageSteps = 5032;
-  const historyCount = 6;
-  const monthlyHistoryCount = 8;
-  const savedTree = 11;
-  const topPercentage= 21;
-
-  const historyDetails = [
-    { content: '제로 웨이스트 매장 방문', count: 1 },
-    { content: '텀블러 사용', count: 1 },
-    { content: '만보기 목표 달성', count: 4 },
-  ];
-  const monthlyHistoryDetails = [
-    { content: '제로 웨이스트 매장 방문', count: 2 },
-    { content: '텀블러 사용', count: 2 },
-    { content: '만보기 목표 달성', count: 4 },
-  ];
-
   const apiUrl = process.env.REACT_APP_API_URL;
+
+  const [isWeeklyAvailable, setIsWeeklyAvailable] = useState(false);
   const [weeklyReport, setWeeklyReport] = useState({
     userName: "",
     yearMonthWeek: "",
@@ -50,8 +32,10 @@ function ReportScreen(): React.JSX.Element {
     totalCertifications: 0,
     activityCounts: {
       "": 0
-    }
+    },
   });
+
+  const [isMonthlyAvailable, setIsMonthlyAvailable] = useState(false);
   const [monthlyReport, setMonthlyReport] = useState({
     userName: "",
     reportMonth: "",
@@ -61,7 +45,7 @@ function ReportScreen(): React.JSX.Element {
       "": 0
     },
     userPercentage: 0,
-    userRange: ""
+    userRange: "0 ~ 5kg",
   });
 
   const fetchWeeklyReportData = async () => {
@@ -97,14 +81,33 @@ function ReportScreen(): React.JSX.Element {
 
         if (result.success) {
           setWeeklyReport(result.data);
+          setIsWeeklyAvailable(true);
           console.log('Weekly report fetched successfully:', result.data);
         } else {
-          console.error(result.message);
-          setWeeklyReport(null);
+          console.log(result.message);
+          setIsWeeklyAvailable(false);
+          setWeeklyReport({
+            userName: "",
+            yearMonthWeek: "",
+            weeklyAvgSteps: 0,
+            totalCertifications: 0,
+            activityCounts: {
+              "": 0
+            },
+          });
         }
       } catch (error) {
-        console.error('Error fetching weekly report data:', error);
-        setWeeklyReport(null);
+        console.log('Error fetching weekly report data:', error);
+        setIsWeeklyAvailable(false);
+        setWeeklyReport({
+          userName: "",
+          yearMonthWeek: "",
+          weeklyAvgSteps: 0,
+          totalCertifications: 0,
+          activityCounts: {
+            "": 0
+          },
+        });
       }
     };
 
@@ -145,14 +148,37 @@ function ReportScreen(): React.JSX.Element {
 
           if (result.success) {
             setMonthlyReport(result.data);
+            setIsMonthlyAvailable(true);
             console.log('Monthly report fetched successfully:', result.data);
           } else {
-            console.error(result.message);
-            setMonthlyReport(null);
+            console.log(result.message);
+            setIsMonthlyAvailable(false);
+            setMonthlyReport({
+                userName: "",
+                reportMonth: "",
+                treesSaved: 0,
+                monthlyTotalCertifications: 0,
+                activityCounts: {
+                    "": 0
+                },
+                userPercentage: 0,
+                userRange: "0 ~ 5kg",
+            });
           }
         } catch (error) {
-          console.error('Error fetching weekly report data:', error);
-          setMonthlyReport(null);
+          console.log('Error fetching monthly report data:', error);
+          setIsMonthlyAvailable(false);
+          setMonthlyReport({
+              userName: "",
+              reportMonth: "",
+              treesSaved: 0,
+              monthlyTotalCertifications: 0,
+              activityCounts: {
+                  "": 0
+              },
+              userPercentage: 0,
+              userRange: "0 ~ 5kg",
+          });
         }
       };
 
@@ -161,9 +187,13 @@ function ReportScreen(): React.JSX.Element {
       }, []);
 
   const [barPosition, setBarPosition] = useState(0);
+  const { width: windowWidth } = useWindowDimensions();
+  const horizontalPadding = 25; // 좌우 패딩 (예: 25px)
+  const graphWidth = windowWidth - (horizontalPadding * 2);
+  const totalBars = 11; // 막대 개수
   const barWidth = 22; // 막대 너비
   const barSpacing = 2.4; // 막대 간격
-  const containerPadding = 25; // 그래프 컨테이너 패딩
+  const containerPadding = (graphWidth - (totalBars * barWidth + (totalBars - 1) * barSpacing)) / 2;
 
     useEffect(() => {
       // userRange로 막대 인덱스 계산
@@ -183,7 +213,7 @@ function ReportScreen(): React.JSX.Element {
     };
 
     const calculatePosition = (barIndex, barWidth, barSpacing, containerPadding) => {
-      return containerPadding + barIndex * (barWidth + barSpacing) + barWidth / 2;
+      return (containerPadding + barIndex * (barWidth + barSpacing))-27.5;
     };
 
   const handleTabSwitch = (tab: string) => {
@@ -208,7 +238,7 @@ function ReportScreen(): React.JSX.Element {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <View style={styles.fullScreenContainer}>
       <MainHeader />
       <View style={styles.switchContainer}>
         <View style={styles.switchBackground}>
@@ -227,7 +257,8 @@ function ReportScreen(): React.JSX.Element {
         </View>
       </View>
 
-      {selectedTab === '주간' && weeklyReport && (
+      {selectedTab === '주간' && isWeeklyAvailable ? (
+        <ScrollView style={styles.container}>
         <View style={styles.content}>
           <Text style={styles.dateText}>{weeklyReport.yearMonthWeek}</Text>
           <View style={styles.usernameContainer}>
@@ -319,9 +350,18 @@ function ReportScreen(): React.JSX.Element {
             </View>
           </View>
         </View>
-      )}
+        </ScrollView>
+      ) : selectedTab === '주간' && !isWeeklyAvailable ? (
+              <View style={styles.emptyContent}>
+                <View style={styles.emptyContainer}>
+                  <Image source={require("../../img/Report/noreport.png")} style={styles.noReport} />
+                  <Text style={styles.emptyText}>주간 성과 보고서는 아직 준비중이에요!</Text>
+                </View>
+              </View>
+      ) : null}
 
-      {selectedTab === '월간' && (
+      {selectedTab === '월간' && isMonthlyAvailable ? (
+        <ScrollView style={styles.container}>
         <View style={styles.content}>
           <Text style={styles.dateText}>{monthlyReport.reportMonth}</Text>
           <View style={styles.usernameContainer}>
@@ -455,20 +495,34 @@ function ReportScreen(): React.JSX.Element {
             </View>
           </View>
         </View>
-      )}
-    </ScrollView>
+        </ScrollView>
+        ) : selectedTab === '월간' && !isMonthlyAvailable ? (
+                <View style={styles.emptyContent}>
+                  <View style={styles.emptyContainer}>
+                    <Image source={require("../../img/Report/noreport.png")} style={styles.noReport} />
+                    <Text style={styles.emptyText}>월간 성과 보고서는 아직 준비중이에요!</Text>
+                  </View>
+                </View>
+        ) : null}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  fullScreenContainer: {
+      flex: 1,
+      backgroundColor: '#ffffff', // 전체 배경색 적용
+  },
   container: {
     flex: 1,
     backgroundColor: '#ffffff',
   },
   switchContainer: {
-    marginTop: 16,
-    marginRight: 15,
-    alignItems: 'flex-end',
+    position: 'absolute',
+    top: 72,
+    right: 15,
+    width: '32%',
+    zIndex:2,
   },
   switchBackground: {
     flexDirection: 'row',
@@ -477,7 +531,6 @@ const styles = StyleSheet.create({
     padding: 5,
     borderWidth: 1,
     borderColor: '#69E6A2',
-    width: '32%',
     height: 40,
   },
   switchOption: {
@@ -500,7 +553,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    marginTop: 7,
+    marginTop: 57,
   },
   dateText: {
     fontSize: 16,
@@ -747,7 +800,27 @@ const styles = StyleSheet.create({
   closeInfo: {
     width: 8,
     height: 8,
-  }
+  },
+  emptyContent: {
+      flex: 1,
+      backgroundColor: "#EEEEEE", // 배경색 변경
+      justifyContent: "center",
+      alignItems: "center",
+    },
+  emptyContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  noReport: {
+    width: 75.87,
+    height: 65.87,
+    marginBottom: 15,
+  },
+  emptyText: {
+    fontSize: 13,
+    fontWeight: "medium",
+    color: "#545454",
+  },
 });
 
 export default ReportScreen;
