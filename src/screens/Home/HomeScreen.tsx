@@ -293,7 +293,7 @@ function HomeScreen(): React.JSX.Element {
                         </View>
                         <Text style={styles.TitleText2}>오늘도 우리 함께 달려보아요:)</Text>
                     </View>
-                    <View style={{justifyContent: 'center', alignItems: 'center', marginTop: 5, marginBottom: 10}}>
+                    <View style={styles.mainCharContainer}>
                             {mainChar === null && (
                                 <View style={styles.NullBackgroundWrapper}>
                                 <Text style={styles.NullText}>하단 캐릭터 버튼을 눌러</Text>
@@ -452,14 +452,19 @@ const styles = StyleSheet.create({
     },
     MainBackgroundWrapper: {
         width: '100%',
-        height: height * 0.25,
         paddingHorizontal: 10,
         alignItems: 'center',
         justifyContent: 'center',
     },
+    mainCharContainer:{
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 5,
+        marginBottom: 10,
+        height: height * 0.25,
+    },
     NullBackgroundWrapper: {
         width: '100%',
-        height: height * 0.25,
         justifyContent: 'center',
         alignItems: 'center',
     },
