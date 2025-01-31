@@ -27,6 +27,7 @@
     "react-native-screens": "^4.0.0",
     "react-native-shadow-2": "^7.1.1",
     "react-native-shake": "^6.0.0-beta.3",
+    "react-native-splash-screen": "^3.3.0",
     "react-native-svg": "^15.8.0",
     "react-native-vector-icons": "^10.2.0",
     "react-native-vision-camera": "^4.6.3"
