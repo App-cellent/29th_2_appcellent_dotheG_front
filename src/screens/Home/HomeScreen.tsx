@@ -217,6 +217,7 @@ function HomeScreen(): React.JSX.Element {
         useCallback(() => {
             fetchHomeData();
             fetchQuizYNData();
+            setOpenQuest(false);
         }, [fetchHomeData, fetchQuizYNData])
     );
 
