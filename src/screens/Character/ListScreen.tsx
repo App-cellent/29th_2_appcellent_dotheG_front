@@ -257,7 +257,7 @@ function ListScreen(): React.JSX.Element {
             <View style={styles.modalOverlay}>
                 <View style={styles.secondModalContainer}>
                     <Text style={styles.secondModalTitle}>
-                        <Text style={{ color: '#69E6A2' }}>'{characterName}'</Text>가 {"\n"}대표 캐릭터로 지정되었어요!
+                        <Text style={{ color: '#69E6A2' }}>'{characterName}'</Text>이(가) {"\n"}대표 캐릭터로 지정되었어요!
                     </Text>
                     <Text style={styles.secondModalText}>
                         이 캐릭터로 선택하시겠습니까?

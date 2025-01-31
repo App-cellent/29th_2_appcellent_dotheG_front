@@ -182,12 +182,16 @@ function CharacterScreen(): React.JSX.Element {
                         style={styles.characterImg}
                         resizeMode="center"
                     />
+
                     {/* 캐릭터 이름 */}
                     <Text style={styles.characterName}>
                         {character ? character.characterName : 'No Character'}
                     </Text>
+
                     {/* 캐릭터 희귀도 */}
-                    <CharacterRarity rarity={character ? character.characterRarity : null} />
+                    {character && character.characterRarity && (
+                        <CharacterRarity rarity={character.characterRarity} />
+                    )}
                     <View style={styles.squareContainer}>
                         <View style={styles.leafContainer}>
                             <Image
@@ -205,12 +209,6 @@ function CharacterScreen(): React.JSX.Element {
                         />
                     </View>
                 </View>
-
-                {/* 로그아웃 테스트 */}
-                <TouchableOpacity onPress={handleLogout}>
-                    <Text style={{ textAlign: 'center' }}>로그아웃</Text>
-                </TouchableOpacity>
-                {/* 로그아웃 테스트 */}
             </LinearGradient>
         </View>
     );
