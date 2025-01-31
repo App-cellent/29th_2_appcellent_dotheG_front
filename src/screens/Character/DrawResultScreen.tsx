@@ -6,8 +6,8 @@ import {
     Text, 
     View, 
     Image, 
-    ImageBackground, 
-    TouchableWithoutFeedback
+    ImageBackground,
+    TouchableWithoutFeedback,
 } from 'react-native';
 
 import CharacterRarity from '../../components/CharacterRarity';
@@ -58,7 +58,13 @@ function DrawResultScreen(): React.JSX.Element {
 
     return(
         <TouchableWithoutFeedback
-            onPress={() => navigation.navigate('Character', { screen: 'ListScreen' })}
+            style={{ flex: 1 }}
+            onPress={() =>
+                navigation.navigate("Main", {
+                  screen: "Character",
+                  params: { screen: "ListScreen" }
+                })
+            }
             accessible={false}
         >
             <View style={styles.container}>
