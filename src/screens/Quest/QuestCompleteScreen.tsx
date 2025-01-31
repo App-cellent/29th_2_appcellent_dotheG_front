@@ -65,7 +65,7 @@ const QuestCompleteScreen = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.exitButton} onPress={() => navigation.goBack()}>
+        <TouchableOpacity style={styles.exitButton} onPress={() => navigation.navigate('Main')}>
           <Image source={require('../../img/Quest/simpleexit.png')} style={styles.exitIcon} />
         </TouchableOpacity>
       </View>
@@ -82,13 +82,23 @@ const QuestCompleteScreen = () => {
                 style={styles.photo}
                 resizeMode="cover"
               />
-            <Image source={require('../../img/Quest/smallchecked.png')} style={styles.checkbox} />
+            <Image
+              source={require('../../img/Quest/bigchecked.png')}
+              style={styles.checkboxCenter}
+            />
           </View>
         )}
-        <View style={styles.questButton}>
-          <Text style={styles.questTitle}>{selectedQuest.Description}</Text>
-          <Text style={styles.questDescription}>더 많은 활동을 인증해서 탄소를 절감해보세요!</Text> {/* Description 출력 */}
+
+        <View style={styles.wrapper}>
+        {selectedQuest && (
+        <View style={styles.questCompleteContainer}>
+            <Image source={require('../../img/Quest/smallchecked.png')} style={styles.smallCheckBox} />
+            <View style={styles.textContainer}>
+                <Text style={styles.questTitle}>{selectedQuest.Description}</Text>
+                <Text style={styles.questDescription}>더 많은 활동을 인증해서 탄소를 절감해보세요!</Text>
+            </View>
         </View>
+        )}
 
         <View style={styles.rowContainer}>
           <Complete width={82} height={24} />
@@ -107,6 +117,7 @@ const QuestCompleteScreen = () => {
           <Text style={styles.completeButtonText}>퀘스트 인증 완료하기</Text>
         </LinearGradient>
       </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -115,6 +126,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFFFFF',
+  },
+  wrapper: {
+      width: '100%',
+      paddingHorizontal: 16,
   },
   header: {
     position: 'absolute',
@@ -154,12 +169,18 @@ const styles = StyleSheet.create({
   },
   photoContainer: {
     alignItems: 'center',
-    paddingHorizontal: 16,
   },
+  checkboxCenter: {
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+      transform: [{ translateX: -40 }, { translateY: -40 }],
+      width: 80,
+      height: 80,
+    },
   photo: {
-    width: width - 32,
-    height: width - 32,
-    borderRadius: 10,
+    width: width,
+    height: width,
     marginBottom: 16,
   },
   mainText: {
@@ -171,13 +192,40 @@ const styles = StyleSheet.create({
   },
   rowContainer: {
     flexDirection: 'row',
+    alignSelf: 'flex-start',
     alignItems: 'center',
     marginBottom: 24,
   },
   questTextContainer: {
-    paddingHorizontal: 22,
+    paddingHorizontal: 16,
     marginTop: 16,
     backgroundColor: '#FFFFFF',
+  },
+  questCompleteContainer: {
+      width: '100%',
+      height: 68,
+      borderWidth: 2,
+      borderRadius: 15,
+      borderColor: '#69E6A2',
+      flexDirection: 'row',
+      padding: 10,
+      gap: 10,
+      marginBottom: 6,
+  },
+  checkbox: {
+      position: 'absolute',
+      width: 67,
+      height: 67,
+  },
+  smallCheckBox: {
+      width: 17,
+      height: 17,
+      position: 'absolute',
+      top: 15,
+      left: 15,
+  },
+  textContainer: {
+      marginLeft: 30,
   },
   questTitle: {
     fontSize: 16,
@@ -191,12 +239,10 @@ const styles = StyleSheet.create({
     color: '#C9C9C9',
   },
   completeButtonContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
+    position: 'relative',
+    width: '100%',
+    height: 52,
     paddingHorizontal: 16,
-    paddingVertical: 16,
     backgroundColor: '#FFFFFF',
   },
   completeButton: {
