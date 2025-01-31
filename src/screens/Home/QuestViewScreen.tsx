@@ -59,7 +59,8 @@ function QuestViewScreen() {
                 if (result.success) {
                     setUserName(result.data.userName);
                     setListSize(result.data.listSize);
-                    setActivityData(result.data.activities.slice(0, 3));
+                    if(listSize > 0) setActivityData(result.data.activities.slice(0, listSize));
+                    else setActivityData(result.data.activities);
                 } else {
                     console.log(result.message);
                 }
@@ -112,24 +113,25 @@ function QuestViewScreen() {
             </View>
 
             <View style={{ flex: 0 }}>
-            <FlatList
-                data={activityData}
-                keyExtractor={(item) => item.activityId.toString()}
-                numColumns={3}
-                contentContainerStyle={styles.imageGrid}
-                renderItem={({ item }) => (
-                    <TouchableOpacity onPress={() => handleImagePress(item)} style={styles.imageWrapper}>
-                        <Image
-                            source={{ uri: formatImageUrl(item.activityImage) }}
-                            style={[
-                                styles.imageItem,
-                                selectedActivity?.activityImage === item.activityImage ? styles.selectedImageBorder : null,
-                            ]}
-                        />
-                        <CheckIcon style={styles.iconOverlay} />
-                    </TouchableOpacity>
-                )}
-            />
+                <FlatList
+                    key={listSize}
+                    horizontal={true}
+                    data={activityData}
+                    keyExtractor={(item) => item.activityId.toString()}
+                    contentContainerStyle={styles.imageGrid}
+                    renderItem={({ item }) => (
+                        <TouchableOpacity onPress={() => handleImagePress(item)} style={styles.imageWrapper}>
+                            <Image
+                                source={{ uri: formatImageUrl(item.activityImage) }}
+                                style={[
+                                    styles.imageItem,
+                                    selectedActivity?.activityImage === item.activityImage ? styles.selectedImageBorder : null,
+                                ]}
+                            />
+                            <CheckIcon style={styles.iconOverlay} />
+                        </TouchableOpacity>
+                    )}
+                />
             </View>
 
             {selectedActivity && (
