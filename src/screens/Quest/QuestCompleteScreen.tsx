@@ -21,6 +21,8 @@ const QuestCompleteScreen = () => {
   const [activityImage, setActivityImage] = useState(null);
   const [activityId, setActivityId] = useState(null);
 
+  const apiUrl = process.env.REACT_APP_API_URL;
+
   const currentDate = new Date();
   const formattedDate = `${currentDate.getFullYear()}.${String(currentDate.getMonth() + 1).padStart(2, '0')}.${String(currentDate.getDate()).padStart(2, '0')}`;
 
@@ -47,6 +49,66 @@ const QuestCompleteScreen = () => {
       setSelectedQuest(questInfo);
     }
   }, [formData]);
+
+  const submitQuest = async () => {
+      try {
+          const accessToken = await AsyncStorage.getItem('token');
+          console.log('Access Token:', accessToken);
+
+          if (!activityId) throw new Error('activityId가 설정되지 않았습니다.');
+
+          // activityImage 경로 수정 (file:// 중복 제거)
+          const correctedImageUri = activityImage.replace("file://file://", "file://");
+
+          // 새로운 FormData 객체 생성
+          const formData = new FormData();
+          formData.append("activityId", activityId);
+          formData.append("activityImage", {
+              uri: correctedImageUri,
+              type: "image/jpeg",
+              name: "upload.jpg"
+          });
+
+          console.log("Converted formData:", formData);
+
+          const response = await fetch(`${apiUrl}/upload/certification?activityId=${activityId}&timestamp=${new Date().getTime()}`, {
+              method: 'POST',
+              headers: {
+                  "Cache-Control": 'no-store',
+                  access: `${accessToken}`,
+              },
+              body: formData,
+          });
+
+          const responseText = await response.text();
+          console.log('Response Text:', responseText);
+
+          if (response.ok) {
+              try {
+                  const result = JSON.parse(responseText);
+                  console.log('Parsed Result:', result);
+
+                  if (result.success) {
+                      navigation.navigate('QuestViewScreen');
+                  } else {
+                      setModalVisible(true);
+                  }
+              } catch (jsonError) {
+                  console.error('JSON Parsing Error:', jsonError);
+                  Alert.alert('알림', '서버 응답을 처리할 수 없습니다. 다시 시도해주세요.');
+              }
+          } else {
+              console.error('Server Error:', response.status);
+              Alert.alert('알림', '서버와의 통신에 문제가 발생했습니다.');
+              setModalVisible(true);
+          }
+      } catch (error) {
+          console.error('퀘스트 인증 중 오류:', error);
+          setModalVisible(true);
+      } finally {
+          setLoading(false);
+      }
+  };
 
   const formatImageUrl = (imagePath) => {
     if (!imagePath) return null;
@@ -107,7 +169,7 @@ const QuestCompleteScreen = () => {
       </View>
 
       {/* 퀘스트 인증 완료 버튼 */}
-      <TouchableOpacity style={styles.completeButtonContainer} onPress={() => navigation.navigate('QuestViewScreen')}>
+      <TouchableOpacity style={styles.completeButtonContainer} onPress={submitQuest}>
         <LinearGradient
           colors={['#9BC9FE', '#69E6A2']}
           start={{ x: 0, y: 0 }}
