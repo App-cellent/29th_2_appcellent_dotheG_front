@@ -494,7 +494,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     bodyContainer: {
-        paddingHorizontal: 17,
+        paddingHorizontal: 27,
         justifyContent: 'center',
     },
     labelText: {
