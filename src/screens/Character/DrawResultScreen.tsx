@@ -1,6 +1,14 @@
 import * as React from 'react';
-import { useRoute } from '@react-navigation/native';
-import { StyleSheet, Text, View, Image, ImageBackground } from 'react-native';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { 
+    StyleSheet, 
+    Text, 
+    View, 
+    Image, 
+    ImageBackground,
+    TouchableWithoutFeedback,
+} from 'react-native';
 
 import CharacterRarity from '../../components/CharacterRarity';
 
@@ -8,15 +16,19 @@ type DrawResultParams = {
     characterData: {
         characterId: number;
         characterName: string;
-        characterImageUrl: string;
         characterRarity: number;
     };
 };
 
+type RootStackParamList = {
+    Character: { screen?: 'CharacterScreen' | 'ListScreen' };
+  };
+
 function DrawResultScreen(): React.JSX.Element {
+    const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
     const route = useRoute();
     const { characterData } = route.params as DrawResultParams;
-    const { characterId, characterName, characterImageUrl, characterRarity } = characterData || {};
+    const { characterId, characterName, characterRarity } = characterData || {};
     
     const characterImages: { [key: number]: any } = {
         1: require('../../img/Character/Image/1.png'),
@@ -40,25 +52,40 @@ function DrawResultScreen(): React.JSX.Element {
         19: require('../../img/Character/Image/19.png'),
     };
 
+    console.log(navigation.getState());
+    console.log("Parent Navigator:", navigation.getParent());
+
+
     return(
-        <View style={styles.container}>
-            <ImageBackground
-                source={require('../../img/Character/circleGradient.png')}
-                style={styles.background}
-            >
-                <Text style={styles.text}>
-                    <Text style={styles.characterText}>새로운 캐릭터</Text>
-                    {'가 나왔어요!'}
-                </Text>
-                <Image
-                    source={characterImages[characterId]}
-                    style={styles.characterImg}
-                    resizeMode="contain"
-                />
-                <Text style={[styles.text, styles.marginBottom9]}>{characterName}</Text>
-                <CharacterRarity rarity={characterRarity} />
-            </ImageBackground>
-        </View>
+        <TouchableWithoutFeedback
+            style={{ flex: 1 }}
+            onPress={() =>
+                navigation.navigate("Main", {
+                  screen: "Character",
+                  params: { screen: "ListScreen" }
+                })
+            }
+            accessible={false}
+        >
+            <View style={styles.container}>
+                <ImageBackground
+                    source={require('../../img/Character/circleGradient.png')}
+                    style={styles.background}
+                >
+                    <Text style={styles.text}>
+                        <Text style={styles.characterText}>새로운 캐릭터</Text>
+                        {'가 나왔어요!'}
+                    </Text>
+                    <Image
+                        source={characterImages[characterId]}
+                        style={styles.characterImg}
+                        resizeMode="contain"
+                    />
+                    <Text style={[styles.text, styles.marginBottom9]}>{characterName}</Text>
+                    <CharacterRarity rarity={characterRarity} />
+                </ImageBackground>
+            </View>
+        </TouchableWithoutFeedback>
     );
 }
 

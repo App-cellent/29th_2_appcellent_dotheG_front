@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
-import { useNavigation, useRoute, NavigationProp } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
 import Svg, { Text as SvgText, Defs, LinearGradient as SvgLinearGradient, Stop, Line } from 'react-native-svg';
 import { 
@@ -29,11 +28,14 @@ interface Character {
     id: number;
     name: string;
     rarity: string;
-    image: string;
-}
+    image: any;
+    owned: boolean; 
+};
 
 function ListScreen(): React.JSX.Element {
-    const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'ListScreen'>>();
+    const navigation = useNavigation();
+    const route = useRoute();
+    const { showModal } = route.params || {};
 
     const [selectedTab, setSelectedTab] = useState<keyof typeof tabMapping>('전체보기');
     const [characters, setCharacters] = useState<Character[]>([]);
@@ -42,7 +44,44 @@ function ListScreen(): React.JSX.Element {
     const [modalVisible, setModalVisible] = useState(false);
     const [secondModalVisible, setSecondModalVisible] = useState(false);
     const [selectedCharacterData, setSelectedCharacterData] = useState<Character | null>(null);
+    const [newDrawCharacter, setNewDrawCharacter] = useState<Character | null>(null);
 
+    // 뽑기 후 캐릭터 상세 조회 Modal
+    useEffect(() => {
+        const checkNewDrawCharacter = async () => {
+            const newDrawId = await AsyncStorage.getItem('newDrawCharacterId');
+            if (newDrawId) {
+                const characterId = parseInt(newDrawId);
+
+                if(characters.length > 0){
+                    const targetCharacter = characters.find(char => char.id === characterId)
+                    if(targetCharacter){
+                        await AsyncStorage.removeItem('newDrawCharacterId');
+                        handleCharacterModal(characterId);
+                    }
+                } else {
+                    const retryCheck = () => {
+                        if (characters.length > 0) {
+                          const targetCharacter = characters.find(char => char.id === characterId);
+                          if (targetCharacter) {
+                            handleCharacterModal(characterId);
+                            AsyncStorage.removeItem('newDrawCharacterId');
+                          }
+                        } else {
+                          setTimeout(retryCheck, 500);
+                        }
+                    }
+                    setTimeout(retryCheck, 500);
+                }
+            } else if (showModal) {
+                setModalVisible(true);
+            }
+        };
+        checkNewDrawCharacter();
+    }, [characters]);
+
+    // 캐릭터 이미지
+    const nullCharacterImage = require('../../img/Character/nullCharacter.png');
     const characterImages: { [key: number]: any } = {
         1: require('../../img/Character/Image/1.png'),
         2: require('../../img/Character/Image/2.png'),
@@ -64,6 +103,10 @@ function ListScreen(): React.JSX.Element {
         18: require('../../img/Character/Image/18.png'),
         19: require('../../img/Character/Image/19.png'),
     };
+
+    useEffect(() => {
+        fetchCharacterData(tabMapping[selectedTab]);
+    }, [selectedTab]);
 
     // 탭 매핑
     const tabMapping = {
@@ -130,7 +173,8 @@ function ListScreen(): React.JSX.Element {
                     id: char.charId,
                     name: char.charName,
                     rarity: char.charRarity,
-                    image: { uri: char.charImageUrl },
+                    owned: char.owned,
+                    image: char.owned ? (characterImages[char.charId] || nullCharacterImage) : nullCharacterImage
                 }));
                 setCharacters(mappedData);
             } else {
@@ -142,10 +186,6 @@ function ListScreen(): React.JSX.Element {
             setIsLoading(false);
         }
     };
-
-    useEffect(() => {
-        fetchCharacterData(tabMapping[selectedTab]);
-    }, [selectedTab]);
 
     // 캐릭터 상세 조회 API
     const fetchCharacterDetail = async (characterId: number) => {
@@ -177,35 +217,29 @@ function ListScreen(): React.JSX.Element {
         }
     };
 
-    // const sortedCharacters = 
-    //     selectedTab === '전체보기'
-    //     ? characters
-    //     : characters.filter(character => character.rarity === selectedTab);
-
-    // const groupedCharacters = [];
-    // for (let i = 0; i < sortedCharacters.length; i += 3) {
-    //     groupedCharacters.push(sortedCharacters.slice(i, i + 3));
-    // }
-
+    // 캐릭터 상세 조회  API
     const handleCharacterModal = async (id: number) => {
-        const characterDetail = await fetchCharacterDetail(id); // 상세 정보 요청
+        console.log('Selected Character:', id);
+        const characterDetail = await fetchCharacterDetail(id);
         if (characterDetail) {
             setSelectedCharacterData({
                 id: characterDetail.charId,
                 name: characterDetail.charName,
                 rarity: mapRarity(characterDetail.charRarity),
-                image: { uri: characterDetail.charImageUrl },
+                image: characterImages[characterDetail.charId],
+                owned: characters ? characterDetail.owned : false,
             });
             setModalVisible(true);
         }
     };
 
+    // 대표 캐릭터로 지정하기 버튼 클릭시
     const handleFirstModalConfirm = () => {
         setModalVisible(false);
         setSecondModalVisible(true);
     };
 
-    // 대표 캐릭터 지정 팝업창
+    // 대표 캐릭터 지정 Modal
     interface SecondModalProps {
         visible: boolean;
         onConfirm: () => void;
@@ -267,13 +301,15 @@ function ListScreen(): React.JSX.Element {
                 const result = await response.json();
                 if (result.success) {
                     await AsyncStorage.setItem('selectedCharacter', JSON.stringify(selectedCharacterData));
-
-                    Alert.alert("대표 캐릭터가 설정되었습니다!");
                     console.log("대표 캐릭터 지정 성공", selectedCharacterData);
-                    navigation.navigate("CharacterScreen", { updatedCharacter: selectedCharacterData });
+
+                    setModalVisible(false);
+                    setSecondModalVisible(false);
+                    
+                    navigation.navigate('CharacterScreen');
                 } else {
                     console.error(result.message);
-                    Alert.alert(result.message);
+                    Alert.alert(result.message || "대표 캐릭터 지정 실패");
                 }
             } else {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -281,6 +317,8 @@ function ListScreen(): React.JSX.Element {
         } catch (error) {
             console.error("API error:", error);
             Alert.alert("대표 캐릭터 지정 중 오류가 발생했습니다. 다시 시도해주세요.");
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -360,17 +398,19 @@ function ListScreen(): React.JSX.Element {
                     </View>
 
                     {isLoading ? (
-                        <Text>Loading...</Text>
+                        <Text style={{ color: '#9B9B9B' }}>Loading...</Text>
                     ) : (
                     <FlatList
                         data={characters}
                         keyExtractor={(item) => item.id.toString()}
+                        numColumns={3}
+                        columnWrapperStyle={{ justifyContent: 'space-between' }}
                         renderItem={({ item }) => (
-                            <View style={styles.row}>
                                 <TouchableOpacity 
                                     key={item.id} 
                                     style={styles.characterBox}
-                                    onPress={() => handleCharacterModal(item.id)}
+                                    onPress={() => item.owned && handleCharacterModal(item.id)}
+                                    disabled={!item.owned}
                                 >
                                     {selectedCharacter === item.id ? (
                                         <View style={styles.gradientContainer}>
@@ -393,17 +433,12 @@ function ListScreen(): React.JSX.Element {
                                         />
                                     )}
                                 </TouchableOpacity>
-                                {/* 빈 CharacterBox 추가 */}
-                                {Array(3 - 1).fill(null).map((_, index) => (
-                                    <View key={index} style={styles.emptyBox} />
-                                ))}
-                            </View>
                         )}
                     />
                     )}
                 </View>
 
-                {/* 캐릭터 도감 팝업창 */}
+                {/* 캐릭터 상세 조회 Modal */}
                 <Modal
                     animationType="fade"
                     transparent={true}
@@ -418,7 +453,7 @@ function ListScreen(): React.JSX.Element {
                             >
                                 <Image
                                     source={require('../../img/Character/closeIcon.png')}
-                                    style={{ width: 15, height: 15 }}
+                                    style={{ width: 18, height: 18 }}
                                 />
                             </TouchableOpacity>
                             <Text style={styles.modalTitle}>캐릭터 살펴보기</Text>
@@ -448,14 +483,14 @@ function ListScreen(): React.JSX.Element {
                                 </>
                             )}
                             <GradientButton 
-                                height={57} width={256} text="대표 캐릭터로 지정하기"
+                                height={57} width={275} text="대표 캐릭터로 지정하기"
                                 onPress={handleFirstModalConfirm}
                             />
                         </View>
                     </View>
                 </Modal>
 
-                {/* 대표 캐릭터 지정 팝업창 */}
+                {/* 대표 캐릭터 지정 Modal */}
                 <SecondModal
                     visible={secondModalVisible}
                     characterName={selectedCharacterData?.name || ''}
@@ -540,16 +575,12 @@ const styles = StyleSheet.create({
         marginRight: 5,
         marginLeft: 5,
     },
-    row: {
-        flexDirection: 'row',
-        justifyContent: 'flex-start',
-        flexWrap: 'wrap',
-    },
     characterBox: {
         width: 100,
         height: 100,
         borderRadius: 15,
-        margin: 14,
+        marginHorizontal: 14,
+        marginVertical: 10,
         backgroundColor: '#FFFFFF',
         alignItems: 'center',
         justifyContent: 'center',
@@ -577,15 +608,8 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     image: {
-        width: 60,
         height: 60,
-    },
-    emptyBox: {
-        width: 100,
-        height: 100,
-        borderRadius: 15,
-        margin: 14,
-        backgroundColor: 'transparent',
+        resizeMode: 'contain',
     },
     modalOverlay: {
         flex: 1,
@@ -604,26 +628,28 @@ const styles = StyleSheet.create({
     },
     closeIcon: {
         position: 'absolute',
-        top: 18,
-        right: 20,
+        top: 20,
+        right: 23,
     },
     modalTitle: {
-        fontSize: 20,
+        fontSize: 22,
         fontWeight: '700',
         color: '#121212',
-        marginTop: 20,
-        marginBottom: 10,
+        marginTop: 30,
+        marginBottom: 5,
     },
     modalText: {
-        fontSize: 15,
+        fontSize: 17,
         fontWeight: '400',
         color: '#545454',
     },
     characterImg: {
-        width: 150,
-        height: 'auto',
+        width: '70%',
+        maxWidth: 200,
+        height: undefined,
         aspectRatio: 1,
-        marginVertical: 20,
+        marginVertical: 10,
+        resizeMode: 'contain',
     },
     characterName: {
         fontSize: 17,
@@ -634,7 +660,7 @@ const styles = StyleSheet.create({
     starContainer: {
         flexDirection: 'row',
         marginTop: 10,
-        marginBottom: 15,
+        marginBottom: 18,
         gap: 2,
     },
     starIcon: {

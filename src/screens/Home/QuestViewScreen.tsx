@@ -1,12 +1,14 @@
-import React, { useCallback, useState } from 'react';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import React, { useState, useEffect } from 'react';
+import { useNavigation } from '@react-navigation/native';
 import colors from "../../utils/colors";
 import { getFontSize } from '../../utils/fontUtils';
+import QuestList from "../../utils/QuestList";
 
 import LeftArrow from '../../img/Home/Quiz/LeftArrow.svg';
-import CheckIcon from '../../img/Home/QuestView/checkIcon.svg';
 import GreenCircle from '../../img/Home/QuestView/greenCircle.svg';
-
+import CheckIcon from '../../img/Home/QuestView/checkIcon.svg';
+import Complete from '../../img/Home/QuestView/complete.svg';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   StyleSheet,
   Text,
@@ -14,107 +16,140 @@ import {
   Image,
   Dimensions,
   TouchableOpacity,
-  FlatList
+  FlatList,
 } from 'react-native';
 
-const { width } = Dimensions.get('window');
-const imageData = [
-  require('../../img/Home/QuestView/Example.png'),
-  require('../../img/Home/CloseIcon.png'),
-  require('../../img/Home/InfoIcon.png'),
-];
+const { width, height } = Dimensions.get('window');
 
-function QuestViewScreen(): React.JSX.Element {
+function QuestViewScreen() {
     const navigation = useNavigation();
-    const route = useRoute();
+    const apiUrl = process.env.REACT_APP_API_URL;
+    const [userName, setUserName] = useState("");
+    const [listSize, setListSize] = useState(0);
+    const [activityData, setActivityData] = useState([]);
+    const [selectedActivity, setSelectedActivity] = useState(null);
+
     const currentDate = new Date();
+    const formattedDate = `${currentDate.getFullYear()}.${String(currentDate.getMonth() + 1).padStart(2, '0')}.${String(currentDate.getDate()).padStart(2, '0')}`;
 
-    const formattedDate = currentDate.toLocaleDateString('ko-KR', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-    });
+    const getQuestDescription = (activityId) => {
+        return QuestList.find(quest => quest.activityId === activityId)?.Description || "인증완료 퀘스트";
+    };
 
-    const [selectedImage, setSelectedImage] = useState(null);
+    useEffect(() => {
+        const fetchQuestData = async () => {
+            try {
+                const accessToken = await AsyncStorage.getItem('token');
+                if (!accessToken) {
+                    console.error('토큰이 없습니다');
+                    return;
+                }
 
-    const handleImagePress = useCallback((image) => {
-        setSelectedImage(image);
+                const response = await fetch(`${apiUrl}/upload/viewToday?timestamp=${new Date().getTime()}`, {
+                    method: 'GET',
+                    headers: {
+                        "Cache-Control": 'no-store',
+                        "Content-Type": "application/json",
+                        access: `${accessToken}`,
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                if (result.success) {
+                    setUserName(result.data.userName);
+                    setListSize(result.data.listSize);
+                    if(listSize > 0) setActivityData(result.data.activities.slice(0, listSize));
+                    else setActivityData(result.data.activities);
+                } else {
+                    console.log(result.message);
+                }
+            } catch (error) {
+                console.error('퀘스트 데이터 불러오기 실패:', error);
+                setActivityData([]);
+            }
+        };
+        fetchQuestData();
     }, []);
 
-    const renderImageItem = ({ item }) => {
-        const isSelected = selectedImage === item;
+    const handleImagePress = (activity) => {
+        setSelectedActivity(activity);
+    };
 
-        return (
-            <TouchableOpacity onPress={() => handleImagePress(item)}>
-                <View style={[styles.imageWrapper, isSelected && styles.selectedImageWrapper]}>
-                    <Image
-                        source={item}
-                        style={styles.imageItem}
-                    />
-                    <CheckIcon style={styles.checkIcon} width={30} height={30} />
-                </View>
-            </TouchableOpacity>
-        );
+    const formatImageUrl = (imagePath) => {
+        if (!imagePath) return null;
+        if (imagePath.startsWith('data:image')) return imagePath;
+        return `data:image/jpeg;base64,${imagePath}`;
     };
 
     return (
         <View style={styles.container}>
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => navigation.pop()}>
-                    <LeftArrow
-                        style={styles.closeIcon}
-                    />
+                    <LeftArrow style={styles.closeIcon} />
                 </TouchableOpacity>
                 <Text style={styles.headerText}>나의 퀘스트 인증</Text>
             </View>
 
             <View style={styles.profileContainer}>
-                <Image
-                  source={require('../../img/My/profileimage.png')}
-                  style={styles.profileImage}
-                />
+                <Image source={require('../../img/My/profileimage.png')} style={styles.profileImage} />
                 <View>
                     <View style={styles.rowContainer}>
-                        <Text style={styles.boldText}>앱설런트</Text>
+                        <Text style={styles.boldText}>{userName}</Text>
                         <Text style={styles.mediumText}>님의  </Text>
                     </View>
                     <Text style={styles.mediumText}>오늘의 퀘스트를 보여드릴게요.</Text>
-                    <View style={[styles.rowContainer, {marginTop: 6} ]}>
+                    <View style={[styles.rowContainer, { marginTop: 6 }]}>
                         <Text style={styles.smallText}>오늘의 인증  </Text>
-                        <Text style={styles.smallText}>2</Text>
+                        <Text style={styles.smallText}>{listSize}</Text>
                         <Text style={styles.smallText}>개</Text>
                     </View>
                 </View>
             </View>
 
-            <View style={styles.imageContainer}>
-                <View style={[styles.rowContainer, {alignItems: 'center', alignSelf: 'flex-end', marginBottom: 5,}]}>
-                    <GreenCircle width={6} height={6}/>
-                    <Text style={[styles.smallText, {color: '#C9C9C9', marginLeft: 3}]}>최신순</Text>
-                </View>
-
-                <FlatList
-                    data={imageData}
-                    renderItem={renderImageItem}
-                    keyExtractor={(item, index) => index.toString()}
-                    numColumns={3}
-                    columnWrapperStyle={styles.row}
-                />
-
-                {selectedImage && (
-                    <View>
-                        <Image
-                            source={selectedImage}
-                            style={styles.selectedImage}
-                        />
-                        <View>
-                            <Text style={styles.headerText}>인증완료 퀘스트</Text>
-                            <Text style={styles.DateText}>{formattedDate}</Text>
-                            <Text style={styles.redText}>텀블러를 사용했어요. 탄소를 10g 절감했어요!</Text>
-                        </View>
-                    </View>
-                )}
+            <View style={[styles.rowContainer, {alignItems: 'center', alignSelf: 'flex-end', marginBottom: 5, paddingRight: 20,}]}>
+                <GreenCircle width={6} height={6}/>
+                <Text style={[styles.smallText, {color: '#C9C9C9', marginLeft: 3}]}>최신순</Text>
             </View>
+
+            <View style={{ flex: 0 }}>
+                <FlatList
+                    key={listSize}
+                    horizontal={true}
+                    data={activityData}
+                    keyExtractor={(item) => item.activityId.toString()}
+                    contentContainerStyle={styles.imageGrid}
+                    renderItem={({ item }) => (
+                        <TouchableOpacity onPress={() => handleImagePress(item)} style={styles.imageWrapper}>
+                            <Image
+                                source={{ uri: formatImageUrl(item.activityImage) }}
+                                style={[
+                                    styles.imageItem,
+                                    selectedActivity?.activityImage === item.activityImage ? styles.selectedImageBorder : null,
+                                ]}
+                            />
+                            <CheckIcon style={styles.iconOverlay} />
+                        </TouchableOpacity>
+                    )}
+                />
+            </View>
+
+            {selectedActivity && (
+                <View style={styles.selectedImageContainer}>
+                    <Image
+                        source={{ uri: formatImageUrl(selectedActivity.activityImage) }}
+                        style={styles.selectedImage}
+                    />
+                    <Text style={styles.mainText}>{getQuestDescription(selectedActivity.activityId)}</Text>
+                    <View style={styles.rowContainer}>
+                        <Complete width={82} height={24} />
+                        <Text style={styles.DateText}>{formattedDate}</Text>
+                    </View>
+                </View>
+            )}
         </View>
     );
 }
@@ -139,14 +174,19 @@ const styles = StyleSheet.create({
         color: colors.black,
         fontSize: getFontSize(22),
         fontWeight: '800',
-        lineHeight: 34,
+    },
+    mainText: {
+        marginBottom: 18,
+        color: colors.black,
+        fontSize: getFontSize(22),
+        fontWeight: '800',
     },
     profileContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingBottom: 24,
         paddingHorizontal: 22,
         paddingTop: 16,
+        paddingBottom: 24,
     },
     profileImage: {
         width: 80,
@@ -155,8 +195,53 @@ const styles = StyleSheet.create({
     },
     rowContainer: {
         flexDirection: 'row',
+        alignItems: 'center'
     },
-    boldText:{
+    imageGrid: {
+        paddingHorizontal: 15,
+        paddingBottom: 0
+    },
+    imageWrapper: {
+        justifyContent: 'center',
+    },
+    imageItem: {
+        width: width / 3 - 20,
+        height: width / 3 - 20,
+        margin: 5,
+        borderRadius: 5,
+        backgroundColor: 'white',
+    },
+    selectedImageBorder: {
+        shadowColor: '#69E6A2',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 1,
+        shadowRadius: 5,
+        borderWidth: 3,
+        borderColor: '#69E6A2',
+        borderRadius: 5,
+        padding: 5,
+    },
+    iconOverlay: {
+        width: 20,
+        height: 20,
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: [{ translateX: -20 }, { translateY: -20 }],
+    },
+    selectedImageContainer: {
+        paddingHorizontal: 20,
+        marginTop: 13,
+        marginBottom: 20,
+    },
+    selectedImage: {
+        width: '100%',
+        height: (width * 3 / 5),
+        resizeMode: 'cover',
+        borderRadius: 5,
+        marginBottom: 17,
+    },
+    boldText: {
         color: colors.black,
         fontSize: getFontSize(15),
         fontWeight: '800',
@@ -168,57 +253,24 @@ const styles = StyleSheet.create({
         fontWeight: '400',
         lineHeight: 19,
     },
-    smallText:{
-         color: '#7E7E82',
-         fontSize: getFontSize(10),
-         fontWeight: '400',
-    },
-    imageContainer: {
-        paddingHorizontal: 22,
-    },
-    row: {
-        justifyContent: 'space-between',
-    },
-    imageWrapper: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        flexWrap: 'wrap',
-    },
-    imageItem: {
-        width: (width - 44) / 3 - 5,
-        height: (width - 44) / 3 - 5,
-        borderRadius: 5,
-    },
-    selectedImageWrapper: {
-        borderColor: colors.green,
-        borderWidth: 3,
-        borderRadius: 5,
-    },
-    checkIcon: {
-        position: 'absolute',
-        top: '50%',
-        left: '50%',
-        transform: [{ translateX: -15 }, { translateY: -15 }],
-    },
-    selectedImage: {
-        marginTop: 15,
-        width: '100%',
-        height: (width * 3 / 4),
-        resizeMode: 'cover',
-        borderRadius: 5,
+    smallText: {
+        color: '#7E7E82',
+        fontSize: getFontSize(10),
+        fontWeight: '400',
     },
     DateText: {
         color: '#545454',
         fontSize: getFontSize(15),
         fontWeight: '400',
         lineHeight: 34,
+        marginLeft: 8,
     },
     redText: {
         color: '#FF5959',
         fontSize: getFontSize(10),
         fontWeight: '400',
         lineHeight: 23,
-    }
+    },
 });
 
 export default QuestViewScreen;

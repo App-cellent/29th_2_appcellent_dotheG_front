@@ -5,11 +5,13 @@ import { StackNavigationProp } from '@react-navigation/stack';
 
 import { LinearGradient } from 'react-native-linear-gradient';
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width, height } = Dimensions.get('window');
 function Tutorial(): React.JSX.Element {
     const navigation = useNavigation();
   const [currentStep, setCurrentStep] = useState(1);
+  const apiUrl = process.env.REACT_APP_API_URL;
 
   const steps = [
     require('../../img/User/step1.png'),
@@ -25,9 +27,37 @@ function Tutorial(): React.JSX.Element {
   };
 
   const goCharacterScreen = () => {
-      navigation.navigate('Main', {
-          screen: 'Character',
-      });
+      const fetchTutorialData = async () => {
+          try {
+              const accessToken = await AsyncStorage.getItem('token');
+              const response = await fetch(`${apiUrl}/mainpage/tutorial`, {
+                  method: 'POST',
+                  headers: {
+                      "Cache-Control": 'no-store',
+                      "Content-Type": "application/json",
+                      access: `${accessToken}`,
+                  },
+              });
+
+              if (!response.ok) {
+                  throw new Error(`HTTP error! status: ${response.status}`);
+              }
+
+              const result = await response.json();
+
+              if (result.success) {
+                  console.log(result);
+                  navigation.navigate('Main', {
+                        screen: 'Character',
+                  });
+              } else {
+                  console.error(result.message);
+              }
+          } catch (error) {
+              console.error('Error fetching tutorial POST:', error);
+          }
+      };
+      fetchTutorialData();
   };
 
   return (

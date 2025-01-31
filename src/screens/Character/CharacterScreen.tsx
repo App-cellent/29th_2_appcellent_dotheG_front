@@ -69,7 +69,7 @@ function CharacterScreen(): React.JSX.Element {
     
           if (response.ok) {
             console.log('Logout Success:', response.status);
-            Alert.alert('Success', '로그아웃 성공');
+            //Alert.alert('Success', '로그아웃 성공');
 
             await AsyncStorage.removeItem('token');
             await AsyncStorage.removeItem('refreshToken');
@@ -162,7 +162,7 @@ function CharacterScreen(): React.JSX.Element {
                 style={styles.container}
             >
                 <View style={styles.header}>
-                    <TouchableOpacity onPress={() => navigation.goBack()}>
+                    <TouchableOpacity>
                         <Image
                             source={require('../../img/Character/backIcon.png')}
                         />
@@ -180,7 +180,7 @@ function CharacterScreen(): React.JSX.Element {
                     <Image
                         source={characterImages[character?.characterId]}
                         style={styles.characterImg}
-                        resizeMode="contain"
+                        resizeMode="center"
                     />
                     {/* 캐릭터 이름 */}
                     <Text style={styles.characterName}>
@@ -234,12 +234,15 @@ const styles = StyleSheet.create({
         lineHeight: 34,
     },
     bodyContainer: {
+        flex: 1,
         alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
+        paddingHorizontal: 25,
     },
     characterImg: {
-        width: 268,
-        height: 184,
-        marginTop: 116,
+        width: 300,
+        height: 200,
         marginBottom: 40,
     },
     characterName: {

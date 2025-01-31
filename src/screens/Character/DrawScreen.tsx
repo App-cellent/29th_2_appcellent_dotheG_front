@@ -3,13 +3,13 @@ import { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import LinearGradient from 'react-native-linear-gradient';
-import { 
-    StyleSheet, 
-    Text, 
-    View, 
-    Image, 
-    TouchableOpacity, 
-    Modal, 
+import {
+    StyleSheet,
+    Text,
+    View,
+    Image,
+    TouchableOpacity,
+    Modal,
     Alert,
 } from 'react-native';
 
@@ -28,12 +28,12 @@ function DrawScreen(): React.JSX.Element {
     const navigation = useNavigation<NavigationProp>();
 
     const options = [
-        { id: 1, label: '동물 정해서\n뽑기', modalTitle: '동물 정해서 뽑기', fruit: 35, },
-        { id: 2, label: '랜덤 뽑기', modalTitle: '랜덤 캐릭터 뽑기', fruit: 20, },
-        { id: 3, label: '희귀도1 뽑기', modalTitle: '희귀도1 캐릭터 뽑기', fruit: 19, },
-        { id: 4, label: '희귀도2 뽑기', modalTitle: '희귀도2 캐릭터 뽑기', fruit: 25, },
-        { id: 5, label: '희귀도3 뽑기', modalTitle: '희귀도3 캐릭터 뽑기', fruit: 35 },
-        { id: 6, label: '희귀도4 뽑기', modalTitle: '희귀도4 캐릭터 뽑기', fruit: 55 },
+        { id: 1, label: '동물 정해서\n뽑기', modalTitle: '동물 정해서 뽑기', fruit: 70, },
+        { id: 2, label: '랜덤 뽑기', modalTitle: '랜덤 캐릭터 뽑기', fruit: 25, },
+        { id: 3, label: '희귀도1 뽑기', modalTitle: '희귀도1 캐릭터 뽑기', fruit: 20, },
+        { id: 4, label: '희귀도2 뽑기', modalTitle: '희귀도2 캐릭터 뽑기', fruit: 50, },
+        { id: 5, label: '희귀도3 뽑기', modalTitle: '희귀도3 캐릭터 뽑기', fruit: 100 },
+        { id: 6, label: '희귀도4 뽑기', modalTitle: '희귀도4 캐릭터 뽑기', fruit: 150 },
     ];
 
     const [selectedOption, setSelectedOption] = useState<number | null>(null);
@@ -46,7 +46,7 @@ function DrawScreen(): React.JSX.Element {
             Alert.alert('선택 오류', '옵션을 선택해주세요.');
         }
     };
-    
+
     // 뽑기 API
     const apiUrl = process.env.REACT_APP_API_URL;
 
@@ -72,10 +72,10 @@ function DrawScreen(): React.JSX.Element {
             } else if (selected.id === 6) {
                 drawType = 'RANK_4';
             }
-            
+
             try {
                 const accessToken = await AsyncStorage.getItem('token');
-                
+
                 const response = await fetch(`${apiUrl}/characters/draw`, {
                     method: 'POST',
                     headers: {
@@ -107,55 +107,57 @@ function DrawScreen(): React.JSX.Element {
                 colors={['rgba(155, 201, 254, 0.4)', 'rgba(105, 230, 162, 0.4)']}
                 style={styles.container}
             >
-                <View style={styles.textContainer}>
-                    <Text style={styles.textLarge}>캐릭터 뽑기 옵션을</Text>
-                    <Text style={styles.textLarge}>선택해주세요.</Text>
-                    <Text style={styles.textSmall}>희귀도에 따라 열매수가 달라요!</Text>
-                </View>
+                <View style={styles.wrapper}>
+                    <View style={styles.textContainer}>
+                        <Text style={styles.textLarge}>캐릭터 뽑기 옵션을</Text>
+                        <Text style={styles.textLarge}>선택해주세요.</Text>
+                        <Text style={styles.textSmall}>희귀도에 따라 열매수가 달라요!</Text>
+                    </View>
 
-                <View style={styles.bodyContainer}>
-                    <View style={styles.optionContainer}>
-                        {options.map(option => (
-                            <TouchableOpacity 
-                                key={option.id} 
-                                onPress={() => setSelectedOption(option.id)}
-                            >
-                                {selectedOption === option.id ? (
-                                    <LinearGradient
-                                        colors={['#69E6A2', '#9BC9FE']}
-                                        style={styles.selectedGradient}
-                                    >
+                    <View style={styles.bodyContainer}>
+                        <View style={styles.optionContainer}>
+                            {options.map(option => (
+                                <TouchableOpacity
+                                    key={option.id}
+                                    onPress={() => setSelectedOption(option.id)}
+                                >
+                                    {selectedOption === option.id ? (
+                                        <LinearGradient
+                                            colors={['#69E6A2', '#9BC9FE']}
+                                            style={styles.selectedGradient}
+                                        >
+                                            <View style={styles.optionCard}>
+                                                <Text style={styles.optionText}>{option.label}</Text>
+                                                <View style={styles.fruitContainer}>
+                                                    <Image
+                                                        source={require('../../img/Character/fruit.png')}
+                                                        style={styles.fruitIcon}
+                                                    />
+                                                    <Text style={styles.fruitText}>{option.fruit}</Text>
+                                                </View>
+                                            </View>
+                                        </LinearGradient>
+                                    ) : (
                                         <View style={styles.optionCard}>
                                             <Text style={styles.optionText}>{option.label}</Text>
                                             <View style={styles.fruitContainer}>
-                                                <Image 
+                                                <Image
                                                     source={require('../../img/Character/fruit.png')}
                                                     style={styles.fruitIcon}
                                                 />
                                                 <Text style={styles.fruitText}>{option.fruit}</Text>
                                             </View>
                                         </View>
-                                    </LinearGradient>
-                                ) : (
-                                    <View style={styles.optionCard}>
-                                        <Text style={styles.optionText}>{option.label}</Text>
-                                        <View style={styles.fruitContainer}>
-                                            <Image 
-                                                source={require('../../img/Character/fruit.png')}
-                                                style={styles.fruitIcon}
-                                            />
-                                            <Text style={styles.fruitText}>{option.fruit}</Text>
-                                        </View>
-                                    </View>
-                                )}
-                            </TouchableOpacity>
-                        ))}
-                    </View>
-                    <View style={styles.buttonContainer}>
-                        <GradientButton
-                            height={56} width={350} text="다음"
-                            onPress={handleNext}
-                        />
+                                    )}
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+                        <View style={styles.buttonContainer}>
+                            <GradientButton
+                                height={56} width={350} text="다음"
+                                onPress={handleNext}
+                            />
+                        </View>
                     </View>
                 </View>
 
@@ -194,10 +196,14 @@ function DrawScreen(): React.JSX.Element {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        justifyContent: 'center',
+    },
+    wrapper: {
+        flex: 1,
+        justifyContent: 'center',
+        paddingHorizontal: 31,
     },
     textContainer: {
-        marginLeft: 31,
-        marginTop: 50,
         marginBottom: 12,
     },
     textLarge: {
@@ -215,11 +221,10 @@ const styles = StyleSheet.create({
         marginTop: 5,
     },
     bodyContainer: {
-        flex: 1,
         alignItems: 'center',
     },
     optionContainer: {
-        width: '84%',
+        width: '100%',
         marginLeft: 31,
         marginRight: 31,
         marginTop: 20,
@@ -264,8 +269,6 @@ const styles = StyleSheet.create({
         fontWeight: '700',
     },
     buttonContainer: {
-        marginTop: 'auto',
-        marginBottom: 70,
     },
     modalOverlay: {
         flex: 1,

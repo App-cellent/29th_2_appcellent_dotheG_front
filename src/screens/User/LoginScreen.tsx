@@ -1,13 +1,13 @@
-import * as React from 'react'
+import * as React from 'react';
 import { useState, useEffect, useRef } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
-import { 
+import {
     StyleSheet,
     Text,
     Image,
     View,
-    TouchableOpacity, 
+    TouchableOpacity,
     TextInput,
     Animated,
     Alert
@@ -22,15 +22,15 @@ function LoginScreen(): React.JSX.Element {
     const [isChecked, setIsChecked] = useState(false);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [tutorialYN, setTutorialYN] = useState(true);
 
     const apiUrl = process.env.REACT_APP_API_URL;
 
-    const fetchTutorialYNData = async () => {
+    // tutorial 정보 가져오는 함수
+    const fetchTutorialStatus = async () => {
         try {
             const accessToken = await AsyncStorage.getItem('token');
-            const response = await fetch(`${apiUrl}/mainpage/tutorial?timestamp=${new Date().getTime()}`, {
-                method: 'POST',
+            const tutorialResponse = await fetch(`${apiUrl}/mainpage/isTutorial?timestamp=${new Date().getTime()}`, {
+                method: 'GET',
                 headers: {
                     "Cache-Control": 'no-store',
                     "Content-Type": "application/json",
@@ -38,22 +38,24 @@ function LoginScreen(): React.JSX.Element {
                 },
             });
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+            if (!tutorialResponse.ok) {
+                throw new Error(`Error checking tutorial: ${tutorialResponse.status}`);
             }
 
-            const result = await response.json();
+            const result = await tutorialResponse.json();
+            console.log(result);
 
             if (result.success) {
-                console.log(result);
-                setTutorialYN(result.status);
-                navigation.navigate('Tutorial'); // 튜토리얼 진행 여부가 true일 때 Main으로 이동
+                if (result.data === false) {
+                    navigation.navigate('Tutorial');
+                } else {
+                    navigation.navigate('Main');
+                }
             } else {
                 console.error(result.message);
-                navigation.navigate('Tutorial'); // 튜토리얼 진행 여부가 false일 때 Tutorial로 이동
             }
         } catch (error) {
-            console.error('Error fetching quizYN:', error);
+            console.error('Tutorial Error:', error);
         }
     };
 
@@ -69,39 +71,36 @@ function LoginScreen(): React.JSX.Element {
             const response = await fetch(`${apiUrl}/login`, {
                 method: 'POST',
                 headers: {
-                    "Cache-Control":'no-store',
-                    "Content-Type":"application/json",
+                    "Cache-Control": 'no-store',
+                    "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
                     username,
                     password,
                 }),
-            });       
+            });
 
-            // 서버 응답 확인
             if (!response.ok) {
                 const errorText = await response.text();
                 throw new Error(`Login failed: ${response.status} - ${response.statusText}\nResponse: ${errorText}`);
             }
-        
-            // 헤더에서 토큰 추출
+
+            // 토큰을 헤더에서 가져와 AsyncStorage에 저장
             const token = response.headers.get('access');
             if (token) {
-                await AsyncStorage.setItem('token', token); // AsyncStorage에 토큰 저장
-                //console.log('Saved Token:', token);
+                await AsyncStorage.setItem('token', token);
                 console.log('Login Success');
-//                 console.log('ID:', username);
-//                 console.log('PW:', password);
-                fetchTutorialYNData();
+
+                // tutorial 여부 확인
+                fetchTutorialStatus();
             } else {
-                console.error('Token not found in headers');
-                Alert.alert('로그인 실패', '아이디나 비밀번호를 다시 확인해주세요.');
+                Alert.alert('로그인 실패', '토큰을 받을 수 없습니다.');
             }
         } catch (error) {
             console.error('Login Error:', error);
             Alert.alert('로그인 실패', '아이디나 비밀번호를 다시 확인해주세요.');
         }
-    }
+    };
 
     // 간편하게 시작하기 애니메이션
     const speechBubbleAnimated = useRef(new Animated.Value(0)).current;
@@ -134,89 +133,88 @@ function LoginScreen(): React.JSX.Element {
                 source={require('../../img/User/appLogo.png')}
                 style={styles.appLogo}
             />
-                <View style={styles.header}>
-                    <View style={styles.rowContainer}>
+            <View style={styles.header}>
+                <View style={styles.rowContainer}>
                     <Text style={styles.textBoldLarge}>지금, </Text>
                     <DoTheG width={93} height={34}/>
                     <Text style={styles.textSemiBoldLarge}>와 함께</Text>
-                    </View>
-                    <Text style={styles.textBoldLarge}>달려보세요!</Text>
                 </View>
-
-            <View style={styles.Wrapper}>
-            <TextInput
-                style={styles.inputText}
-                placeholder="아이디를 입력해주세요"
-                placeholderTextColor="#C9C9C9"
-                keyboardType="default"
-                value={username}
-                onChangeText={setUsername}
-            />
-            <TextInput
-                style={styles.inputText}
-                placeholder="비밀번호를 입력해주세요"
-                placeholderTextColor="#C9C9C9"
-                secureTextEntry
-                value={password}
-                onChangeText={setPassword}
-            />
-
-            <View style={styles.option}>
-                <TouchableOpacity
-                    style={styles.checkContainer}
-                    onPress={autoLoginCheck}
-                >
-                    <Image
-                        source={isChecked
-                            ? require('../../img/User/checkIcon.png')
-                            : require('../../img/User/checkIconGray.png')}
-                        style={styles.checkIcon}
-                    />
-                    <Text style={styles.checkText}>자동로그인</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    //onPress={() => navigation.navigate('FindIdPwScreen')}
-                >
-                    <Text style={styles.findText}>아이디/비밀번호 찾기</Text>
-                </TouchableOpacity>
+                <Text style={styles.textBoldLarge}>달려보세요!</Text>
             </View>
 
-            <TouchableOpacity
-                style={[styles.BtnContainer]}
-                onPress={handleLogin}
-            >
-                <LinearGradient
-                    colors={['#9BC9FE', '#69E6A2']}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 0 }}
-                    style={styles.completeButton}
+            <View style={styles.Wrapper}>
+                <TextInput
+                    style={styles.inputText}
+                    placeholder="아이디를 입력해주세요"
+                    placeholderTextColor="#C9C9C9"
+                    keyboardType="default"
+                    value={username}
+                    onChangeText={setUsername}
+                />
+                <TextInput
+                    style={styles.inputText}
+                    placeholder="비밀번호를 입력해주세요"
+                    placeholderTextColor="#C9C9C9"
+                    secureTextEntry
+                    value={password}
+                    onChangeText={setPassword}
+                />
+
+                <View style={styles.option}>
+                    <TouchableOpacity
+                        style={styles.checkContainer}
+                        onPress={autoLoginCheck}
+                    >
+                        <Image
+                            source={isChecked
+                                ? require('../../img/User/checkIcon.png')
+                                : require('../../img/User/checkIconGray.png')}
+                            style={styles.checkIcon}
+                        />
+                        <Text style={styles.checkText}>자동로그인</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        //onPress={() => navigation.navigate('FindIdPwScreen')}
+                    >
+                        <Text style={styles.findText}>아이디/비밀번호 찾기</Text>
+                    </TouchableOpacity>
+                </View>
+
+                <TouchableOpacity
+                    style={[styles.BtnContainer]}
+                    onPress={handleLogin}
                 >
-                    <Text style={styles.completeButtonText}>로그인</Text>
-                </LinearGradient>
-            </TouchableOpacity>
+                    <LinearGradient
+                        colors={['#9BC9FE', '#69E6A2']}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 0 }}
+                        style={styles.completeButton}
+                    >
+                        <Text style={styles.completeButtonText}>로그인</Text>
+                    </LinearGradient>
+                </TouchableOpacity>
 
-            <TouchableOpacity
-                style={styles.signupButton}
-                onPress={() => navigation.navigate('SignupScreen')}
-            >
-                <Text style={styles.signupText}>회원가입</Text>
-            </TouchableOpacity>
+                <TouchableOpacity
+                    style={styles.signupButton}
+                    onPress={() => navigation.navigate('SignupScreen')}
+                >
+                    <Text style={styles.signupText}>회원가입</Text>
+                </TouchableOpacity>
 
-            <Animated.Image
-                source={require('../../img/User/speechBubble.png')}
-                style={[styles.speechBubble, { transform: [{ translateY: speechBubbleAnimated }] }]}
-            />
-            <Image
-                source={require('../../img/User/naverIcon.png')}
-                style={styles.naverLogo}
-            />
+                <Animated.Image
+                    source={require('../../img/User/speechBubble.png')}
+                    style={[styles.speechBubble, { transform: [{ translateY: speechBubbleAnimated }] }]}/>
+                <Image
+                    source={require('../../img/User/naverIcon.png')}
+                    style={styles.naverLogo}
+                />
             </View>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    container:{
+    container: {
         flex: 1,
         alignItems: 'center',
     },
@@ -234,7 +232,7 @@ const styles = StyleSheet.create({
     },
     Wrapper: {
         paddingHorizontal: 37,
-        width: '100%'
+        width: '100%',
     },
     textBoldLarge: {
         fontSize: 24,
@@ -334,13 +332,13 @@ const styles = StyleSheet.create({
         width: 130,
         height: 40,
         marginBottom: 7,
-        alignSelf: 'center'
+        alignSelf: 'center',
     },
     naverLogo: {
         width: 36,
         height: 36,
-        alignSelf: 'center'
+        alignSelf: 'center',
     },
-})
+});
 
 export default LoginScreen;
