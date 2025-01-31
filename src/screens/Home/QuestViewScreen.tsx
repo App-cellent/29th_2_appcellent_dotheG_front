@@ -2,9 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import colors from "../../utils/colors";
 import { getFontSize } from '../../utils/fontUtils';
+import QuestList from "../../utils/QuestList";
+
 import LeftArrow from '../../img/Home/Quiz/LeftArrow.svg';
 import GreenCircle from '../../img/Home/QuestView/greenCircle.svg';
 import CheckIcon from '../../img/Home/QuestView/checkIcon.svg';
+import Complete from '../../img/Home/QuestView/complete.svg';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   StyleSheet,
@@ -27,11 +30,11 @@ function QuestViewScreen() {
     const [selectedActivity, setSelectedActivity] = useState(null);
 
     const currentDate = new Date();
-    const formattedDate = currentDate.toLocaleDateString('ko-KR', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-    });
+    const formattedDate = `${currentDate.getFullYear()}.${String(currentDate.getMonth() + 1).padStart(2, '0')}.${String(currentDate.getDate()).padStart(2, '0')}`;
+
+    const getQuestDescription = (activityId) => {
+        return QuestList.find(quest => quest.activityId === activityId)?.Description || "인증완료 퀘스트";
+    };
 
     useEffect(() => {
         const fetchQuestData = async () => {
@@ -140,9 +143,11 @@ function QuestViewScreen() {
                         source={{ uri: formatImageUrl(selectedActivity.activityImage) }}
                         style={styles.selectedImage}
                     />
-                    <Text style={styles.headerText}>인증완료 퀘스트</Text>
-                    <Text style={styles.DateText}>{formattedDate}</Text>
-                    <Text style={styles.redText}>{selectedActivity.activityName}. 탄소를 10g 절감했어요!</Text>
+                    <Text style={styles.headerText}>{getQuestDescription(selectedActivity.activityId)}</Text>
+                    <View style={styles.rowContainer}>
+                        <Complete width={82} height={24} />
+                        <Text style={styles.DateText}>{formattedDate}</Text>
+                    </View>
                 </View>
             )}
         </View>
@@ -166,6 +171,7 @@ const styles = StyleSheet.create({
         marginRight: 18,
     },
     headerText: {
+        marginBottom: 18,
         color: colors.black,
         fontSize: getFontSize(22),
         fontWeight: '800',
@@ -184,6 +190,7 @@ const styles = StyleSheet.create({
     },
     rowContainer: {
         flexDirection: 'row',
+        alignItems: 'center'
     },
     imageGrid: {
         paddingHorizontal: 15,
@@ -251,6 +258,7 @@ const styles = StyleSheet.create({
         fontSize: getFontSize(15),
         fontWeight: '400',
         lineHeight: 34,
+        marginLeft: 8,
     },
     redText: {
         color: '#FF5959',
