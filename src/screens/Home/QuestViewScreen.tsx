@@ -143,7 +143,7 @@ function QuestViewScreen() {
                         source={{ uri: formatImageUrl(selectedActivity.activityImage) }}
                         style={styles.selectedImage}
                     />
-                    <Text style={styles.headerText}>{getQuestDescription(selectedActivity.activityId)}</Text>
+                    <Text style={styles.mainText}>{getQuestDescription(selectedActivity.activityId)}</Text>
                     <View style={styles.rowContainer}>
                         <Complete width={82} height={24} />
                         <Text style={styles.DateText}>{formattedDate}</Text>
@@ -171,6 +171,11 @@ const styles = StyleSheet.create({
         marginRight: 18,
     },
     headerText: {
+        color: colors.black,
+        fontSize: getFontSize(22),
+        fontWeight: '800',
+    },
+    mainText: {
         marginBottom: 18,
         color: colors.black,
         fontSize: getFontSize(22),

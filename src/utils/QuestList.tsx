@@ -8,7 +8,7 @@ const QuestList = [
     { activityId: 11, activityName: "플로깅/줍깅", Reward: 5, Description: "플로깅/줍깅을 실천했어요!" },
     { activityId: 12, activityName: "친환경 브랜드 이용", Reward: 5, Description: "친환경 브랜드를 이용했어요!" },
     { activityId: 13, activityName: "제로 웨이스트 샵 방문", Reward: 5, Description: "제로 웨이스트 샵을 방문했어요!" },
-    { activityId: 14, activityName: "반려 식물 키우기", Reward: 5, Description: "반려 식물을 키워요! " },
+    { activityId: 14, activityName: "반려 식물 키우기", Reward: 5, Description: "반려 식물을 키워요!  " },
 ];
 
 export default QuestList;
