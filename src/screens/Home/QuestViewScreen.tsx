@@ -37,7 +37,42 @@ function QuestViewScreen() {
     };
 
     useEffect(() => {
+        const fetchQuestData = async () => {
+            try {
+                const accessToken = await AsyncStorage.getItem('token');
+                if (!accessToken) {
+                    console.error('토큰이 없습니다');
+                    return;
+                }
 
+                const response = await fetch(`${apiUrl}/upload/viewToday?timestamp=${new Date().getTime()}`, {
+                    method: 'GET',
+                    headers: {
+                        "Cache-Control": 'no-store',
+                        "Content-Type": "application/json",
+                        access: `${accessToken}`,
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                if (result.success) {
+                    setUserName(result.data.userName);
+                    setListSize(result.data.listSize);
+                    if(listSize > 0) setActivityData(result.data.activities.slice(0, listSize));
+                    else setActivityData(result.data.activities);
+                } else {
+                    console.log(result.message);
+                }
+            } catch (error) {
+                console.error('퀘스트 데이터 불러오기 실패:', error);
+                setActivityData([]);
+            }
+        };
+        fetchQuestData();
     }, []);
 
     const handleImagePress = (activity) => {

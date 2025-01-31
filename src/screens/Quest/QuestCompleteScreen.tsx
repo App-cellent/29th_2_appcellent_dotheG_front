@@ -1,40 +1,66 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, Dimensions, ScrollView, Alert } from 'react-native';
+import {
+  View, Text, Image, StyleSheet, TouchableOpacity,
+  Dimensions, ScrollView, Alert
+} from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { LinearGradient } from 'react-native-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getFontSize } from '../../utils/fontUtils';
 import QuestList from "../../utils/QuestList";
+import Complete from '../../img/Home/QuestView/complete.svg';
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 const QuestCompleteScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { photoPath } = route.params;
-  const screenWidth = Dimensions.get('window').width;
-  const today = new Date();
-  const [selectedQuest, setSelectedQuest] = useState(1);
-  const [dailyConfirmCount, setDailyConfirmCount] = useState(0);
+  const formData = route.params?.formData;
 
-  const apiUrl = process.env.REACT_APP_API_URL;
+  const [selectedQuest, setSelectedQuest] = useState(null);
+  const [activityImage, setActivityImage] = useState(null);
+  const [activityId, setActivityId] = useState(null);
 
   const currentDate = new Date();
   const formattedDate = `${currentDate.getFullYear()}.${String(currentDate.getMonth() + 1).padStart(2, '0')}.${String(currentDate.getDate()).padStart(2, '0')}`;
 
-  const getQuestDescription = (activityId) => {
-      return QuestList.find(quest => quest.activityId === activityId)?.Description || "인증완료 퀘스트";
-  };
-
   useEffect(() => {
+    if (formData && formData._parts) {
+      const formDataObj = formData._parts.reduce((obj, [key, value]) => {
+        if (typeof value === 'object' && value !== null) {
+          obj[key] = value.uri || value;
+        } else {
+          obj[key] = value;
+        }
+        return obj;
+      }, {});
 
-  }, []);
+      console.log("Converted formData:", formDataObj);
 
-  const handleCompleteQuest = async () => {
-      navigation.navigate('QuestViewScreen');
-  }
+      const id = formDataObj.activityId;
+      const image = formDataObj.activityImage;
 
+      setActivityId(id);
+      setActivityImage(image);
 
+      const questInfo = QuestList.find(quest => quest.activityId === parseInt(id));
+      setSelectedQuest(questInfo);
+    }
+  }, [formData]);
 
+  const formatImageUrl = (imagePath) => {
+    if (!imagePath) return null;
+    if (imagePath.startsWith('file://')) {
+      return imagePath;
+    }
+    if (imagePath.startsWith('data:image')) {
+      return imagePath;
+    }
+    if (/^[A-Za-z0-9+/=]+$/.test(imagePath)) {
+      return `data:image/jpeg;base64,${imagePath}`;
+    }
+    return imagePath;
+  };
 
   return (
     <View style={styles.container}>
@@ -49,34 +75,29 @@ const QuestCompleteScreen = () => {
 
       {/* 촬영된 사진 */}
       <View style={styles.photoContainer}>
-        <Image source={{ uri: `file://${photoPath}` }} style={dynamicStyles.photo} />
-        <Image
-            source={{ uri: formatImageUrl(selectedActivity.activityImage) }}
-            style={styles.selectedImage}
-        />
-      </View>
-
-      {/* 퀘스트 목록 */}
-        <View style={[
-            styles.questButton,
-                selectedQuest === quest.activityId && styles.selectedQuestButton, // 선택된 퀘스트 스타일
-        ]}>
-            <Image
-              source={
-                selectedQuest === quest.activityId
-                  ? require('../../img/Quest/smallchecked.png')
-                  : require('../../img/Quest/smallunchecked.png')
-              }
-              style={styles.checkbox}
-            />
-            <View style={styles.questTextContainer}>
-              <Text style={styles.questTitle}>{getQuestDescription(selectedActivity.activityId)}</Text>
-              <Text style={styles.questDescription}>더 많은 활동을 인증해서 탄소를 절감해보세요!</Text>
-            </View>
+        {activityImage && (
+            <View style={styles.photoContainer}>
+              <Image
+                source={{ uri: formatImageUrl(activityImage) }}
+                style={styles.photo}
+                resizeMode="cover"
+              />
+            <Image source={require('../../img/Quest/smallchecked.png')} style={styles.checkbox} />
+          </View>
+        )}
+        <View style={styles.questButton}>
+          <Text style={styles.questTitle}>{selectedQuest.Description}</Text>
+          <Text style={styles.questDescription}>더 많은 활동을 인증해서 탄소를 절감해보세요!</Text> {/* Description 출력 */}
         </View>
 
-      {/* 퀘스트 인증하기 버튼 */}
-      <TouchableOpacity style={styles.completeButtonContainer} onPress={handleCompleteQuest}>
+        <View style={styles.rowContainer}>
+          <Complete width={82} height={24} />
+          <Text style={styles.DateText}>{formattedDate}</Text>
+        </View>
+      </View>
+
+      {/* 퀘스트 인증 완료 버튼 */}
+      <TouchableOpacity style={styles.completeButtonContainer} onPress={() => navigation.navigate('QuestViewScreen')}>
         <LinearGradient
           colors={['#9BC9FE', '#69E6A2']}
           start={{ x: 0, y: 0 }}
@@ -106,18 +127,19 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     alignItems: 'center',
     paddingHorizontal: 16,
+    zIndex: 1,
   },
   exitButton: {
-    alignItems: 'center',
+    padding: 8,
   },
   exitIcon: {
-    width: 16.32,
-    height: 16.35,
+    width: 16,
+    height: 16,
     resizeMode: 'contain',
   },
   greenText: {
     fontSize: 16,
-    fontWeight: 'medium',
+    fontWeight: '600',
     color: '#69E6A2',
     marginTop: 54,
     marginLeft: 22,
@@ -128,62 +150,54 @@ const styles = StyleSheet.create({
     color: '#121212',
     marginTop: 10,
     marginLeft: 22,
+    marginBottom: 20,
   },
   photoContainer: {
-    position: 'relative',
-    width: width,
-    height: width,
-  },
-  checkboxCenter: {
-      position: 'absolute',
-      top: '50%',
-      left: '50%',
-      transform: [{ translateX: -40 }, { translateY: -40 }],
-      width: 80,
-      height: 80,
-    },
-  scrollView: {
-    flex: 1,
-    paddingHorizontal: 16,
-    marginTop: 20,
-  },
-  questButton: {
-    flexDirection: 'row',
-    position: 'relative',
-    backgroundColor: '#FFFFFF',
-    marginBottom: 20,
-    borderRadius: 15,
-    borderWidth: 2,
-    borderColor: '#C9C9C9',
-    height: 68,
     alignItems: 'center',
+    paddingHorizontal: 16,
   },
-  selectedQuestButton: {
-    borderColor: '#69E6A2',
+  photo: {
+    width: width - 32,
+    height: width - 32,
+    borderRadius: 10,
+    marginBottom: 16,
   },
-  checkbox: {
-    width: 16,
-    height: 16,
-    marginLeft: 18,
+  mainText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#545454',
+    marginTop: 12,
+    marginBottom: 8,
+  },
+  rowContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 24,
   },
   questTextContainer: {
-    flex: 1,
-    marginLeft: 7.65,
-    justifyContent: 'center',
+    paddingHorizontal: 22,
+    marginTop: 16,
+    backgroundColor: '#FFFFFF',
   },
   questTitle: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#545454',
+    marginBottom: 4,
   },
   questDescription: {
-    fontSize: 11,
-    fontWeight: 'bold',
+    fontSize: 12,
+    fontWeight: '500',
     color: '#C9C9C9',
   },
   completeButtonContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
     paddingHorizontal: 16,
     paddingVertical: 16,
+    backgroundColor: '#FFFFFF',
   },
   completeButton: {
     height: 56,
@@ -195,6 +209,18 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  DateText: {
+    color: '#545454',
+    fontSize: getFontSize(15),
+    fontWeight: '400',
+    lineHeight: 34,
+    marginLeft: 8,
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    marginRight: 10,
   },
 });
 

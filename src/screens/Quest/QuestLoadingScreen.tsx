@@ -9,13 +9,16 @@ import {
     ImageBackground,
     TouchableOpacity,
     Modal,
-    Image
+    Image,
+    ActivityIndicator,
+    Alert
 } from 'react-native';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import GradientButton from '../../components/GradientButton';
 
 type RootStackParamList = {
     QuestCompleteScreen: { questData: any };
+    CameraScreen: undefined;
 };
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'QuestCompleteScreen'>;
@@ -26,26 +29,60 @@ function QuestLoadingScreen(): React.JSX.Element {
     const route = useRoute<RoutePropType>();
 
     const [modalVisible, setModalVisible] = useState(false);
-
-    const questData = route.params?.questData;
+    const [loading, setLoading] = useState(true);
+    const apiUrl = process.env.REACT_APP_API_URL;
+    const { formData } = route.params;
 
     useEffect(() => {
-        const loading = setTimeout(() => {
-            navigation.navigate('QuestCompleteScreen', { questData });
-        }, 3000);
+        const submitQuest = async () => {
+            try {
+                const accessToken = await AsyncStorage.getItem('token');
+                console.log('Access Token:', accessToken);
 
-        return () => clearTimeout(loading);
-    }, [navigation, questData]);
+                const response = await fetch(`${apiUrl}/upload/certification?timestamp=${new Date().getTime()}`, {
+                    method: 'POST',
+                    headers: {
+                        "Cache-Control": 'no-store',
+                        access: `${accessToken}`,
+                    },
+                    body: formData,
+                });
 
-    return(
+                const responseText = await response.text();
+                console.log('Response Text:', responseText);
+                const result = JSON.parse(responseText);
+
+                if (response.ok && result.success) {
+                    navigation.navigate('QuestCompleteScreen', { formData });
+                } else {
+                    setModalVisible(true); // 인증 실패 시 모달 띄움
+                }
+            } catch (error) {
+                console.error('퀘스트 인증 중 오류:', error);
+                Alert.alert('알림', '퀘스트 인증 중 오류가 발생했습니다. 다시 시도해주세요.');
+                setModalVisible(true);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        submitQuest();
+    }, []);
+
+    return (
         <View style={styles.container}>
             <ImageBackground
                 source={require('../../img/Character/circleGradient.png')}
                 style={styles.background}
             >
-                <Text style={styles.text}>퀘스트 인증을</Text>
-                <Text style={styles.text}>확인 중이에요...</Text>
-                <Text style={styles.smallText}>잠시만 기다려주세요</Text>
+                {loading ? (
+                    <>
+                        <ActivityIndicator size="large" color="#69E6A2" />
+                        <Text style={styles.text}>퀘스트 인증을</Text>
+                        <Text style={styles.text}>확인 중이에요...</Text>
+                        <Text style={styles.smallText}>잠시만 기다려주세요</Text>
+                    </>
+                ) : null}
             </ImageBackground>
 
             {/* 퀘스트 인증 실패 모달 */}
@@ -61,14 +98,24 @@ function QuestLoadingScreen(): React.JSX.Element {
                             source={require('../../img/Quest/fail.png')}
                             style={styles.icon}
                         />
-
                         <Text style={styles.modalTitle}>퀘스트 인증을 실패했어요.</Text>
                         <View style={styles.modalButtonContainer}>
                             <GradientButton
-                                height={57} width={267} text="다시 촬영하기"
-                                onPress={() => navigation.navigate('CameraScreen')}
+                                height={57}
+                                width={267}
+                                text="다시 촬영하기"
+                                onPress={() => {
+                                    setModalVisible(false);
+                                    navigation.navigate('CameraScreen');
+                                }}
                             />
-                            <TouchableOpacity style={styles.modalCancelButton} onPress={() => setModalVisible(false)}>
+                            <TouchableOpacity
+                                style={styles.modalCancelButton}
+                                onPress={() => {
+                                    setModalVisible(false);
+                                    navigation.navigate('Main');
+                                }}
+                            >
                                 <Text style={styles.modalCancelText}>홈으로 돌아가기</Text>
                             </TouchableOpacity>
                         </View>
@@ -97,14 +144,14 @@ const styles = StyleSheet.create({
     },
     text:{
         fontSize: 23,
-        fontWeight: 700,
+        fontWeight: '700',
         textAlign: 'center',
         marginBottom: 4,
     },
     smallText: {
         color: '#545454',
         fontSize: 16,
-        fontWeight: 500,
+        fontWeight: '500',
         marginTop: 14,
     },
     modalOverlay: {
@@ -146,6 +193,6 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         color: '#C9C9C9',
     }
-})
+});
 
 export default QuestLoadingScreen;

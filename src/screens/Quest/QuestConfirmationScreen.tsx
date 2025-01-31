@@ -38,54 +38,7 @@ const QuestConfirmationScreen = () => {
       return;
     }
 
-    if (!selectedQuest) {
-      Alert.alert('알림', '퀘스트를 선택해주세요.');
-      return;
-    }
-
-    try {
-      console.log('FormData:', formData);
-      console.log('Corrected Photo Path:', correctedPhotoPath);
-
-      const accessToken = await AsyncStorage.getItem('token');
-      console.log('Access Token:', accessToken);
-
-      const response = await fetch(`${apiUrl}/upload/certification?timestamp=${new Date().getTime()}`, {
-        method: 'POST',
-        headers: {
-          "Cache-Control": 'no-store',
-          access: `${accessToken}`,
-        },
-        body: formData,
-      });
-
-      if (response.status === 401) {
-        console.warn('Token expired, refreshing token...');
-        const newToken = await refreshToken();
-        if (newToken) {
-          await AsyncStorage.setItem('token', newToken);
-          return handleCompleteQuest(); // 갱신된 토큰으로 재요청
-        } else {
-          throw new Error('Failed to refresh token');
-        }
-      }
-
-      const responseText = await response.text();
-      console.log('Response Text:', responseText);
-      const result = JSON.parse(responseText);
-
-      if (response.ok && result.success) {
-        setDailyConfirmCount(dailyConfirmCount + 1);
-        //Alert.alert('알림', '퀘스트 인증이 완료되었습니다.');
-        setSelectedQuest(null);
-        navigation.navigate('QuestLoadingScreen');
-      } else {
-        Alert.alert('알림', result.message || '퀘스트 인증에 실패했습니다.');
-      }
-    } catch (error) {
-      console.error('퀘스트 인증 중 오류:', error);
-      Alert.alert('알림', '퀘스트 인증 중 오류가 발생했습니다. 다시 시도해주세요.');
-    }
+    navigation.navigate('QuestLoadingScreen', { formData });
   };
 
   const dynamicStyles = StyleSheet.create({
