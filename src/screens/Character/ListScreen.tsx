@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
-import { useNavigation, useRoute, NavigationProp } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
 import Svg, { Text as SvgText, Defs, LinearGradient as SvgLinearGradient, Stop, Line } from 'react-native-svg';
 import { 
@@ -34,7 +33,9 @@ interface Character {
 };
 
 function ListScreen(): React.JSX.Element {
-    const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'ListScreen'>>();
+    const navigation = useNavigation();
+    const route = useRoute();
+    const { showModal } = route.params || {};
 
     const [selectedTab, setSelectedTab] = useState<keyof typeof tabMapping>('전체보기');
     const [characters, setCharacters] = useState<Character[]>([]);
@@ -43,6 +44,41 @@ function ListScreen(): React.JSX.Element {
     const [modalVisible, setModalVisible] = useState(false);
     const [secondModalVisible, setSecondModalVisible] = useState(false);
     const [selectedCharacterData, setSelectedCharacterData] = useState<Character | null>(null);
+    const [newDrawCharacter, setNewDrawCharacter] = useState<Character | null>(null);
+
+    // 뽑기 후 캐릭터 상세 조회 Modal
+    useEffect(() => {
+        const checkNewDrawCharacter = async () => {
+            const newDrawId = await AsyncStorage.getItem('newDrawCharacterId');
+            if (newDrawId) {
+                const characterId = parseInt(newDrawId);
+
+                if(characters.length > 0){
+                    const targetCharacter = characters.find(char => char.id === characterId)
+                    if(targetCharacter){
+                        await AsyncStorage.removeItem('newDrawCharacterId');
+                        handleCharacterModal(characterId);
+                    }
+                } else {
+                    const retryCheck = () => {
+                        if (characters.length > 0) {
+                          const targetCharacter = characters.find(char => char.id === characterId);
+                          if (targetCharacter) {
+                            handleCharacterModal(characterId);
+                            AsyncStorage.removeItem('newDrawCharacterId');
+                          }
+                        } else {
+                          setTimeout(retryCheck, 500);
+                        }
+                    }
+                    setTimeout(retryCheck, 500);
+                }
+            } else if (showModal) {
+                setModalVisible(true);
+            }
+        };
+        checkNewDrawCharacter();
+    }, [characters]);
 
     // 캐릭터 이미지
     const nullCharacterImage = require('../../img/Character/nullCharacter.png');
@@ -203,7 +239,7 @@ function ListScreen(): React.JSX.Element {
         setSecondModalVisible(true);
     };
 
-    // 대표 캐릭터 지정 팝업창
+    // 대표 캐릭터 지정 Modal
     interface SecondModalProps {
         visible: boolean;
         onConfirm: () => void;
@@ -265,13 +301,15 @@ function ListScreen(): React.JSX.Element {
                 const result = await response.json();
                 if (result.success) {
                     await AsyncStorage.setItem('selectedCharacter', JSON.stringify(selectedCharacterData));
-
-                    Alert.alert("대표 캐릭터가 설정되었습니다!");
                     console.log("대표 캐릭터 지정 성공", selectedCharacterData);
-                    navigation.navigate("CharacterScreen", { updatedCharacter: selectedCharacterData });
+
+                    setModalVisible(false);
+                    setSecondModalVisible(false);
+                    
+                    navigation.navigate('CharacterScreen');
                 } else {
                     console.error(result.message);
-                    Alert.alert(result.message);
+                    Alert.alert(result.message || "대표 캐릭터 지정 실패");
                 }
             } else {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -279,6 +317,8 @@ function ListScreen(): React.JSX.Element {
         } catch (error) {
             console.error("API error:", error);
             Alert.alert("대표 캐릭터 지정 중 오류가 발생했습니다. 다시 시도해주세요.");
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -362,10 +402,10 @@ function ListScreen(): React.JSX.Element {
                     ) : (
                     <FlatList
                         data={characters}
-                        keyExtractor={(item, index) => index.toString()}
+                        keyExtractor={(item) => item.id.toString()}
                         numColumns={3}
+                        columnWrapperStyle={{ justifyContent: 'space-between' }}
                         renderItem={({ item }) => (
-                            <View style={styles.row}>
                                 <TouchableOpacity 
                                     key={item.id} 
                                     style={styles.characterBox}
@@ -393,13 +433,12 @@ function ListScreen(): React.JSX.Element {
                                         />
                                     )}
                                 </TouchableOpacity>
-                            </View>
                         )}
                     />
                     )}
                 </View>
 
-                {/* 캐릭터 도감 팝업창 */}
+                {/* 캐릭터 상세 조회 Modal */}
                 <Modal
                     animationType="fade"
                     transparent={true}
@@ -451,7 +490,7 @@ function ListScreen(): React.JSX.Element {
                     </View>
                 </Modal>
 
-                {/* 대표 캐릭터 지정 팝업창 */}
+                {/* 대표 캐릭터 지정 Modal */}
                 <SecondModal
                     visible={secondModalVisible}
                     characterName={selectedCharacterData?.name || ''}
@@ -535,11 +574,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginRight: 5,
         marginLeft: 5,
-    },
-    row: {
-        flexDirection: 'row',
-        justifyContent: 'flex-start',
-        flexWrap: 'wrap',
     },
     characterBox: {
         width: 100,

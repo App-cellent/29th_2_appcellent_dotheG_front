@@ -33,16 +33,6 @@ import CharacterActiveIcon from '../img/Navigator/CharacterActiveIcon.svg';
 import ReportActiveIcon from '../img/Navigator/ReportActiveIcon.svg';
 import MyActiveIcon from '../img/Navigator/MyActiveIcon.svg';
 
-// import {
-//   SafeAreaView,
-//   ScrollView,
-//   StatusBar,
-//   StyleSheet,
-//   Text,
-//   useColorScheme,
-//   View,
-// } from 'react-native';
-
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
