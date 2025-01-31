@@ -1,6 +1,7 @@
 import * as React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
+
 import { 
     StyleSheet, 
     Text, 
@@ -11,10 +12,12 @@ import {
     Alert,
     ScrollView,
     KeyboardAvoidingView,
-    Platform
+    Platform,
+    Keyboard
 } from 'react-native';
 
 import GradientButton from '../../components/GradientButton';
+import { LinearGradient } from 'react-native-linear-gradient';
 
 function SignupScreen() {
     const navigation = useNavigation();
@@ -34,7 +37,21 @@ function SignupScreen() {
 
     const [isAgreeChecked, setIsAgreeChecked] = useState(false);
 
+    const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
 
+    useEffect(() => {
+        const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
+            setIsKeyboardVisible(true); // 키보드가 열리면 버튼 숨기기
+        });
+        const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
+            setIsKeyboardVisible(false); // 키보드가 닫히면 버튼 보이기
+        });
+
+        return () => {
+            keyboardDidHideListener.remove();
+            keyboardDidShowListener.remove();
+        };
+    }, []);
 
     // 개인정보 동의
     const handleAgreeCheck = () => {
@@ -52,7 +69,10 @@ function SignupScreen() {
     // 비밀번호
     const handlePasswordCheck = (text: string) => {
         setPassword(text);
+        // 대문자 or 소문자, 숫자, 특수문자
         const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,20}$/;
+        // 대문자, 소문자, 숫자, 특수문자 모두 포함
+        //const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,20}$/;
         setIsPasswordValid(passwordRegex.test(text));
         setIsPasswordMatch(text === confirmPassword);
     };
@@ -96,9 +116,11 @@ function SignupScreen() {
             if (response.ok) {
                 console.log('중복 확인 성공 : 사용 가능한 아이디');
                 setIdCheckResult(result.message); // 사용 가능한 아이디
+                //Alert.alert(result.message);
             } else {
                 console.log('중복 확인 성공 : 중복되는 아이디');
                 setIdCheckResult(result.message); // 중복되는 아이디
+                //Alert.alert(result.message);
             }
         } catch (error) {
             console.error("아이디 중복 확인 에러:", error);
@@ -131,9 +153,11 @@ function SignupScreen() {
             if (response.ok) {
                 console.log('중복 확인 성공 : 사용 가능한 닉네임');
                 setNicknameCheckResult(result.message); // 사용 가능한 닉네임
+                //Alert.alert(result.message);
             } else {
                 console.log('중복 확인 성공 : 중복되는 닉네임');
                 setNicknameCheckResult(result.message); // 중복 닉네임
+                //Alert.alert(result.message);
             }
         } catch (error) {
             console.error("닉네임 중복 확인 에러:", error);
@@ -230,19 +254,34 @@ function SignupScreen() {
                             )}
                         </View>
                         <TouchableOpacity
-                            style={[ styles.confirmButton, isIdValid && { backgroundColor: '#69E6A2' } ]}
+                            style={[
+                                styles.confirmButton,
+                                isIdValid && { backgroundColor: '#69E6A2' }
+                            ]}
                             onPress={checkIdAvailability}
                             disabled={!isIdValid}
                         >
-                            <Text style={[styles.confirmButtonText, isIdValid && { color: '#FFFFFF' }]}>중복확인</Text>
+                            <Text
+                                style={[styles.confirmButtonText, isIdValid && { color: '#FFFFFF' }]}
+                            >중복확인</Text>
                         </TouchableOpacity>
                     </View>
-                    <Text style={id.length === 0 ? styles.redText : isIdValid ? styles.greenText : styles.redText}>
+                    <Text
+                        style={
+                            id.length === 0
+                                ? styles.redText
+                                : idCheckResult?.includes('사용 가능')
+                                    ? styles.greenText
+                                    : styles.redText
+                        }
+                    >
                         {id.length === 0
                             ? '영문 소문자와 숫자만 사용해서 4~12자의 아이디를 입력해주세요.'
-                            : isIdValid
+                            : idCheckResult?.includes('사용 가능')
                                 ? '사용 가능한 아이디입니다.'
-                                : '중복되는 아이디입니다.'}
+                                : idCheckResult?.includes('중복')
+                                ? '중복되는 아이디입니다.'
+                                : '조건에 맞게 입력 후 중복확인을 진행해주세요.'}
                     </Text>
 
                     {/* 비밀번호 */}
@@ -258,12 +297,24 @@ function SignupScreen() {
                         />
                         {password.length > 0 && (
                             <Image
-                                source={isPasswordValid ? require('../../img/User/checkIcon.png') : require('../../img/User/warnIcon.png')}
+                                source={
+                                    isPasswordValid
+                                        ? require('../../img/User/checkIcon.png')
+                                        : require('../../img/User/warnIcon.png')
+                                }
                                 style={styles.smallCheckIcon}
                             />
                         )}
                     </View>
-                    <Text style={password.length === 0 ? styles.redText : isPasswordValid ? styles.greenText : styles.redText}>
+                    <Text
+                        style={
+                            password.length === 0
+                                ? styles.redText
+                                : isPasswordValid
+                                ? styles.greenText
+                                : styles.redText
+                        }
+                    >
                         {password.length === 0
                             ? '영문 대문자와 소문자, 숫자, 특수문자를 조합하여 6~20자로 입력해주세요.'
                             : isPasswordValid
@@ -283,15 +334,23 @@ function SignupScreen() {
                         />
                         {password.length > 0 && confirmPassword.length > 0 && (
                             <Image
-                                source={isPasswordMatch ? require('../../img/User/checkIcon.png') : require('../../img/User/warnIcon.png')}
+                                source={
+                                    isPasswordMatch
+                                        ? require('../../img/User/checkIcon.png')
+                                        : require('../../img/User/warnIcon.png')
+                                }
                                 style={styles.smallCheckIcon}
                             />
                         )}
                     </View>
                     <View style={styles.messageContainer}>
                         {(password.length > 0 && confirmPassword.length > 0) && (
-                            <Text style={isPasswordMatch ? styles.greenText : styles.redText}>
-                                {isPasswordMatch ? '비밀번호가 일치합니다.' : '비밀번호가 일치하지 않습니다.'}
+                            <Text
+                                style={isPasswordMatch ? styles.greenText : styles.redText}
+                            >
+                                {isPasswordMatch
+                                    ? '비밀번호가 일치합니다.'
+                                    : '비밀번호가 일치하지 않습니다.'}
                             </Text>
                         )}
                     </View>
@@ -317,20 +376,35 @@ function SignupScreen() {
                             )}
                         </View>
                         <TouchableOpacity
-                            style={[ styles.confirmButton, isNicknameValid && { backgroundColor: '#69E6A2' } ]}
+                            style={[
+                                styles.confirmButton,
+                                isNicknameValid && { backgroundColor: '#69E6A2' }
+                            ]}
                             onPress={checkNicknameAvailability}
                             disabled={!isNicknameValid}
                         >
-                            <Text style={[styles.confirmButtonText, isNicknameValid && { color: '#FFFFFF' }]}>중복확인</Text>
+                            <Text
+                                style={[styles.confirmButtonText, isNicknameValid && { color: '#FFFFFF' }]}
+                            >중복확인</Text>
                         </TouchableOpacity>
                     </View>
 
-                    <Text style={nickname.length === 0 ? styles.redText : isNicknameValid ? styles.greenText : styles.redText}>
+                    <Text
+                        style={
+                            nickname.length === 0
+                                ? styles.redText
+                                : nicknameCheckResult?.includes('사용 가능')
+                                    ? styles.greenText
+                                    : styles.redText
+                        }
+                    >
                         {nickname.length === 0
                             ? '한글로만 닉네임을 설정해주세요.'
-                            : isNicknameValid
+                            : nicknameCheckResult?.includes('사용 가능')
                                 ? '사용 가능한 닉네임입니다.'
-                                : '중복되는 닉네임입니다.'}
+                                : nicknameCheckResult?.includes('중복')
+                                ? '중복 닉네임입니다.'
+                                : '조건에 맞게 입력 후 중복확인을 진행해주세요.'}
                     </Text>
 
                     {/* 개인정보 동의 */}
@@ -347,24 +421,46 @@ function SignupScreen() {
                         <Text style={styles.agreeText}>실시간 만보기 측정을 위한 현재 위치 측정{"\n"}사용 동의</Text>
                     </View>
                     <Text style={styles.greenText}>만보기 측정을 통해 캐릭터 리워드를 받을 때 필요해요!</Text>
-                </View> {/* <-- 이 부분이 누락된 태그 */}
+                </View>
             </ScrollView>
 
             {/* 가입하기 */}
-            <View style={styles.signupButtonContainer}>
-                {isFormValid ? (
-                    <View style={styles.gradientButtonContainer}>
-                        <GradientButton
-                            height={52} width={362} text="가입하기"
+            {!isKeyboardVisible && (
+                <View style={styles.signupButtonContainer}>
+                    {isFormValid ? (
+                        <TouchableOpacity
+                            style={[styles.BtnContainer,]}
                             onPress={fetchSignupData}
-                        />
-                    </View>
-                ) : (
-                    <GradientButton
-                        height={52} width={362} text="가입하기" disabled
-                    />
-                )}
-            </View>
+                        >
+                            <LinearGradient
+                                colors={['#9BC9FE', '#69E6A2']}
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 0 }}
+                                style={styles.completeButton}
+                            >
+                                <Text style={styles.completeButtonText}>가입하기</Text>
+                            </LinearGradient>
+                        </TouchableOpacity>
+                    ) : (
+                        <TouchableOpacity
+                            style={[
+                                styles.BtnContainer,
+                                { backgroundColor: 'transparent' }
+                            ]}
+                            disabled={true}
+                        >
+                            <LinearGradient
+                                colors={['#D3D3D3', '#D3D3D3']}
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 0 }}
+                                style={styles.completeButton}
+                            >
+                                <Text style={styles.completeButtonText}>가입하기</Text>
+                            </LinearGradient>
+                        </TouchableOpacity>
+                    )}
+                </View>
+            )}
         </KeyboardAvoidingView>
     );
 }
@@ -514,14 +610,7 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
     },
     signupButtonContainer: {
-        position: 'absolute',
-        bottom: 10,
-        left: 16,
-        right: 16,
-        height: 56,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderRadius: 15,
+
     },
     signupButton: {
         backgroundColor: '#EEEEEE',
@@ -537,6 +626,28 @@ const styles = StyleSheet.create({
         fontWeight: 700,
         lineHeight: 34,
         textAlign: 'center',
+    },
+    BtnContainer: {
+        position: 'absolute',
+        bottom: 10,
+        left: 16,
+        right: 16,
+        height: 52, // 버튼 높이 고정
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 15,
+    },
+    completeButton: {
+        width: '100%',
+        height: '100%',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 15,
+    },
+    completeButtonText: {
+        color: '#FFFFFF',
+        fontSize: 16,
+        fontWeight: 'bold',
     },
 })
 
