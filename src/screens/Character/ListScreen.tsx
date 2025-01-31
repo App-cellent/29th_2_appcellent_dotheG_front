@@ -265,10 +265,13 @@ function ListScreen(): React.JSX.Element {
                 const result = await response.json();
                 if (result.success) {
                     await AsyncStorage.setItem('selectedCharacter', JSON.stringify(selectedCharacterData));
-
-                    Alert.alert("대표 캐릭터가 설정되었습니다!");
                     console.log("대표 캐릭터 지정 성공", selectedCharacterData);
-                    navigation.navigate("CharacterScreen", { updatedCharacter: selectedCharacterData });
+
+                    setSecondModalVisible(false);
+                    setModalVisible(false);
+
+                    navigation.navigate('CharacterScreen');
+
                 } else {
                     console.error(result.message);
                     Alert.alert(result.message);
@@ -279,8 +282,11 @@ function ListScreen(): React.JSX.Element {
         } catch (error) {
             console.error("API error:", error);
             Alert.alert("대표 캐릭터 지정 중 오류가 발생했습니다. 다시 시도해주세요.");
+        } finally {
+            setIsLoading(false);
         }
     };
+
 
     const handleSecondModalCancel = () => {
         setSecondModalVisible(false);
