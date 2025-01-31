@@ -173,7 +173,7 @@ function MyScreen({ navigation }): React.JSX.Element {
 
       if (response.ok) {
         console.log('Logout Success:', response.status);
-        Alert.alert('Success', '로그아웃 성공');
+        //Alert.alert('Success', '로그아웃 성공');
 
         await AsyncStorage.removeItem('token');
         await AsyncStorage.removeItem('refreshToken');

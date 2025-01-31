@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { 
     StyleSheet, 
     Text, 
@@ -12,6 +11,8 @@ import {
 
 import CharacterRarity from '../../components/CharacterRarity';
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 type DrawResultParams = {
     characterData: {
         characterId: number;
@@ -20,12 +21,8 @@ type DrawResultParams = {
     };
 };
 
-type RootStackParamList = {
-    Character: { screen?: 'CharacterScreen' | 'ListScreen' };
-  };
-
 function DrawResultScreen(): React.JSX.Element {
-    const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+    const navigation = useNavigation();
     const route = useRoute();
     const { characterData } = route.params as DrawResultParams;
     const { characterId, characterName, characterRarity } = characterData || {};
@@ -52,13 +49,21 @@ function DrawResultScreen(): React.JSX.Element {
         19: require('../../img/Character/Image/19.png'),
     };
 
-    console.log(navigation.getState());
-    console.log("Parent Navigator:", navigation.getParent());
+    const goToListScreen = async () => {
+        if (characterId) {
+            await AsyncStorage.setItem('newDrawCharacterId', characterId.toString());
+        }
 
+        navigation.navigate("Main", {
+            screen: "Character",
+            params: { screen: "ListScreen" }
+        });
+    };
 
     return(
         <TouchableWithoutFeedback
-            onPress={() => navigation.navigate('Character', { screen: 'ListScreen' })}
+            style={{ flex: 1 }}
+            onPress={goToListScreen}
             accessible={false}
         >
             <View style={styles.container}>
