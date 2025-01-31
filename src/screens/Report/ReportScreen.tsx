@@ -10,6 +10,7 @@ import {
   Image,
   ImageBackground,
   ScrollView,
+  useWindowDimensions,
 } from 'react-native';
 import Svg, { Text as SvgText, Defs, LinearGradient, Stop } from 'react-native-svg';
 
@@ -186,9 +187,13 @@ function ReportScreen(): React.JSX.Element {
       }, []);
 
   const [barPosition, setBarPosition] = useState(0);
+  const { width: windowWidth } = useWindowDimensions();
+  const horizontalPadding = 25; // 좌우 패딩 (예: 25px)
+  const graphWidth = windowWidth - (horizontalPadding * 2);
+  const totalBars = 11; // 막대 개수
   const barWidth = 22; // 막대 너비
   const barSpacing = 2.4; // 막대 간격
-  const containerPadding = 25; // 그래프 컨테이너 패딩
+  const containerPadding = (graphWidth - (totalBars * (barWidth + barSpacing) - barSpacing)) / 2;
 
     useEffect(() => {
       // userRange로 막대 인덱스 계산
