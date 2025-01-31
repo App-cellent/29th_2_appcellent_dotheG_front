@@ -193,7 +193,7 @@ function ReportScreen(): React.JSX.Element {
   const totalBars = 11; // 막대 개수
   const barWidth = 22; // 막대 너비
   const barSpacing = 2.4; // 막대 간격
-  const containerPadding = (graphWidth - (totalBars * (barWidth + barSpacing) - barSpacing)) / 2;
+  const containerPadding = (graphWidth - (totalBars * barWidth + (totalBars - 1) * barSpacing)) / 2;
 
     useEffect(() => {
       // userRange로 막대 인덱스 계산
@@ -213,7 +213,7 @@ function ReportScreen(): React.JSX.Element {
     };
 
     const calculatePosition = (barIndex, barWidth, barSpacing, containerPadding) => {
-      return containerPadding + barIndex * (barWidth + barSpacing) + barWidth / 2;
+      return (containerPadding + barIndex * (barWidth + barSpacing))-27.5;
     };
 
   const handleTabSwitch = (tab: string) => {
