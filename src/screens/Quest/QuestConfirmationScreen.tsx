@@ -69,29 +69,37 @@ const QuestConfirmationScreen = () => {
 
       {/* 퀘스트 목록 */}
       <ScrollView style={styles.scrollView}>
-        {QuestList.map((quest) => (
-          <TouchableOpacity
-            key={quest.activityId}
-            style={[
-              styles.questButton,
-              selectedQuest === quest.activityId && styles.selectedQuestButton,
-            ]}
-            onPress={() => setSelectedQuest(quest.activityId)}
-          >
-            <Image
-              source={
-                selectedQuest === quest.activityId
-                  ? require('../../img/Quest/smallchecked.png')
-                  : require('../../img/Quest/smallunchecked.png')
-              }
-              style={styles.checkbox}
-            />
-            <View style={styles.questTextContainer}>
-              <Text style={styles.questTitle}>{quest.Description}</Text>
-              <Text style={styles.questDescription}>더 많은 활동을 인증해서 탄소를 절감해보세요!</Text> {/* Description 출력 */}
-            </View>
-          </TouchableOpacity>
-        ))}
+        {QuestList.map((quest) => {
+          const isDisabled = [3, 12, 13].includes(quest.activityId);
+          return (
+            <TouchableOpacity
+              key={quest.activityId}
+              style={[
+                styles.questButton,
+                selectedQuest === quest.activityId && styles.selectedQuestButton,
+              ]}
+              onPress={() => {
+                if (!isDisabled) {
+                  setSelectedQuest(quest.activityId);
+                }
+              }}
+              disabled={isDisabled} // 선택 불가능하도록 설정
+            >
+              <Image
+                source={
+                  selectedQuest === quest.activityId
+                    ? require('../../img/Quest/smallchecked.png')
+                    : require('../../img/Quest/smallunchecked.png')
+                }
+                style={styles.checkbox}
+              />
+              <View style={styles.questTextContainer}>
+                <Text style={styles.questTitle}>{quest.Description}</Text>
+                <Text style={styles.questDescription}>{isDisabled ? "분석 준비 중입니다" : "더 많은 활동을 인증해서 탄소를 절감해보세요!"}</Text>
+              </View>
+            </TouchableOpacity>
+          );
+        })}
       </ScrollView>
 
       {/* 퀘스트 인증하기 버튼 */}

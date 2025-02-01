@@ -257,8 +257,19 @@ function MyScreen({ navigation }): React.JSX.Element {
       console.log('알림 설정 변경 응답:', data);
 
       if (data.success) {
-        setAlarmEnabled(!alarmEnabled);
+        const newAlarmState = !alarmEnabled;
+        setAlarmEnabled(newAlarmState);
         console.log("알림 설정이 성공적으로 변경되었습니다.");
+
+        // 알림 설정 변경 시에만 알림을 표시
+        PushNotification.localNotification({
+          channelId: "default-channel",
+          title: "[알림 설정 변경]",
+          message: newAlarmState ? "알림이 설정되었습니다." : "알림이 해제되었습니다.",
+          allowWhileIdle: true,
+          playSound: true,
+          soundName: "default",
+        });
       } else {
         alert("알림 설정 변경에 실패했습니다.");
       }
@@ -288,6 +299,7 @@ function MyScreen({ navigation }): React.JSX.Element {
   }, [alarmEnabled]);
 
   const scheduleNotifications = () => {
+    /*
     // 월간 성과보고서 알림
     PushNotification.localNotificationSchedule({
       channelId: "default-channel",
@@ -355,7 +367,10 @@ function MyScreen({ navigation }): React.JSX.Element {
       playSound: true,
       soundName: "default",
     });
+    */
+    return;
   };
+
 
   const getNextMonthlyDate = (day, hour) => {
     const now = new Date();
