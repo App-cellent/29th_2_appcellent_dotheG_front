@@ -82,11 +82,9 @@ export const CameraScreen = () => {
       <View style={styles.topBackground} />
       <View style={styles.leftBackground} />
       <View style={styles.rightBackground} />
-      <View style={styles.bottomBackground}>
-        <Text style={styles.bottomText}>
-          오늘의 퀘스트는 <Text style={{ color: '#69E6A2' }}>{questText}</Text>에요.
-        </Text>
-      </View>
+      <View style={styles.bottomBackground} />
+
+
 
       {/* 프레임 */}
       <View style={styles.cameraFrame}>
