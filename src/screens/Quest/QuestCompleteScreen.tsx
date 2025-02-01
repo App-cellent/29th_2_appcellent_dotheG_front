@@ -20,6 +20,7 @@ const QuestCompleteScreen = () => {
   const [selectedQuest, setSelectedQuest] = useState(null);
   const [activityImage, setActivityImage] = useState(null);
   const [activityId, setActivityId] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
 
   const apiUrl = process.env.REACT_APP_API_URL;
 
