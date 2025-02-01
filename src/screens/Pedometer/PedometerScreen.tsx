@@ -296,6 +296,8 @@ function PedometerScreen(): React.JSX.Element {
         return () => clearInterval(interval);  // 컴포넌트 언마운트 시 interval 정리
       }, [opacityAnimation]);
 
+    const formatNumber = (num) => num.toLocaleString();
+
     return (
         <View style={styles.container}>
             <MainHeader />
@@ -318,7 +320,7 @@ function PedometerScreen(): React.JSX.Element {
                 </Svg>
 
                 <Text style={[styles.SmallText, {marginTop: 10}]}>오늘 걸음수</Text>
-                <Text style={styles.BoldLargeText}>{todayStep}</Text>
+                <Text style={styles.BoldLargeText}>{formatNumber(todayStep)}</Text>
 
                 <View style={styles.walkingContainer}>
                     <View style={styles.walkingIconContainer}>
@@ -362,7 +364,7 @@ function PedometerScreen(): React.JSX.Element {
                         <Text style={styles.GreenText}>0</Text>
                         <View style={{flexDirection: 'row', alignItems: 'flex-end'}}>
                             <Text style={styles.GrayText}>목표 걸음 </Text>
-                            <Text style={styles.GrayText}>{todayTargetStep}</Text>
+                            <Text style={styles.GrayText}>{formatNumber(todayTargetStep)}</Text>
                             <Text style={styles.GrayText}>보</Text>
                         </View>
                     </View>
@@ -375,7 +377,7 @@ function PedometerScreen(): React.JSX.Element {
                         <Image source={require('../../img/Pedometer/CircleGreen.png')} style={styles.Icon} />
                         <View style={styles.stepContainer}>
                             <View style={{flexDirection: 'row'}}>
-                                <Text style={styles.stepText}>{weekStep}</Text>
+                                <Text style={styles.stepText}>{formatNumber(weekStep)}</Text>
                                 <Text style={styles.stepText}>걸음</Text>
                             </View>
                             <Text style={styles.SmallGrayText}>주간 걸음 수</Text>
@@ -397,7 +399,7 @@ function PedometerScreen(): React.JSX.Element {
                             <Image source={require('../../img/Pedometer/CircleWhite.png')} style={styles.Icon} />
                             <View style={styles.stepContainer}>
                               <View style={{ flexDirection: 'row' }}>
-                                <Text style={styles.stepText}>{weekStep}</Text>
+                                <Text style={styles.stepText}>{formatNumber(weekStep)}</Text>
                                 <Text style={styles.stepText}>걸음</Text>
                               </View>
                               <Text style={styles.SmallWhiteText}>주간 목표 걸음 수 달성!</Text>
@@ -423,7 +425,7 @@ function PedometerScreen(): React.JSX.Element {
                     <Image source={require('../../img/Pedometer/CircleGreen.png')} style={styles.Icon} />
                     <View style={styles.stepContainer}>
                         <View style={{flexDirection: 'row'}}>
-                            <Text style={styles.stepText}>{totalStep}</Text>
+                            <Text style={styles.stepText}>{formatNumber(totalStep)}</Text>
                             <Text style={styles.stepText}>걸음</Text>
                         </View>
                         <Text style={styles.SmallGrayText}>누적 걸음 수</Text>
