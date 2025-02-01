@@ -241,7 +241,7 @@ const styles = StyleSheet.create({
         width: '100%',
         marginLeft: 31,
         marginRight: 31,
-        marginTop: 20,
+        marginTop: 0,
         flexDirection: 'row',
         flexWrap: 'wrap',
         justifyContent: 'space-between',
@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#FFFFFF',
         borderRadius: 16,
         padding: 18,
-        marginBottom: 27,
+        marginBottom: 15,
         justifyContent: 'space-between',
     },
     selectedGradient: {
@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
     buttonContainer: {
         alignSelf: 'center',
         position: 'absolute',
-        bottom: 50,
+        bottom: 20,
     },
     modalOverlay: {
         flex: 1,
