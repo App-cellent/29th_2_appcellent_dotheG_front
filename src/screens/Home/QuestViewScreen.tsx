@@ -94,60 +94,72 @@ function QuestViewScreen() {
                 <Text style={styles.headerText}>나의 퀘스트 인증</Text>
             </View>
 
-            <View style={styles.profileContainer}>
-                <Image source={require('../../img/My/profileimage.png')} style={styles.profileImage} />
-                <View>
-                    <View style={styles.rowContainer}>
-                        <Text style={styles.boldText}>{userName}</Text>
-                        <Text style={styles.mediumText}>님의  </Text>
-                    </View>
-                    <Text style={styles.mediumText}>오늘의 퀘스트를 보여드릴게요.</Text>
-                    <View style={[styles.rowContainer, { marginTop: 6 }]}>
-                        <Text style={styles.smallText}>오늘의 인증  </Text>
-                        <Text style={styles.smallText}>{listSize}</Text>
-                        <Text style={styles.smallText}>개</Text>
-                    </View>
+            {listSize === 0 ? (
+                <View style={styles.emptyContainer}>
+                  <Image
+                    source={require('../../img/My/graymole.png')}
+                    style={styles.moleImage}
+                  />
+                  <Text style={styles.emptyText}>아직 인증한 퀘스트가 없어요!</Text>
                 </View>
-            </View>
-
-            <View style={[styles.rowContainer, {alignItems: 'center', alignSelf: 'flex-end', marginBottom: 5, paddingRight: 20,}]}>
-                <GreenCircle width={6} height={6}/>
-                <Text style={[styles.smallText, {color: '#C9C9C9', marginLeft: 3}]}>최신순</Text>
-            </View>
-
-            <View style={{ flex: 0 }}>
-                <FlatList
-                    key={listSize}
-                    horizontal={true}
-                    data={activityData}
-                    keyExtractor={(item) => item.activityId.toString()}
-                    contentContainerStyle={styles.imageGrid}
-                    renderItem={({ item }) => (
-                        <TouchableOpacity onPress={() => handleImagePress(item)} style={styles.imageWrapper}>
-                            <Image
-                                source={{ uri: formatImageUrl(item.activityImage) }}
-                                style={[
-                                    styles.imageItem,
-                                    selectedActivity?.activityImage === item.activityImage ? styles.selectedImageBorder : null,
-                                ]}
-                            />
-                            <CheckIcon style={styles.iconOverlay} />
-                        </TouchableOpacity>
-                    )}
-                />
-            </View>
-
-            {selectedActivity && (
-                <View style={styles.selectedImageContainer}>
-                    <Image
-                        source={{ uri: formatImageUrl(selectedActivity.activityImage) }}
-                        style={styles.selectedImage}
-                    />
-                    <Text style={styles.mainText}>{getQuestDescription(selectedActivity.activityId)}</Text>
-                    <View style={styles.rowContainer}>
-                        <Complete width={82} height={24} />
-                        <Text style={styles.DateText}>{formattedDate}</Text>
+            ) : (
+                <View style={styles.wrapper}>
+                    <View style={styles.profileContainer}>
+                        <Image source={require('../../img/My/profileimage.png')} style={styles.profileImage} />
+                        <View>
+                            <View style={styles.rowContainer}>
+                                <Text style={styles.boldText}>{userName}</Text>
+                                <Text style={styles.mediumText}>님의  </Text>
+                            </View>
+                            <Text style={styles.mediumText}>오늘의 퀘스트를 보여드릴게요.</Text>
+                            <View style={[styles.rowContainer, { marginTop: 6 }]}>
+                                <Text style={styles.smallText}>오늘의 인증  </Text>
+                                <Text style={styles.smallText}>{listSize}</Text>
+                                <Text style={styles.smallText}>개</Text>
+                            </View>
+                        </View>
                     </View>
+
+                    <View style={[styles.rowContainer, {alignItems: 'center', alignSelf: 'flex-end', marginBottom: 5, paddingRight: 20,}]}>
+                        <GreenCircle width={6} height={6}/>
+                        <Text style={[styles.smallText, {color: '#C9C9C9', marginLeft: 3}]}>최신순</Text>
+                    </View>
+
+                    <View style={{ flex: 0 }}>
+                        <FlatList
+                            key={listSize}
+                            horizontal={true}
+                            data={activityData}
+                            keyExtractor={(item) => item.activityId.toString()}
+                            contentContainerStyle={styles.imageGrid}
+                            renderItem={({ item }) => (
+                                <TouchableOpacity onPress={() => handleImagePress(item)} style={styles.imageWrapper}>
+                                    <Image
+                                        source={{ uri: formatImageUrl(item.activityImage) }}
+                                        style={[
+                                            styles.imageItem,
+                                            selectedActivity?.activityImage === item.activityImage ? styles.selectedImageBorder : null,
+                                        ]}
+                                    />
+                                    <CheckIcon style={styles.iconOverlay} />
+                                </TouchableOpacity>
+                            )}
+                        />
+                    </View>
+
+                    {selectedActivity && (
+                        <View style={styles.selectedImageContainer}>
+                            <Image
+                                source={{ uri: formatImageUrl(selectedActivity.activityImage) }}
+                                style={styles.selectedImage}
+                            />
+                            <Text style={styles.mainText}>{getQuestDescription(selectedActivity.activityId)}</Text>
+                            <View style={styles.rowContainer}>
+                                <Complete width={82} height={24} />
+                                <Text style={styles.DateText}>{formattedDate}</Text>
+                            </View>
+                        </View>
+                    )}
                 </View>
             )}
         </View>
@@ -175,6 +187,21 @@ const styles = StyleSheet.create({
         fontSize: getFontSize(22),
         fontWeight: '800',
     },
+    emptyContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+      },
+      moleImage: {
+        width: 75.87,
+        height: 65.87,
+        marginBottom: 16.13,
+      },
+      emptyText: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#C9C9C9',
+      },
     mainText: {
         marginBottom: 18,
         color: colors.black,
