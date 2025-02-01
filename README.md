@@ -1,79 +1,56 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# 프로젝트 소개
+DotheG; do the Green
 
-# Getting Started
+친환경 활동도 게임처럼, 캐릭터 수집으로 만드는 나만의 Eco-Life!
 
->**Note**: Make sure you have completed the [React Native - Environment Setup](https://reactnative.dev/docs/environment-setup) instructions till "Creating a new application" step, before proceeding.
+<img src="https://github.com/user-attachments/assets/0f2b0823-5b82-42a6-99c1-287ac3d733df" width="480"/>
 
-## Step 1: Start the Metro Server
 
-First, you will need to start **Metro**, the JavaScript _bundler_ that ships _with_ React Native.
+# Frontend
 
-To start Metro, run the following command from the _root_ of your React Native project:
+## ✨Main 기능
+- 회원가입/로그인
+- 튜토리얼 제공
+- 만보기 측정
+- 친환경 활동 인증
+- 데일리 환경 퀴즈
+- 캐릭터 뽑기 및 수집
+- 주간/월간 성과보고서
+- 마이페이지 
 
-```bash
-# using npm
-npm start
 
-# OR using Yarn
-yarn start
+## 👩‍💻 역할 분담
+|       이름         | 프로필                                                              |                                      역할분담                         |
+| -------------------------------------- | ------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| 김세희 | <img src="https://github.com/user-attachments/assets/41a54fdf-4557-4aea-af94-1fa13bae9430" width="160"/> |  |
+| 이연재 | <img src="https://github.com/user-attachments/assets/e0fff187-5177-487f-9faf-664b454106b3" width="160"/> |  |
+| 정지윤 | <img src="https://github.com/user-attachments/assets/a25f9c0f-ac80-47c6-9cf0-32ca968f05e7" width="160"/> |  | 
+
+
+## 🌳 프로젝트 구조
 ```
-
-## Step 2: Start your Application
-
-Let Metro Bundler run in its _own_ terminal. Open a _new_ terminal from the _root_ of your React Native project. Run the following command to start your _Android_ or _iOS_ app:
-
-### For Android
-
-```bash
-# using npm
-npm run android
-
-# OR using Yarn
-yarn android
+├─components
+├─img
+│  ├─Character
+│  │  └─Image
+│  ├─Home
+│  │  ├─QuestView
+│  │  └─Quiz
+│  ├─My
+│  ├─Navigator
+│  ├─Pedometer
+│  ├─Quest
+│  ├─Report
+│  └─User
+├─navigator
+├─screens
+│  ├─Character
+│  ├─Home
+│  │  └─Quiz
+│  ├─My
+│  ├─Pedometer
+│  ├─Quest
+│  ├─Report
+│  └─User
+└─utils
 ```
-
-### For iOS
-
-```bash
-# using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
-```
-
-If everything is set up _correctly_, you should see your new app running in your _Android Emulator_ or _iOS Simulator_ shortly provided you have set up your emulator/simulator correctly.
-
-This is one way to run your app — you can also run it directly from within Android Studio and Xcode respectively.
-
-## Step 3: Modifying your App
-
-Now that you have successfully run the app, let's modify it.
-
-1. Open `App.tsx` in your text editor of choice and edit some lines.
-2. For **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Developer Menu** (<kbd>Ctrl</kbd> + <kbd>M</kbd> (on Window and Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (on macOS)) to see your changes!
-
-   For **iOS**: Hit <kbd>Cmd ⌘</kbd> + <kbd>R</kbd> in your iOS Simulator to reload the app and see your changes!
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [Introduction to React Native](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you can't get this to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
