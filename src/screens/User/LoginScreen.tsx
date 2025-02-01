@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useState, useEffect, useRef } from 'react';
 import { useNavigation } from '@react-navigation/native';
+import { Linking } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import {
     StyleSheet,
@@ -14,7 +15,6 @@ import {
 } from 'react-native';
 
 import DoTheG from '../../img/Navigator/DoTheG.svg';
-import GradientButton from '../../components/GradientButton';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 function LoginScreen(): React.JSX.Element {
@@ -127,6 +127,26 @@ function LoginScreen(): React.JSX.Element {
         setIsChecked(!isChecked);
     };
 
+    // 네이버 로그인
+    const handleNaverLogin = () => {
+        if (!apiUrl) {
+            console.error('API URL is not defined in environment variables.');
+            Alert.alert('오류', '서버 URL이 설정되지 않음.');
+            return;
+        }
+
+        const naverLoginUrl = `${apiUrl}/oauth2/authorization/naver`;
+
+        Linking.openURL(naverLoginUrl)
+        .then(() => {
+            console.log('네이버 로그인 페이지 접속 성공');
+        })
+        .catch((error) => {
+            console.error('네이버 로그인 페이지 접속 실패', error);
+            Alert.alert('오류', '네이버 로그인 페이지에 접속 불가능합니다.');
+        });
+    };
+
     return(
         <View style={styles.container}>
             <Image
@@ -180,6 +200,7 @@ function LoginScreen(): React.JSX.Element {
                     </TouchableOpacity>
                 </View>
 
+                {/* 로그인 버튼 */}
                 <TouchableOpacity
                     style={[styles.BtnContainer]}
                     onPress={handleLogin}
@@ -193,7 +214,8 @@ function LoginScreen(): React.JSX.Element {
                         <Text style={styles.completeButtonText}>로그인</Text>
                     </LinearGradient>
                 </TouchableOpacity>
-
+                
+                {/* 회원가입 버튼 */}
                 <TouchableOpacity
                     style={styles.signupButton}
                     onPress={() => navigation.navigate('SignupScreen')}
@@ -201,13 +223,19 @@ function LoginScreen(): React.JSX.Element {
                     <Text style={styles.signupText}>회원가입</Text>
                 </TouchableOpacity>
 
+                {/* 간편하게 시작하기 */}
                 <Animated.Image
                     source={require('../../img/User/speechBubble.png')}
-                    style={[styles.speechBubble, { transform: [{ translateY: speechBubbleAnimated }] }]}/>
+                    style={[styles.speechBubble, { transform: [{ translateY: speechBubbleAnimated }] }]}
+                />
+
+                {/* 네이버 로그인 */}
+                <TouchableOpacity onPress={handleNaverLogin}>
                 <Image
                     source={require('../../img/User/naverIcon.png')}
                     style={styles.naverLogo}
                 />
+                </TouchableOpacity>
             </View>
         </View>
     );

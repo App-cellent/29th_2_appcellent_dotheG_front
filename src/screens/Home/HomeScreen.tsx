@@ -42,7 +42,7 @@ function HomeScreen(): React.JSX.Element {
 
     const [backPressedOnce, setBackPressedOnce] = useState(false);
 
-    const [showTreeInfo, setShowTreeInfo] = useState(true);
+    const [showTreeInfo, setShowTreeInfo] = useState(false);
     const [loading, setLoading] = useState(false);
 
     // User state
