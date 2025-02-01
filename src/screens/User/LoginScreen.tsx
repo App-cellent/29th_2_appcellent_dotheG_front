@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useState, useEffect, useRef } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { Linking } from 'react-native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import LinearGradient from 'react-native-linear-gradient';
 import {
     StyleSheet,
@@ -17,7 +18,41 @@ import {
 import DoTheG from '../../img/Navigator/DoTheG.svg';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+type RootParamList = {
+    HomeScreen: undefined;
+};
+  
+// 네이버 로그인 후 앱으로 돌아왔을 때
+const useNaverLoginListener = () => {
+    const navigation = useNavigation<NativeStackNavigationProp<RootParamList>>();
+
+    useEffect(() => {
+        const handleDeepLink = (event: { url: string }) => {
+            const url = event.url;
+            console.log('딥링크 감지:', url);
+
+            navigation.replace('HomeScreen');
+        };
+
+        // 앱이 실행 중일 때 딥링크 이벤트 감지
+        Linking.addEventListener('url', handleDeepLink);
+
+        // 앱이 종료 상태에서 실행될 때 초기 URL 확인
+        Linking.getInitialURL().then((url) => {
+            if (url) {
+                handleDeepLink({ url });
+            }
+        });
+
+        return () => {
+            Linking.removeEventListener('url', handleDeepLink);
+        };
+    }, []);
+};
+
 function LoginScreen(): React.JSX.Element {
+    useNaverLoginListener();
+
     const navigation = useNavigation();
     const [isChecked, setIsChecked] = useState(false);
     const [username, setUsername] = useState('');
@@ -128,6 +163,17 @@ function LoginScreen(): React.JSX.Element {
     };
 
     // 네이버 로그인
+    
+    // const handleNaverLogin = async (): Promise<void> => {
+    //     const { failureResponse, successResponse } = await NaverLogin.login();
+    //     if (successResponse) {
+    //         const profileResult = await NaverLogin.getProfile(successResponse!.accessToken);
+    //         console.log(profileResult);
+    //     } else {
+    //         console.log(failureResponse);
+    //     }
+    // };
+
     const handleNaverLogin = () => {
         if (!apiUrl) {
             console.error('API URL is not defined in environment variables.');
@@ -138,13 +184,13 @@ function LoginScreen(): React.JSX.Element {
         const naverLoginUrl = `${apiUrl}/oauth2/authorization/naver`;
 
         Linking.openURL(naverLoginUrl)
-        .then(() => {
-            console.log('네이버 로그인 페이지 접속 성공');
-        })
-        .catch((error) => {
-            console.error('네이버 로그인 페이지 접속 실패', error);
-            Alert.alert('오류', '네이버 로그인 페이지에 접속 불가능합니다.');
-        });
+            .then(() => {
+                console.log('네이버 로그인 페이지 접속 성공');
+            })
+            .catch((error) => {
+                console.error('네이버 로그인 페이지 접속 실패', error);
+                Alert.alert('오류', '네이버 로그인 페이지에 접속 불가능합니다.');
+            });
     };
 
     return(
