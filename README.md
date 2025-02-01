@@ -22,9 +22,9 @@ DotheG: do the Green
 ## 👩‍💻 역할 분담
 |       이름         | 프로필                                                              |                                      역할분담                         |
 | -------------------------------------- | ------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| 김세희 | <img src="https://github.com/user-attachments/assets/41a54fdf-4557-4aea-af94-1fa13bae9430" width="160"/> |  |
-| 이연재 | <img src="https://github.com/user-attachments/assets/a25f9c0f-ac80-47c6-9cf0-32ca968f05e7" width="160"/> |  |
-| 정지윤 | <img src="https://github.com/user-attachments/assets/e0fff187-5177-487f-9faf-664b454106b3" width="160"/> |  | 
+| 김세희 | <img src="https://github.com/user-attachments/assets/41a54fdf-4557-4aea-af94-1fa13bae9430" width="160"/> | 메인페이지, 만보기 |
+| 이연재 | <img src="https://github.com/user-attachments/assets/a25f9c0f-ac80-47c6-9cf0-32ca968f05e7" width="160"/> | 로그인&회원가입, 캐릭터 |
+| 정지윤 | <img src="https://github.com/user-attachments/assets/e0fff187-5177-487f-9faf-664b454106b3" width="160"/> | 활동인증, 성과보고서, 마이페이지 | 
 
 
 ## 🌳 프로젝트 구조
