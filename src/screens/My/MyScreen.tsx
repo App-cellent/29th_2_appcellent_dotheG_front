@@ -278,7 +278,7 @@ function MyScreen({ navigation }): React.JSX.Element {
           });
 
           // 백엔드로 알림 정보 전송
-          sendNotificationToBackend(title, message);
+          await sendNotificationToBackend(title, message);
 
           console.log("알림이 활성화되었습니다.");
         } else {
