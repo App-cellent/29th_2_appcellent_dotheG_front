@@ -39,7 +39,6 @@ function TodayQuiz2Screen(): React.JSX.Element {
         const fetchQuizData = async () => {
             try {
                 const accessToken = await AsyncStorage.getItem('token');
-                const selectedAnswerInt = parseInt(selectedAnswer, 10);
                 const response = await fetch(`${apiUrl}/quiz/getQuiz?timestamp=${new Date().getTime()}`, {
                     method: 'GET',
                     headers: {
@@ -49,7 +48,6 @@ function TodayQuiz2Screen(): React.JSX.Element {
                     },
                 });
 
-                // 응답 상태
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
@@ -59,7 +57,12 @@ function TodayQuiz2Screen(): React.JSX.Element {
                 if (result.success) {
                     console.log(result.data);
                     setQuizTitle(result.data.quizTitle);
-                    setQuizText(result.data.quizText);
+                    // 받아온 데이터가 문자열일 경우 JSON 파싱
+                    const parsedQuizText = typeof result.data.quizText === 'string'
+                        ? JSON.parse(result.data.quizText)
+                        : result.data.quizText;
+                    // 최대 4개의 보기만 사용
+                    setQuizText(parsedQuizText.slice(0, 4));
                 } else {
                     console.error(result.message);
                 }
