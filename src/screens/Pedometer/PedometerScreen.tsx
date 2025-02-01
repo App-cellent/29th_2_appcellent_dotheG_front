@@ -197,7 +197,6 @@ function PedometerScreen(): React.JSX.Element {
                 if (result.success) {
                     setTodayReward(result.data.today);
                     setWeekReward(result.data.weekly);
-                    console.log(result.data);
                 } else {
                     console.error(result.message);
                 }
@@ -296,6 +295,8 @@ function PedometerScreen(): React.JSX.Element {
         return () => clearInterval(interval);  // 컴포넌트 언마운트 시 interval 정리
       }, [opacityAnimation]);
 
+    const formatNumber = (num) => num.toLocaleString();
+
     return (
         <View style={styles.container}>
             <MainHeader />
@@ -318,7 +319,7 @@ function PedometerScreen(): React.JSX.Element {
                 </Svg>
 
                 <Text style={[styles.SmallText, {marginTop: 10}]}>오늘 걸음수</Text>
-                <Text style={styles.BoldLargeText}>{todayStep}</Text>
+                <Text style={styles.BoldLargeText}>{formatNumber(todayStep)}</Text>
 
                 <View style={styles.walkingContainer}>
                     <View style={styles.walkingIconContainer}>
@@ -362,7 +363,7 @@ function PedometerScreen(): React.JSX.Element {
                         <Text style={styles.GreenText}>0</Text>
                         <View style={{flexDirection: 'row', alignItems: 'flex-end'}}>
                             <Text style={styles.GrayText}>목표 걸음 </Text>
-                            <Text style={styles.GrayText}>{todayTargetStep}</Text>
+                            <Text style={styles.GrayText}>{formatNumber(todayTargetStep)}</Text>
                             <Text style={styles.GrayText}>보</Text>
                         </View>
                     </View>
@@ -370,12 +371,12 @@ function PedometerScreen(): React.JSX.Element {
             </View>
 
             <View style={styles.bottomContainer}>
-                {!weekGoalYN && (
+                { (!weekGoalYN || (weekGoalYN && weekReward)) && (
                     <View style={styles.MenuBox}>
                         <Image source={require('../../img/Pedometer/CircleGreen.png')} style={styles.Icon} />
                         <View style={styles.stepContainer}>
                             <View style={{flexDirection: 'row'}}>
-                                <Text style={styles.stepText}>{weekStep}</Text>
+                                <Text style={styles.stepText}>{formatNumber(weekStep)}</Text>
                                 <Text style={styles.stepText}>걸음</Text>
                             </View>
                             <Text style={styles.SmallGrayText}>주간 걸음 수</Text>
@@ -383,30 +384,29 @@ function PedometerScreen(): React.JSX.Element {
                     </View>
                 )}
 
-                { weekGoalYN && (
-                  <View>
-                    <Animated.View style={[styles.gradientContainer, { opacity: opacityAnimation }]}>
-                      <LinearGradientBackground
-                        colors={['rgb(155, 201, 254)', 'rgb(105, 230, 162)']}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 0 }}
-                        style={{ borderRadius: 15 }}
-                      >
-                        <View style={styles.GoalMenuBox}>
-                          <View style={{ flexDirection: 'row' }}>
-                            <Image source={require('../../img/Pedometer/CircleWhite.png')} style={styles.Icon} />
-                            <View style={styles.stepContainer}>
+                { weekGoalYN && !weekReward && (
+                    <View>
+                        <Animated.View style={[styles.gradientContainer, { opacity: opacityAnimation }]}>
+                          <LinearGradientBackground
+                            colors={['rgb(155, 201, 254)', 'rgb(105, 230, 162)']}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 0 }}
+                            style={{ borderRadius: 15 }}
+                          >
+                            <View style={styles.GoalMenuBox}>
                               <View style={{ flexDirection: 'row' }}>
-                                <Text style={styles.stepText}>{weekStep}</Text>
-                                <Text style={styles.stepText}>걸음</Text>
+                                <Image source={require('../../img/Pedometer/CircleWhite.png')} style={styles.Icon} />
+                                <View style={styles.stepContainer}>
+                                  <View style={{ flexDirection: 'row' }}>
+                                    <Text style={styles.stepText}>{formatNumber(weekStep)}</Text>
+                                    <Text style={styles.stepText}>걸음</Text>
+                                  </View>
+                                  <Text style={styles.SmallWhiteText}>주간 목표 걸음 수 달성!</Text>
+                                </View>
                               </View>
-                              <Text style={styles.SmallWhiteText}>주간 목표 걸음 수 달성!</Text>
                             </View>
-                          </View>
-                        </View>
-                      </LinearGradientBackground>
-                    </Animated.View>
-                    {weekGoalYN && !weekReward && (
+                          </LinearGradientBackground>
+                        </Animated.View>
                         <View>
                             <TouchableOpacity
                               style={styles.GoalButton}
@@ -415,15 +415,15 @@ function PedometerScreen(): React.JSX.Element {
                               <Text style={styles.GoalButtonText}>클릭!</Text>
                             </TouchableOpacity>
                         </View>
-                    )}
-                  </View>
-                )}
+                      </View>
+                    )
+                }
 
                 <View style={styles.MenuBox}>
                     <Image source={require('../../img/Pedometer/CircleGreen.png')} style={styles.Icon} />
                     <View style={styles.stepContainer}>
                         <View style={{flexDirection: 'row'}}>
-                            <Text style={styles.stepText}>{totalStep}</Text>
+                            <Text style={styles.stepText}>{formatNumber(totalStep)}</Text>
                             <Text style={styles.stepText}>걸음</Text>
                         </View>
                         <Text style={styles.SmallGrayText}>누적 걸음 수</Text>
@@ -588,7 +588,7 @@ const styles = StyleSheet.create({
     MenuBox: {
         backgroundColor: colors.white,
         width: '100%',
-        height: 81,
+        height: 91,
         borderRadius: 15,
         alignItems: 'center',
         flexDirection: 'row',
