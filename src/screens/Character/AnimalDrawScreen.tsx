@@ -26,10 +26,10 @@ function AnimalDrawScreen(): React.JSX.Element {
     const navigation = useNavigation<NavigationProp>();
 
     const animals = [
-        { id: 1, label: '두더지', fruit: 35 },
-        { id: 2, label: '참매', fruit: 20 },
-        { id: 3, label: '꿀벌', fruit: 19 },
-        { id: 4, label: '수달', fruit: 25 },
+        { id: 1, label: '두더지', fruit: 70 },
+        { id: 2, label: '참매', fruit: 70 },
+        { id: 3, label: '꿀벌', fruit: 70 },
+        { id: 4, label: '수달', fruit: 70 },
     ];
 
     const [selectedOption, setSelectedOption] = useState<number | null>(null);
@@ -82,6 +82,13 @@ function AnimalDrawScreen(): React.JSX.Element {
                 colors={['rgba(155, 201, 254, 0.4)', 'rgba(105, 230, 162, 0.4)']}
                 style={styles.container}
             >
+                <View style={styles.header}>
+                    <TouchableOpacity onPress={() => navigation.goBack()}>
+                        <Image
+                            source={require('../../img/Character/backIcon.png')}
+                        />
+                    </TouchableOpacity>
+                </View>
                 <View style={styles.textContainer}>
                     <Text style={styles.textLarge}>뽑고 싶은 동물을</Text>
                     <Text style={styles.textLarge}>선택해주세요.</Text>
@@ -142,9 +149,16 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
+    header: {
+        alignItems: 'center',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        paddingHorizontal: 18,
+        height: 56,
+    },
     textContainer: {
         marginLeft: 31,
-        marginTop: 50,
+        marginTop: 20,
         marginBottom: 12,
     },
     textLarge: {
@@ -210,8 +224,8 @@ const styles = StyleSheet.create({
         fontWeight: '700',
     },
     buttonContainer: {
-        marginTop: 'auto',
-        marginBottom: 70,
+        position: 'absolute',
+        bottom: 50,
     },
 })
 

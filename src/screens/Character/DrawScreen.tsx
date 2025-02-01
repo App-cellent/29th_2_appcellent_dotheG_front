@@ -107,6 +107,13 @@ function DrawScreen(): React.JSX.Element {
                 colors={['rgba(155, 201, 254, 0.4)', 'rgba(105, 230, 162, 0.4)']}
                 style={styles.container}
             >
+                <View style={styles.header}>
+                    <TouchableOpacity onPress={() => navigation.goBack()}>
+                        <Image
+                            source={require('../../img/Character/backIcon.png')}
+                        />
+                    </TouchableOpacity>
+                </View>
                 <View style={styles.wrapper}>
                     <View style={styles.textContainer}>
                         <Text style={styles.textLarge}>캐릭터 뽑기 옵션을</Text>
@@ -152,12 +159,12 @@ function DrawScreen(): React.JSX.Element {
                                 </TouchableOpacity>
                             ))}
                         </View>
-                        <View style={styles.buttonContainer}>
-                            <GradientButton
-                                height={56} width={350} text="다음"
-                                onPress={handleNext}
-                            />
-                        </View>
+                    </View>
+                    <View style={styles.buttonContainer}>
+                        <GradientButton
+                            height={56} width={350} text="다음"
+                            onPress={handleNext}
+                        />
                     </View>
                 </View>
 
@@ -198,9 +205,16 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
     },
+    header: {
+        alignItems: 'center',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        paddingHorizontal: 18,
+        height: 56,
+    },
     wrapper: {
         flex: 1,
-        justifyContent: 'center',
+        //justifyContent: 'center',
         paddingHorizontal: 31,
     },
     textContainer: {
@@ -269,6 +283,9 @@ const styles = StyleSheet.create({
         fontWeight: '700',
     },
     buttonContainer: {
+        alignSelf: 'center',
+        position: 'absolute',
+        bottom: 50,
     },
     modalOverlay: {
         flex: 1,

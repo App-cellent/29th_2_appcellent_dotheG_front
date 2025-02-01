@@ -1,8 +1,9 @@
 import * as React from 'react';
 import { useState, useEffect, useRef } from 'react';
 import { useNavigation } from '@react-navigation/native';
+import { WebView } from 'react-native-webview';
+import { WebViewNavigation } from 'react-native-webview';
 import { Linking } from 'react-native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import LinearGradient from 'react-native-linear-gradient';
 import {
     StyleSheet,
@@ -12,51 +13,20 @@ import {
     TouchableOpacity,
     TextInput,
     Animated,
-    Alert
+    Alert, 
+    ActivityIndicator,
+    Modal
 } from 'react-native';
 
 import DoTheG from '../../img/Navigator/DoTheG.svg';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-type RootParamList = {
-    HomeScreen: undefined;
-};
-  
-// 네이버 로그인 후 앱으로 돌아왔을 때
-const useNaverLoginListener = () => {
-    const navigation = useNavigation<NativeStackNavigationProp<RootParamList>>();
-
-    useEffect(() => {
-        const handleDeepLink = (event: { url: string }) => {
-            const url = event.url;
-            console.log('딥링크 감지:', url);
-
-            navigation.replace('HomeScreen');
-        };
-
-        // 앱이 실행 중일 때 딥링크 이벤트 감지
-        Linking.addEventListener('url', handleDeepLink);
-
-        // 앱이 종료 상태에서 실행될 때 초기 URL 확인
-        Linking.getInitialURL().then((url) => {
-            if (url) {
-                handleDeepLink({ url });
-            }
-        });
-
-        return () => {
-            Linking.removeEventListener('url', handleDeepLink);
-        };
-    }, []);
-};
-
 function LoginScreen(): React.JSX.Element {
-    useNaverLoginListener();
-
     const navigation = useNavigation();
     const [isChecked, setIsChecked] = useState(false);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [naverLoginVisible, setNaverLoginVisible] = useState(false); // 네이버 로그인 웹뷰 모달 상태
 
     const apiUrl = process.env.REACT_APP_API_URL;
 
@@ -162,35 +132,65 @@ function LoginScreen(): React.JSX.Element {
         setIsChecked(!isChecked);
     };
 
-    // 네이버 로그인
-    
-    // const handleNaverLogin = async (): Promise<void> => {
-    //     const { failureResponse, successResponse } = await NaverLogin.login();
-    //     if (successResponse) {
-    //         const profileResult = await NaverLogin.getProfile(successResponse!.accessToken);
-    //         console.log(profileResult);
-    //     } else {
-    //         console.log(failureResponse);
-    //     }
-    // };
-
     const handleNaverLogin = () => {
-        if (!apiUrl) {
-            console.error('API URL is not defined in environment variables.');
-            Alert.alert('오류', '서버 URL이 설정되지 않음.');
-            return;
-        }
+        setNaverLoginVisible(true);
+    };
 
-        const naverLoginUrl = `${apiUrl}/oauth2/authorization/naver`;
+    // WebView에서 네이버 로그인 완료 시 호출될 함수
+    const handleWebViewNavigationStateChange = async (event: WebViewNavigation) => {
+        const { url } = event;
+        console.log('현재 URL: ', url);
 
-        Linking.openURL(naverLoginUrl)
-            .then(() => {
-                console.log('네이버 로그인 페이지 접속 성공');
-            })
-            .catch((error) => {
-                console.error('네이버 로그인 페이지 접속 실패', error);
-                Alert.alert('오류', '네이버 로그인 페이지에 접속 불가능합니다.');
+        try {
+            const response = await fetch(url, {
+                credentials: 'include',
+                headers: {
+                    "Cache-Control": 'no-store',
+                    "Content-Type": "application/json",
+                },
             });
+
+            console.log("Response Headers:", response.headers);
+    
+            if (!response.ok) {
+                throw new Error(`Request failed: ${response.status} - ${response.statusText}`);
+            }
+    
+            const token = response.headers.get('access');
+
+            if (token && token.trim() !== "") {
+                await AsyncStorage.setItem('token', token);
+                Alert.alert('로그인 성공', '메인 화면으로 이동합니다.');
+                console.log('토큰 저장 완료:', token);
+                setNaverLoginVisible(false);
+                navigation.replace('Main');
+            } else {
+                Alert.alert('로그인 실패', '토큰을 받을 수 없습니다.');
+            }
+        } catch (error) {
+            console.error('토큰 저장 오류:', error);
+            Alert.alert('오류', '토큰 저장에 실패했습니다.');
+        }
+    
+        // if (url.includes('token=')) {
+        //     const tokenMatch = url.match(/token=([^&]+)/);
+        //     console.log('Extracted token:', tokenMatch?.[1]);
+
+        //     if (tokenMatch && tokenMatch[1]) {
+        //         const token = tokenMatch[1];
+                
+        //         try {
+        //             await AsyncStorage.setItem('token', token);
+        //             Alert.alert('로그인 성공', '메인 화면으로 이동합니다.');
+        //             console.log('token:', token);
+        //             setNaverLoginVisible(false);
+        //             navigation.replace('Main');
+        //         } catch (error) {
+        //             console.error('토큰 저장 오류:', error);
+        //             Alert.alert('오류', '토큰 저장에 실패했습니다.');
+        //         }
+        //     }
+        // }
     };
 
     return(
@@ -283,6 +283,18 @@ function LoginScreen(): React.JSX.Element {
                 />
                 </TouchableOpacity>
             </View>
+            
+            {/* 네이버 로그인 웹뷰 모달 */}
+            <Modal visible={naverLoginVisible} animationType="slide">
+                <View style={{ flex: 1 }}>
+                    <WebView
+                        source={{ uri: `${apiUrl}/oauth2/authorization/naver` }}
+                        onNavigationStateChange={handleWebViewNavigationStateChange}
+                        javaScriptEnabled
+                        domStorageEnabled
+                    />
+                </View>
+            </Modal>
         </View>
     );
 }
