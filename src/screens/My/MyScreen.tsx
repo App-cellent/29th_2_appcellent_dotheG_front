@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import MainHeader from '../../components/MainHeader';
 import PushNotification from 'react-native-push-notification';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -10,7 +10,8 @@ import {
   TouchableOpacity,
   TextInput,
   Modal,
-  Alert
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
 
 function MyScreen({ navigation }): React.JSX.Element {
@@ -27,8 +28,11 @@ function MyScreen({ navigation }): React.JSX.Element {
 
   const apiUrl = process.env.REACT_APP_API_URL;
 
+  const [isLoading, setIsLoading] = useState(true);
+
   useEffect(() => {
     const fetchUserInfo = async () => {
+      setIsLoading(true); // 데이터 로딩 시작
       try {
         const accessToken = await AsyncStorage.getItem('token');
         console.log('Access Token:', accessToken);
@@ -54,11 +58,10 @@ function MyScreen({ navigation }): React.JSX.Element {
         }
 
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          throw new Error(`HTTP error! Status: ${response.status}`);
         }
 
         const result = await response.json();
-
         if (result.success) {
           console.log("받은 사용자 데이터:", result.data);
           setUserName(result.data.userName);
@@ -75,12 +78,33 @@ function MyScreen({ navigation }): React.JSX.Element {
         setUserName(null);
         setUserId(null);
         setAlarmEnabled(false);
+      } finally {
+        setIsLoading(false); // 데이터 로딩 완료
       }
     };
 
     fetchUserInfo();
   }, []);
 
+  useEffect(() => {
+    PushNotification.createChannel(
+      {
+        channelId: "default-channel",
+        channelName: "Default Channel",
+      },
+      (created) => {
+        console.log(created ? "알림 채널 생성 성공!" : "알림 채널이 이미 존재합니다.");
+      }
+    );
+  }, []);
+
+  if (isLoading) {
+      return (
+          <View style={styles.container}>
+              <ActivityIndicator size="large" />
+          </View>
+      );
+  }
 
   const openNicknameModal = () => {
     setNicknameModalVisible(true);
@@ -219,13 +243,15 @@ function MyScreen({ navigation }): React.JSX.Element {
         const newToken = await refreshToken();
         if (newToken) {
           await AsyncStorage.setItem('token', newToken);
-          return toggleAlarm();
+          return toggleAlarm(); // 토큰 갱신 후 다시 시도
         } else {
           throw new Error('Failed to refresh token');
         }
       }
 
       if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Error:", errorData);
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
@@ -233,24 +259,32 @@ function MyScreen({ navigation }): React.JSX.Element {
       console.log('알림 설정 변경 응답:', data);
 
       if (data.success) {
-        const newAlarmState = !alarmEnabled;
-        setAlarmEnabled(newAlarmState);
-        console.log("알림 설정이 성공적으로 변경되었습니다.");
+        const newAlarmState = !alarmEnabled; // 현재 알림 상태를 반전시킴
+        setAlarmEnabled(newAlarmState); // 새로운 알림 상태로 업데이트
 
-        const title = "[알림 설정 변경]";
-        const message = newAlarmState ? "알림이 설정되었습니다." : "알림이 해제되었습니다.";
+        if (!alarmEnabled) {
+          // 알림이 활성화된 경우
+          const title = "[알림 설정]";
+          const message = "알림이 설정되었습니다.";
 
-        // 알림 설정 변경 시 알림을 표시
-        PushNotification.localNotification({
-          channelId: "default-channel",
-          title: "[알림 설정 변경]",
-          message: newAlarmState ? "알림이 설정되었습니다." : "알림이 해제되었습니다.",
-          allowWhileIdle: true,
-          playSound: true,
-          soundName: "default",
-        });
+          // 로컬 알림 표시
+          PushNotification.localNotification({
+            channelId: "default-channel",
+            title: title,
+            message: message,
+            allowWhileIdle: true,
+            playSound: true,
+            soundName: "default",
+          });
 
-        await sendNotificationToBackend(title, message);
+          // 백엔드로 알림 정보 전송
+          sendNotificationToBackend(title, message);
+
+          console.log("알림이 활성화되었습니다.");
+        } else {
+          // 알림이 비활성화된 경우
+          console.log("알림이 비활성화되었습니다.");
+        }
       } else {
         alert("알림 설정 변경에 실패했습니다.");
       }
@@ -288,25 +322,6 @@ function MyScreen({ navigation }): React.JSX.Element {
       console.error("알림 저장 중 오류 발생:", error);
     }
   };
-
-  useEffect(() => {
-    PushNotification.createChannel(
-      {
-        channelId: "default-channel",
-        channelName: "Default Channel",
-      },
-      (created) => {
-        console.log(created ? "알림 채널 생성 성공!" : "알림 채널이 이미 존재합니다.");
-      }
-    );
-
-    if (alarmEnabled) {
-      scheduleNotifications();
-      console.log("알림이 활성화되었습니다.");
-    } else {
-      console.log("알림이 비활성화되었습니다.");
-    }
-  }, [alarmEnabled]);
 
   const scheduleNotifications = () => {
     /*

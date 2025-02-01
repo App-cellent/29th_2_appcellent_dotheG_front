@@ -182,6 +182,8 @@ function SignupScreen() {
         formData.append('userName', nickname);
         formData.append('userLogin', id);
         formData.append('userPassword', password);
+        formData.append('available', 'true');
+        formData.append('isSocial', 'false');
 
         try {
             const response = await fetch(`${apiUrl}/users/signup`, {
