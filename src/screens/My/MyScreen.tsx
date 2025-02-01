@@ -113,7 +113,7 @@ function MyScreen({ navigation }): React.JSX.Element {
           const newToken = await refreshToken();
           if (newToken) {
             await AsyncStorage.setItem('token', newToken);
-            return handleChangeNickname(); // 갱신된 토큰으로 재요청
+            return handleChangeNickname();
           } else {
             throw new Error('Failed to refresh token');
           }
@@ -173,7 +173,6 @@ function MyScreen({ navigation }): React.JSX.Element {
 
       if (response.ok) {
         console.log('Logout Success:', response.status);
-        //Alert.alert('Success', '로그아웃 성공');
 
         await AsyncStorage.removeItem('token');
         await AsyncStorage.removeItem('refreshToken');
@@ -188,29 +187,6 @@ function MyScreen({ navigation }): React.JSX.Element {
       Alert.alert('Error', '로그아웃 오류 발생');
     }
   };
-  
-  // const handleLogout = async () => {
-  //   try {
-  //     // 저장된 토큰 제거
-  //     await AsyncStorage.removeItem('token');
-
-  //     // 상태 초기화
-  //     setUserName(null);
-  //     setUserId(null);
-  //     setAlarmEnabled(false);
-
-  //     // 로그인 화면으로 이동
-  //     navigation.reset({
-  //         index: 0,
-  //         routes: [{ name: 'LoginScreen' }],
-  //     });
-  //   } catch (error) {
-  //     console.error('로그아웃 중 오류 발생:', error);
-  //     alert('로그아웃 처리 중 오류가 발생했습니다. 다시 시도해주세요.');
-  //   } finally {
-  //     setLogoutModalVisible(false);
-  //   }
-  // };
 
   const goToWithdrawalScreen = () => {
     navigation.navigate('WithdrawalScreen');
@@ -243,7 +219,7 @@ function MyScreen({ navigation }): React.JSX.Element {
         const newToken = await refreshToken();
         if (newToken) {
           await AsyncStorage.setItem('token', newToken);
-          return toggleAlarm(); // 갱신된 토큰으로 재요청
+          return toggleAlarm();
         } else {
           throw new Error('Failed to refresh token');
         }
@@ -261,7 +237,10 @@ function MyScreen({ navigation }): React.JSX.Element {
         setAlarmEnabled(newAlarmState);
         console.log("알림 설정이 성공적으로 변경되었습니다.");
 
-        // 알림 설정 변경 시에만 알림을 표시
+        const title = "[알림 설정 변경]";
+        const message = newAlarmState ? "알림이 설정되었습니다." : "알림이 해제되었습니다.";
+
+        // 알림 설정 변경 시 알림을 표시
         PushNotification.localNotification({
           channelId: "default-channel",
           title: "[알림 설정 변경]",
@@ -270,12 +249,43 @@ function MyScreen({ navigation }): React.JSX.Element {
           playSound: true,
           soundName: "default",
         });
+
+        await sendNotificationToBackend(title, message);
       } else {
         alert("알림 설정 변경에 실패했습니다.");
       }
     } catch (error) {
       console.error("알림 설정 변경 중 오류가 발생했습니다.", error);
       alert("서버 오류로 알림 설정 변경에 실패했습니다.");
+    }
+  };
+
+  const sendNotificationToBackend = async (title: string, message: string) => {
+    try {
+      const accessToken = await AsyncStorage.getItem('token');
+      console.log('Access Token:', accessToken);
+
+      const response = await fetch(`${apiUrl}/notifications?timestamp=${new Date().getTime()}`, {
+        method: 'POST',
+        headers: {
+          "Cache-Control": 'no-store',
+          "Content-Type": "application/json",
+          access: `${accessToken}`,
+        },
+        body: JSON.stringify({
+          title: title,
+          message: message,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('알림 백엔드 저장 응답:', data);
+    } catch (error) {
+      console.error("알림 저장 중 오류 발생:", error);
     }
   };
 

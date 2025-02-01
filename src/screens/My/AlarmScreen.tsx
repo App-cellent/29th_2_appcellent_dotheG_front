@@ -1,83 +1,130 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Image, FlatList } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 function AlarmScreen({ navigation }) {
-  const [notifications, setNotifications] = useState([
-    {
-      id: '1',
-      message: 'Do the G는 데일리 퀘스트와 스페셜 퀘스트를 제공합니다.',
-      time: '1분 전',
-    },
-    {
-      id: '2',
-      message: 'Do the G는 데일리 퀘스트와 스페셜 퀘스트를 제공합니다.',
-      time: '9분 전',
-    },
-    {
-      id: '3',
-      message: 'Do the G는 데일리 퀘스트와 스페셜 퀘스트를 제공합니다.',
-      time: '9분 전',
-    },
-    {
-      id: '4',
-      message: 'Do the G는 데일리 퀘스트와 스페셜 퀘스트를 제공합니다.',
-      time: '9분 전',
-    },
-    {
-      id: '5',
-      message: 'Do the G는 데일리 퀘스트와 스페셜 퀘스트를 제공합니다.',
-      time: '9분 전',
-    },
-    {
-      id: '6',
-      message: 'Do the G는 데일리 퀘스트와 스페셜 퀘스트를 제공합니다.',
-      time: '9분 전',
-    },
-    {
-      id: '7',
-      message: 'Do the G는 데일리 퀘스트와 스페셜 퀘스트를 제공합니다.',
-      time: '9분 전',
-    },
-    {
-      id: '8',
-      message: 'Do the G는 데일리 퀘스트와 스페셜 퀘스트를 제공합니다.',
-      time: '9분 전',
-    },
-    {
-      id: '9',
-      message: 'Do the G는 데일리 퀘스트와 스페셜 퀘스트를 제공합니다.',
-      time: '9분 전',
-    },
-    {
-      id: '10',
-      message: 'Do the G는 데일리 퀘스트와 스페셜 퀘스트를 제공합니다.',
-      time: '9분 전',
-    },
-    {
-      id: '11',
-      message: 'Do the G는 데일리 퀘스트와 스페셜 퀘스트를 제공합니다.',
-      time: '9분 전',
-    },
-    {
-      id: '12',
-      message: 'Do the G는 데일리 퀘스트와 스페셜 퀘스트를 제공합니다.',
-      time: '9분 전',
-    },
-  ]);
+  const apiUrl = process.env.REACT_APP_API_URL;
+
+  const [notifications, setNotifications] = useState([]);
+
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
+  const fetchNotifications = async () => {
+    try {
+      const accessToken = await AsyncStorage.getItem('token');
+      console.log('Access Token:', accessToken);
+
+      const response = await fetch(`${apiUrl}/notifications?timestamp=${new Date().getTime()}`, {
+        method: 'GET',
+        headers: {
+          "Cache-Control": 'no-store',
+          "Content-Type": "application/json",
+          access: `${accessToken}`,
+        },
+      });
+
+      if (response.status === 401) {
+        console.warn('Token expired, refreshing token...');
+        const newToken = await refreshToken();
+        if (newToken) {
+          await AsyncStorage.setItem('token', newToken);
+          return fetchNotifications();
+        } else {
+          throw new Error('Failed to refresh token');
+        }
+      }
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      if (result.success) {
+        console.log("받은 알림 데이터:", result.data);
+        const formattedData = result.data.map(notification => ({
+          ...notification,
+          time: formatTimestamp(notification.timestamp),
+        }));
+
+        setNotifications(formattedData);
+      } else {
+        console.error(result.message);
+        setNotifications([]);
+      }
+    } catch (error) {
+      console.error("알림 가져오기 중 오류 발생:", error);
+      setNotifications([]);
+    }
+  };
+
+  const formatTimestamp = (timestamp) => {
+      const date = new Date(timestamp);
+      return date.toLocaleString('ko-KR', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+  };
+
+  const markAsRead = async (userAlertId) => {
+    try {
+      const accessToken = await AsyncStorage.getItem('token');
+
+      const response = await fetch(`${apiUrl}/notifications/${userAlertId}`, {
+        method: 'GET',
+        headers: {
+          "Content-Type": "application/json",
+          access: `${accessToken}`,
+        },
+      });
+
+      if (response.ok) {
+        console.log(`알림 읽음 처리 성공: ${userAlertId}`);
+        setNotifications((prev) =>
+          prev.map((notification) =>
+            notification.id === userAlertId ? { ...notification, read: true } : notification
+          )
+        );
+      } else {
+        const errorMessage = await response.text();
+        console.error(`알림 읽음 처리 실패: ${errorMessage}`);
+        console.log(`알림 아이디: ${userAlertId}`);
+      }
+    } catch (error) {
+      console.error('알림 읽음 처리 중 오류 발생:', error);
+    }
+  };
+
+  const handleNotificationPress = (item) => {
+    if (item.read) return;
+
+    markAsRead(item.id);
+
+    if (item.message.includes('알림')) {
+      navigation.navigate('MyScreen');
+    }
+  };
 
   const renderNotification = ({ item }) => (
-    <View style={styles.notificationItem}>
-      <Image
-        source={require('../../img/My/speakericon.png')}
-        style={styles.speakerIcon}
-      />
-      <View style={styles.notificationContent}>
-        <Text style={styles.notificationMessage} numberOfLines={1}>
-          {item.message}
-        </Text>
-        <Text style={styles.notificationTime}>{item.time}</Text>
+    <TouchableOpacity onPress={() => handleNotificationPress(item)}>
+      <View style={[styles.notificationItem, item.read && styles.readNotification]}>
+        <Image
+          source={require('../../img/My/speakericon.png')}
+          style={styles.speakerIcon}
+        />
+        <View style={styles.notificationContent}>
+          <Text style={styles.notificationMessage} numberOfLines={1}>
+            {item.message}
+          </Text>
+          <Text style={styles.notificationTime}>{item.time}</Text>
+        </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   const renderHeader = () => (
@@ -169,6 +216,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderBottomWidth: 1,
     borderBottomColor: '#E0E0E0',
+  },
+  readNotification: {
+    backgroundColor: '#F0F0F0',
   },
   speakerIcon: {
     width: 36,

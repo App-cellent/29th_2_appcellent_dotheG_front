@@ -14,6 +14,7 @@ import QuestViewScreen from '../screens/Home/QuestViewScreen';
 
 import WithdrawalScreen from '../screens/My/WithdrawalScreen';
 import AlarmScreen from '../screens/My/AlarmScreen';
+import MyScreen from '../screens/My/MyScreen';
 import PasswordChangeScreen from '../screens/My/PasswordChangeScreen';
 import CameraScreen from '../screens/Quest/CameraScreen';
 import QuestConfirmationScreen from '../screens/Quest/QuestConfirmationScreen';
@@ -78,6 +79,12 @@ const StackNavigator = () => {
             <Stack.Screen
                 name="AlarmScreen"
                 component={AlarmScreen}
+                options={{ headerShown: false }}
+            />
+
+            <Stack.Screen
+                name="MyScreen"
+                component={MyScreen}
                 options={{ headerShown: false }}
             />
 
