@@ -23,8 +23,8 @@ DotheG; do the Green
 |       이름         | 프로필                                                              |                                      역할분담                         |
 | -------------------------------------- | ------------------------------------------------------------------- | --------------------------------------------------------------------- |
 | 김세희 | <img src="https://github.com/user-attachments/assets/41a54fdf-4557-4aea-af94-1fa13bae9430" width="160"/> |  |
-| 이연재 | <img src="https://github.com/user-attachments/assets/e0fff187-5177-487f-9faf-664b454106b3" width="160"/> |  |
-| 정지윤 | <img src="https://github.com/user-attachments/assets/a25f9c0f-ac80-47c6-9cf0-32ca968f05e7" width="160"/> |  | 
+| 이연재 | <img src="https://github.com/user-attachments/assets/a25f9c0f-ac80-47c6-9cf0-32ca968f05e7" width="160"/> |  |
+| 정지윤 | <img src="https://github.com/user-attachments/assets/e0fff187-5177-487f-9faf-664b454106b3" width="160"/> |  | 
 
 
 ## 🌳 프로젝트 구조
