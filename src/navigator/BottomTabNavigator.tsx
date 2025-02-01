@@ -102,6 +102,12 @@ function BottomTabNavigator(): React.JSX.Element {
             focused ? <CharacterActiveIcon width={24} height={24} /> : <CharacterIcon width={24} height={24} />
           ),
         }}
+        listeners={({ navigation }) => ({
+          tabPress: (e) => {
+            e.preventDefault();
+            navigation.navigate('Character', { screen: 'CharacterScreen' }); // CharacterScreen으로 이동
+          },
+        })}
       />
       <Tab.Screen
         name="Report"
