@@ -188,7 +188,10 @@ function DrawScreen(): React.JSX.Element {
                                     height={57} width={267} text="확인"
                                     onPress={handleConfirm}
                                 />
-                                <TouchableOpacity style={styles.modalCancelButton} onPress={() => setModalVisible(false)}>
+                                <TouchableOpacity 
+                                    style={styles.modalCancelButton} 
+                                    onPress={() => setModalVisible(false)}
+                                >
                                     <Text style={styles.modalCancelText}>취소</Text>
                                 </TouchableOpacity>
                             </View>

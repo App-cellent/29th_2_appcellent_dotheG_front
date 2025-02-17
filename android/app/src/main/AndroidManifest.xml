@@ -32,7 +32,7 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
 
-                 <data  android:scheme="dotheg"
+                <data   android:scheme="dotheg"
                         android:host="oauth"
                         android:path="/callback" />
             </intent-filter>

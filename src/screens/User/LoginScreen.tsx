@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { WebView } from 'react-native-webview';
 import { WebViewNavigation } from 'react-native-webview';
+import Cookies from '@react-native-cookies/cookies';
 import { Linking } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import {
@@ -14,7 +15,6 @@ import {
     TextInput,
     Animated,
     Alert, 
-    ActivityIndicator,
     Modal
 } from 'react-native';
 
@@ -27,11 +27,13 @@ function LoginScreen(): React.JSX.Element {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [naverLoginVisible, setNaverLoginVisible] = useState(false); // 네이버 로그인 웹뷰 모달 상태
+    const [cookie, setCookie] = useState<string | null>(null);
 
     const apiUrl = process.env.REACT_APP_API_URL;
 
     // tutorial 정보 가져오는 함수
     const fetchTutorialStatus = async () => {
+        const apiUrl = process.env.REACT_APP_API_URL;
         try {
             const accessToken = await AsyncStorage.getItem('token');
             const tutorialResponse = await fetch(`${apiUrl}/mainpage/isTutorial?timestamp=${new Date().getTime()}`, {
@@ -66,6 +68,7 @@ function LoginScreen(): React.JSX.Element {
 
     // 로그인 API (GradientButton onPress)
     const handleLogin = async () => {
+        const apiUrl = process.env.REACT_APP_API_URL;
         if (!apiUrl) {
             console.error('API URL is not defined in environment variables.');
             Alert.alert('오류', '서버 URL이 설정되지 않음.');
@@ -138,59 +141,38 @@ function LoginScreen(): React.JSX.Element {
 
     // WebView에서 네이버 로그인 완료 시 호출될 함수
     const handleWebViewNavigationStateChange = async (event: WebViewNavigation) => {
+        const apiUrl = process.env.REACT_APP_API_URL;
         const { url } = event;
-        console.log('현재 URL: ', url);
+        console.log('Naver Login Redirect URL: ', url);
 
-        try {
-            const response = await fetch(url, {
-                credentials: 'include',
-                headers: {
-                    "Cache-Control": 'no-store',
-                    "Content-Type": "application/json",
-                },
-            });
+        // 리디렉션된 URL 감지
+        if (url.includes(`${apiUrl}/login/oauth2/code/naver`)) {
+            try {
+                // 리디렉션 후 쿠키를 가져오기
+                const cookies = await Cookies.get(`${apiUrl}/login/oauth2/code/naver`);
+                console.log('Cookies:', cookies);
 
-            console.log("Response Headers:", response.headers);
-    
-            if (!response.ok) {
-                throw new Error(`Request failed: ${response.status} - ${response.statusText}`);
+                if (cookies?.authorization?.value) {
+                    const token = cookies.authorization.value; // 토큰 추출
+                    
+                    setCookie(token); // 상태 업데이트
+                    
+                    await AsyncStorage.setItem('token', token); // AsyncStorage에 저장
+                    console.log('토큰 저장 완료:', token);
+                    
+                    // 네이버 로그인 웹뷰 닫음
+                    setNaverLoginVisible(false);
+                    //navigation.replace('Main');
+
+                    // tutorial 여부 확인
+                    fetchTutorialStatus();
+                } else {
+                    console.warn('Authorization cookie not found');
+                }
+            } catch (error) {
+                console.error('쿠키 가져오기 실패:', error);
             }
-    
-            const token = response.headers.get('access');
-
-            if (token && token.trim() !== "") {
-                await AsyncStorage.setItem('token', token);
-                Alert.alert('로그인 성공', '메인 화면으로 이동합니다.');
-                console.log('토큰 저장 완료:', token);
-                setNaverLoginVisible(false);
-                navigation.replace('Main');
-            } else {
-                Alert.alert('로그인 실패', '토큰을 받을 수 없습니다.');
-            }
-        } catch (error) {
-            console.error('토큰 저장 오류:', error);
-            Alert.alert('오류', '토큰 저장에 실패했습니다.');
         }
-    
-        // if (url.includes('token=')) {
-        //     const tokenMatch = url.match(/token=([^&]+)/);
-        //     console.log('Extracted token:', tokenMatch?.[1]);
-
-        //     if (tokenMatch && tokenMatch[1]) {
-        //         const token = tokenMatch[1];
-                
-        //         try {
-        //             await AsyncStorage.setItem('token', token);
-        //             Alert.alert('로그인 성공', '메인 화면으로 이동합니다.');
-        //             console.log('token:', token);
-        //             setNaverLoginVisible(false);
-        //             navigation.replace('Main');
-        //         } catch (error) {
-        //             console.error('토큰 저장 오류:', error);
-        //             Alert.alert('오류', '토큰 저장에 실패했습니다.');
-        //         }
-        //     }
-        // }
     };
 
     return(
@@ -292,6 +274,8 @@ function LoginScreen(): React.JSX.Element {
                         onNavigationStateChange={handleWebViewNavigationStateChange}
                         javaScriptEnabled
                         domStorageEnabled
+                        sharedCookiesEnabled={true}  // 쿠키 공유 설정
+                        thirdPartyCookiesEnabled={true} // 제3자 쿠키 허용
                     />
                 </View>
             </Modal>
